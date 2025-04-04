@@ -61,7 +61,7 @@ class Event
         $this->statut = StatutEvent::DISPONIBLE;
     }
 
-    public function getid_Event(): ?int
+    public function getId_event(): ?int
     {
         return $this->id_event;
     }
