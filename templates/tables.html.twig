@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Partners - EvoPlan{% endblock %}
+
+{% block page_title %}Partners{% endblock %}
+
+{% block page_subtitle %}Manage your partners{% endblock %}
+
+{% block header_actions %}{% endblock %}
+
+{% block content %}
+    <div class="card mb-4">
+        <div class="card-header">Partners List</div>
+        <div class="card-body">
+            <table id="datatablesSimple">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Type</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
+                        <th>Logo</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for partner in partners %}
+                    <tr>
+                        <td>{{ partner.id }}</td>
+                        <td>{{ partner.typePartner }}</td>
+                        <td>{{ partner.email }}</td>
+                        <td>{{ partner.phoneNumber }}</td>
+                        <td>{{ partner.logo }}</td>
+                        <td>
+                            <button class="btn btn-datatable btn-icon btn-transparent-dark me-2" title="Edit">
+                                <i data-feather="edit"></i>
+                            </button>
+                            <button class="btn btn-datatable btn-icon btn-transparent-dark" title="Delete">
+                                <i data-feather="trash-2"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">No partners found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        window.addEventListener('DOMContentLoaded', event => {
+            feather.replace();
+        });
+    </script>
+{% endblock %}
