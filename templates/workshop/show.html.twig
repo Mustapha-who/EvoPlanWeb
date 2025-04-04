@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Workshop{% endblock %}
+
+{% block body %}
+    <h1>Workshop</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id_workshop</th>
+                <td>{{ workshop.id_workshop }}</td>
+            </tr>
+            <tr>
+                <th>Title</th>
+                <td>{{ workshop.title }}</td>
+            </tr>
+            <tr>
+                <th>Date</th>
+                <td>{{ workshop.date ? workshop.date|date('Y-m-d') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Enddate</th>
+                <td>{{ workshop.enddate ? workshop.enddate|date('Y-m-d') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Instructor</th>
+                <td>{{ workshop.instructor }}</td>
+            </tr>
+            <tr>
+                <th>Capacity</th>
+                <td>{{ workshop.capacity }}</td>
+            </tr>
+            <tr>
+                <th>Location</th>
+                <td>{{ workshop.location }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ workshop.description }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_workshop_index') }}">back to list</a>
+
+    <a href="{{ path('app_workshop_edit', {'id_workshop': workshop.id_workshop}) }}">edit</a>
+
+    {{ include('workshop/_delete_form.html.twig') }}
+{% endblock %}

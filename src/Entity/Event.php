@@ -2,13 +2,15 @@
 
 namespace App\Entity;
 
-use App\Enum\lieu;
-use App\Enum\StatutEvent;
+
 use App\Repository\EventRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Enum\Lieu;
+use App\Enum\StatutEvent;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
@@ -54,6 +56,7 @@ class Event
     #[ORM\OneToMany(targetEntity: Partnership::class, mappedBy: 'id_event')]
     private Collection $partnerships;
     /**
+
      * @var Collection<int, Workshop>
      */
     #[ORM\OneToMany(targetEntity: Workshop::class, mappedBy: 'id_event')]
@@ -61,17 +64,19 @@ class Event
 
     public function __construct()
     {
+
         $this->partnerships = new ArrayCollection();
         $this->workshops = new ArrayCollection();
         $this->nombreVisites = 0;
         $this->statut = StatutEvent::DISPONIBLE;
     }
 
-    public function getid_event(): ?int
+
+    public function getid_Event(): ?int
+
     {
         return $this->id_event;
     }
-
 
     public function getNom(): ?string
     {
@@ -183,7 +188,6 @@ class Event
         return $this;
     }
 
-
     /**
      * @return Collection<int, Workshop>
      */
@@ -213,6 +217,7 @@ class Event
 
         return $this;
     }
+
 
     /**
      * @return Collection<int, Partnership>
