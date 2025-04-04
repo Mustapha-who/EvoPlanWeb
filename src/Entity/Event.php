@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+
 use App\Repository\EventRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -9,6 +10,7 @@ use App\Enum\Lieu;
 use App\Enum\StatutEvent;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
@@ -49,6 +51,12 @@ class Event
     private ?StatutEvent $statut = null;
 
     /**
+     * @var Collection<int, Partnership>
+     */
+    #[ORM\OneToMany(targetEntity: Partnership::class, mappedBy: 'id_event')]
+    private Collection $partnerships;
+    /**
+
      * @var Collection<int, Workshop>
      */
     #[ORM\OneToMany(targetEntity: Workshop::class, mappedBy: 'id_event')]
@@ -56,12 +64,16 @@ class Event
 
     public function __construct()
     {
+
+        $this->partnerships = new ArrayCollection();
         $this->workshops = new ArrayCollection();
         $this->nombreVisites = 0;
         $this->statut = StatutEvent::DISPONIBLE;
     }
 
+
     public function getid_Event(): ?int
+
     {
         return $this->id_event;
     }
@@ -200,6 +212,37 @@ class Event
             // set the owning side to null (unless already changed)
             if ($workshop->getIdEvent() === $this) {
                 $workshop->setIdEvent(null);
+            }
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * @return Collection<int, Partnership>
+     */
+    public function getPartnerships(): Collection
+    {
+        return $this->partnerships;
+    }
+
+    public function addPartnership(Partnership $partnership): static
+    {
+        if (!$this->partnerships->contains($partnership)) {
+            $this->partnerships->add($partnership);
+            $partnership->setIdEvent($this);
+        }
+
+        return $this;
+    }
+
+    public function removePartnership(Partnership $partnership): static
+    {
+        if ($this->partnerships->removeElement($partnership)) {
+            // set the owning side to null (unless already changed)
+            if ($partnership->getIdEvent() === $this) {
+                $partnership->setIdEvent(null);
             }
         }
 
