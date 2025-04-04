@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Session index{% endblock %}
+
+{% block body %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-12 mb-3">
+                        <a class="btn btn-outline-light" href="{{ path('app_workshop_index') }}">
+                            <i data-feather="arrow-left" class="me-1"></i>
+                            Back to Workshops
+                        </a>
+                    </div>
+                    <div class="col-auto">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="filter"></i></div>
+                            Sessions
+                            {% if workshop_id %}
+                                for Workshop #{{ workshop_id }}
+                            {% endif %}
+                        </h1>
+                        <div class="page-header-subtitle">Session management and overview</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">Session List</div>
+            <div class="card-body">
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>ID Session</th>
+                            <th>Date</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Participants</th>
+                            <th>Capacity</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for session in sessions %}
+                        <tr>
+                            <td>{{ session.id_session }}</td>
+                            <td>{{ session.date ? session.date|date('Y-m-d') : '' }}</td>
+                            <td>{{ session.dateheuredeb ? session.dateheuredeb|date('H:i:s') : '' }}</td>
+                            <td>{{ session.dateheurefin ? session.dateheurefin|date('H:i:s') : '' }}</td>
+                            <td>{{ session.participantCount }}</td>
+                            <td>{{ session.capacity }}</td>
+                            <td>
+                                <button class="btn btn-datatable btn-icon btn-transparent-dark me-2" onclick="location.href='{{ path('app_session_edit', {'id_session': session.id_session}) }}'">
+                                    <i data-feather="edit"></i>
+                                </button>
+                                <form method="post" action="{{ path('app_session_delete', {'id_session': session.id_session}) }}" style="display: inline-block" onsubmit="return confirm('Are you sure you want to delete this session?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ session.id_session) }}">
+                                    <button type="submit" class="btn btn-datatable btn-icon btn-transparent-dark">
+                                        <i data-feather="trash-2"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">No sessions found</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                
+                <div class="mt-4">
+                    <a class="btn btn-primary" href="{{ path('app_session_new', {'workshop_id': workshop_id}) }}">Create New Session</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
