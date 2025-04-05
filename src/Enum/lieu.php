@@ -1,7 +1,7 @@
 <?php
 namespace App\Enum;
 
-enum lieu: string
+enum Lieu: string
 {
     case TUNIS = 'Tunis';
     case ARIANA = 'Ariana';
