@@ -32,28 +32,33 @@
         <div class="card mb-4">
             <div class="card-header">Session List</div>
             <div class="card-body">
-                <table id="datatablesSimple">
-                    <thead>
+                <table id="datatablesSimple" class="table table-bordered table-striped table-hover">
+                    <thead class="bg-light">
                         <tr>
-                            <th>ID Session</th>
-                            <th>Date</th>
-                            <th>Start Time</th>
-                            <th>End Time</th>
-                            <th>Participants</th>
-                            <th>Capacity</th>
-                            <th>Actions</th>
+                            <th class="text-center">ID Session</th>
+                            <th class="text-center">Date</th>
+                            <th class="text-center">Start Time</th>
+                            <th class="text-center">End Time</th>
+                            <th class="text-center">Participants</th>
+                            <th class="text-center">Capacity</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                     {% for session in sessions %}
                         <tr>
-                            <td>{{ session.id_session }}</td>
-                            <td>{{ session.date ? session.date|date('Y-m-d') : '' }}</td>
-                            <td>{{ session.dateheuredeb ? session.dateheuredeb|date('H:i:s') : '' }}</td>
-                            <td>{{ session.dateheurefin ? session.dateheurefin|date('H:i:s') : '' }}</td>
-                            <td>{{ session.participantCount }}</td>
-                            <td>{{ session.capacity }}</td>
-                            <td>
+                            <td class="text-center">{{ session.id_session }}</td>
+                            <td class="text-center">{{ session.date ? session.date|date('Y-m-d') : '' }}</td>
+                            <td class="text-center">{{ session.dateheuredeb ? session.dateheuredeb|date('H:i:s') : '' }}</td>
+                            <td class="text-center">{{ session.dateheurefin ? session.dateheurefin|date('H:i:s') : '' }}</td>
+                            <td class="text-center">{{ session.participantCount }}</td>
+                            <td class="text-center">{{ session.capacity }}</td>
+                            <td class="text-center">
+                                <button class="btn btn-datatable btn-icon btn-transparent-dark me-2" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#clientModal{{ session.id_session }}">
+                                    <i data-feather="users"></i>
+                                </button>
                                 <button class="btn btn-datatable btn-icon btn-transparent-dark me-2" onclick="location.href='{{ path('app_session_edit', {'id_session': session.id_session}) }}'">
                                     <i data-feather="edit"></i>
                                 </button>
@@ -79,4 +84,79 @@
             </div>
         </div>
     </div>
+
+    {# Modals section - outside the main table #}
+    {% for session in sessions %}
+        <div class="modal fade" id="clientModal{{ session.id_session }}" tabindex="-1" aria-labelledby="clientModalLabel{{ session.id_session }}" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="clientModalLabel{{ session.id_session }}">
+                            Participants for Session #{{ session.id_session }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="text-center">ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for reservation in session.reservationSessions %}
+                                    <tr>
+                                        <td class="text-center">{{ reservation.participant.id }}</td>
+                                        <td>{{ reservation.participant.name }}</td>
+                                        <td>{{ reservation.participant.email }}</td>
+                                        <td>{{ reservation.participant.phoneNumber }}</td>
+                                        <td class="text-center">
+                                            <form method="post" 
+                                                action="{{ path('app_reservation_session_delete', {'id': reservation.id}) }}" 
+                                                style="display: inline-block" 
+                                                onsubmit="return confirm('Are you sure you want to remove this participant?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation.id) }}">
+                                                <input type="hidden" name="session_id" value="{{ session.id_session }}">
+                                                <input type="hidden" name="workshop_id" value="{{ workshop_id }}">
+                                                <button type="submit" class="btn btn-sm btn-datatable btn-icon btn-transparent-dark">
+                                                    <i data-feather="trash-2"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No participants found</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const modalId = urlParams.get('openModal');
+        if (modalId) {
+            const modal = new bootstrap.Modal(document.getElementById('clientModal' + modalId));
+            modal.show();
+        }
+    });
+</script>
 {% endblock %}

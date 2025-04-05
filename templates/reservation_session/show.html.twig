@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ReservationSession{% endblock %}
+
+{% block body %}
+    <h1>ReservationSession</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ reservation_session.id }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_reservation_session_index') }}">back to list</a>
+
+    <a href="{{ path('app_reservation_session_edit', {'id': reservation_session.id}) }}">edit</a>
+
+    {{ include('reservation_session/_delete_form.html.twig') }}
+{% endblock %}

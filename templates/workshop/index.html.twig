@@ -23,35 +23,37 @@
         <div class="card mb-4">
             <div class="card-header">Workshop List</div>
             <div class="card-body">
-                <table id="datatablesSimple">
-                    <thead>
+                <table id="datatablesSimple" class="table table-bordered table-striped table-hover">
+                    <thead class="bg-light">
                         <tr>
-                            <th>ID Workshop </th>
+                            <th class="text-center">ID Workshop</th>
                             <th>Title</th>
                             <th>Date</th>
                             <th>End Date</th>
                             <th>Instructor</th>
                             <th>ID_Event</th>
-                            <th>Capacity</th>
+                            <th class="text-center">Capacity</th>
                             <th>Location</th>
                             <th>Description</th>
-                            <th>Actions</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                   
                     <tbody>
                     {% for workshop in workshops %}
                         <tr>
-                            <td style="width: 5px;">{{ workshop.id_workshop }}</td>
+                            <td class="text-center" style="width: 5px;">{{ workshop.id_workshop }}</td>
                             <td>{{ workshop.title }}</td>
                             <td>{{ workshop.date ? workshop.date|date('Y-m-d') : '' }}</td>
                             <td>{{ workshop.enddate ? workshop.enddate|date('Y-m-d') : '' }}</td>
-                            <td>{{ workshop.instructor }}</td>
-                            <td>{{ workshop.idEvent ? workshop.idEvent.id_event ~ ' - ' ~ workshop.idEvent.nom : '' }}</td>
-                            <td>{{ workshop.capacity }}</td>
+                            <td>{{ workshop.instructor ? workshop.instructor.id ~ ' - ' ~ workshop.instructor.name }}</td>
+                            <td>{{ workshop.Idevent ? workshop.Idevent.id_event ~ ' - ' ~ workshop.Idevent.nom : '' }}</td>
+                            <td class="text-center">{{ workshop.capacity }}</td>
                             <td>{{ workshop.location }}</td>
-                            <td style="width: 350px;">{{ workshop.description }}</td>
-                            <td>
+                            <td style="max-width: 300px; white-space: normal; word-wrap: break-word;">
+                                {{ workshop.description }}
+                            </td>
+                            <td class="text-center">
                                 <button class="btn btn-datatable btn-icon btn-transparent-dark me-2" onclick="location.href='{{ path('app_session_index', {'workshop_id': workshop.id_workshop}) }}'">
                                     <i data-feather="file-text"></i>
                                 </button>
