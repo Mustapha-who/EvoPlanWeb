@@ -44,16 +44,27 @@
                             }) }}
                         </div>
                         <div class="mb-3">
-                            {{ form_row(form.date, {
-                                'attr': {'class': 'form-control form-control-sm'},
-                                'row_attr': {'class': 'mb-2'}
+                            {{ form_label(form.date) }}
+                            {{ form_widget(form.date, {
+                                'attr': {
+                                    'class': 'form-control form-control-sm' ~ (form.enddate.vars.errors|length ? ' is-invalid' : '')
+                                }
                             }) }}
                         </div>
                         <div class="mb-3">
-                            {{ form_row(form.enddate, {
-                                'attr': {'class': 'form-control form-control-sm'},
-                                'row_attr': {'class': 'mb-2'}
+                            {{ form_label(form.enddate) }}
+                            {{ form_widget(form.enddate, {
+                                'attr': {
+                                    'class': 'form-control form-control-sm' ~ (form.enddate.vars.errors|length ? ' is-invalid' : '')
+                                }
                             }) }}
+                            {% if form.enddate.vars.errors|length > 0 %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.enddate.vars.errors %}
+                                        {{ error.message|trans(error.messageParameters, 'validators') }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="mb-3">
                             {{ form_row(form.instructor, {

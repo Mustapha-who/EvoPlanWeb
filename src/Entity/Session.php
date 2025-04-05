@@ -99,10 +99,9 @@ class Session
         return $this->participant_count;
     }
 
-    public function setParticipantCount(int $participant_count): static
+    public function setParticipantCount(?int $participantCount): self
     {
-        $this->participant_count = $participant_count;
-
+        $this->participant_count = $participantCount ?? 0;
         return $this;
     }
 

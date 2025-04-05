@@ -44,8 +44,8 @@
                         <tr>
                             <td class="text-center" style="width: 5px;">{{ workshop.id_workshop }}</td>
                             <td>{{ workshop.title }}</td>
-                            <td>{{ workshop.date ? workshop.date|date('Y-m-d') : '' }}</td>
-                            <td>{{ workshop.enddate ? workshop.enddate|date('Y-m-d') : '' }}</td>
+                            <td>{{ workshop.date ? workshop.date|date('m-d-Y') : '' }}</td>
+                            <td>{{ workshop.enddate ? workshop.enddate|date('m-d-Y') : '' }}</td>
                             <td>{{ workshop.instructor ? workshop.instructor.id ~ ' - ' ~ workshop.instructor.name }}</td>
                             <td>{{ workshop.Idevent ? workshop.Idevent.id_event ~ ' - ' ~ workshop.Idevent.nom : '' }}</td>
                             <td class="text-center">{{ workshop.capacity }}</td>

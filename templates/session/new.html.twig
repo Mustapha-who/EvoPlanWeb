@@ -32,10 +32,19 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            {{ form_row(form.date, {
-                                'attr': {'class': 'form-control form-control-sm'},
-                                'row_attr': {'class': 'mb-2'}
+                            {{ form_label(form.date) }}
+                            {{ form_widget(form.date, {
+                                'attr': {
+                                    'class': 'form-control form-control-sm' ~ (form.date.vars.errors|length ? ' is-invalid' : '')
+                                }
                             }) }}
+                            {% if form.date.vars.errors|length > 0 %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.date.vars.errors %}
+                                        {{ error.message|trans(error.messageParameters, 'validators') }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="mb-3">
                             {{ form_row(form.id_workshop, {
@@ -44,28 +53,43 @@
                             }) }}
                         </div>
                         <div class="mb-3">
-                            {{ form_row(form.dateheuredeb, {
-                                'attr': {'class': 'form-control form-control-sm'},
-                                'row_attr': {'class': 'mb-2'}
+                            {{ form_label(form.dateheuredeb) }}
+                            {{ form_widget(form.dateheuredeb, {
+                                'attr': {
+                                    'class': 'form-control form-control-sm' ~ (form.dateheuredeb.vars.errors|length ? ' is-invalid' : '')
+                                }
                             }) }}
+                            {% if form.dateheuredeb.vars.errors|length > 0 %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.dateheuredeb.vars.errors %}
+                                        {{ error.message|trans(error.messageParameters, 'validators') }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="mb-3">
-                            {{ form_row(form.dateheurefin, {
-                                'attr': {'class': 'form-control form-control-sm'},
-                                'row_attr': {'class': 'mb-2'}
+                            {{ form_label(form.dateheurefin) }}
+                            {{ form_widget(form.dateheurefin, {
+                                'attr': {
+                                    'class': 'form-control form-control-sm' ~ (form.dateheuredeb.vars.errors|length ? ' is-invalid' : '')
+                                }
                             }) }}
                         </div>
+                        
                         <div class="mb-3">
-                            {{ form_row(form.participant_count, {
-                                'attr': {'class': 'form-control form-control-sm'},
-                                'row_attr': {'class': 'mb-2'}
+                            {{ form_label(form.capacity) }}
+                            {{ form_widget(form.capacity, {
+                                'attr': {
+                                    'class': 'form-control form-control-sm' ~ (form.capacity.vars.errors|length ? ' is-invalid' : '')
+                                }
                             }) }}
-                        </div>
-                        <div class="mb-3">
-                            {{ form_row(form.capacity, {
-                                'attr': {'class': 'form-control form-control-sm'},
-                                'row_attr': {'class': 'mb-2'}
-                            }) }}
+                            {% if form.capacity.vars.errors|length > 0 %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.capacity.vars.errors %}
+                                        {{ error.message|trans(error.messageParameters, 'validators') }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
                         <button class="btn btn-primary btn-sm">{{ button_label|default('Save') }}</button>
                     </div>

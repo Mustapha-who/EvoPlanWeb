@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Form;  // ← MUST include namespace
+namespace App\Form;
 
 use App\Entity\Event;
 use App\Entity\Workshop;
@@ -11,6 +11,10 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class WorkshopType extends AbstractType
 {
@@ -23,13 +27,18 @@ class WorkshopType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        // Start output buffering as safety measure
         ob_start();
         try {
             $builder
                 ->add('title')
-                ->add('date', null, ['widget' => 'single_text'])
-                ->add('enddate', null, ['widget' => 'single_text'])
+                ->add('date', null, [
+                    'widget' => 'single_text'
+                ])
+                ->add('enddate', null, [
+                    'widget' => 'single_text',
+                    'constraints' => [new Callback([$this, 'validateDates'])],
+                    'error_bubbling' => false
+                ])
                 ->add('instructor', EntityType::class, [
                     'class' => Instructor::class,
                     'choices' => $this->getInstructors(),
@@ -48,24 +57,42 @@ class WorkshopType extends AbstractType
                     'label' => 'Event'
                 ]);
         } finally {
-            ob_end_clean(); // Discard any accidental output
+            ob_end_clean();
+        }
+    }
+
+    public function validateDates($value, ExecutionContextInterface $context): void
+    {
+        $form = $context->getRoot();
+        $data = $form->getData();
+        
+        if ($data->getIdEvent() && $data->getDate() && $data->getEnddate()) {
+            $eventStart = $data->getIdEvent()->getDateDebut()->format('m/d/Y');
+            $eventEnd = $data->getIdEvent()->getDateFin()->format('m/d/Y');
+            $workshopStart = $data->getDate()->format('m/d/Y');
+            $workshopEnd = $data->getEnddate()->format('m/d/Y');
+
+            if ($workshopStart < $eventStart || $workshopEnd > $eventEnd || $workshopEnd < $workshopStart) {
+                $context->buildViolation("Workshop dates must be between {$eventStart} and {$eventEnd}")
+                    ->atPath('enddate')
+                    ->addViolation();
+            }
         }
     }
 
     private function getInstructors(): array
-{
-    $qb = $this->em->getRepository(User::class)
-        ->createQueryBuilder('u')
-        ->where('u INSTANCE OF App\Entity\UserModule\Instructor');
-    
-    // Join with instructor table to ensure existence
-    $qb->leftJoin('App\Entity\UserModule\Instructor', 'i', 'WITH', 'i.id = u.id')
-       ->andWhere('i.id IS NOT NULL'); // Only users with instructor records
-    
-    return $qb->orderBy('u.name', 'ASC')
-              ->getQuery()
-              ->getResult();
-}
+    {
+        $qb = $this->em->getRepository(User::class)
+            ->createQueryBuilder('u')
+            ->where('u INSTANCE OF App\Entity\UserModule\Instructor');
+        
+        $qb->leftJoin('App\Entity\UserModule\Instructor', 'i', 'WITH', 'i.id = u.id')
+           ->andWhere('i.id IS NOT NULL'); // Only users with instructor records
+        
+        return $qb->orderBy('u.name', 'ASC')
+                  ->getQuery()
+                  ->getResult();
+    }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
