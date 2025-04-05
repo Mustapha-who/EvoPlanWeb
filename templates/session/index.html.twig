@@ -48,7 +48,7 @@
                     {% for session in sessions %}
                         <tr>
                             <td class="text-center">{{ session.id_session }}</td>
-                            <td class="text-center">{{ session.date ? session.date|date('Y-m-d') : '' }}</td>
+                            <td class="text-center">{{ session.date ? session.date|date('m-d-Y') : '' }}</td>
                             <td class="text-center">{{ session.dateheuredeb ? session.dateheuredeb|date('H:i:s') : '' }}</td>
                             <td class="text-center">{{ session.dateheurefin ? session.dateheurefin|date('H:i:s') : '' }}</td>
                             <td class="text-center">{{ session.participantCount }}</td>
@@ -98,7 +98,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-striped table-hover mb-0">
+                            <table id="modalDatatable{{ session.id_session }}" class="table table-bordered table-striped table-hover">
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="text-center">ID</th>
@@ -151,6 +151,20 @@
 {{ parent() }}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize modal tables
+        document.querySelectorAll('[id^="clientModal"]').forEach(modal => {
+            modal.addEventListener('shown.bs.modal', function() {
+                const tableId = this.querySelector('table').id;
+                // Destroy existing datatable if any
+                if (window[tableId + '_datatable']) {
+                    window[tableId + '_datatable'].destroy();
+                }
+                // Initialize new datatable
+                window[tableId + '_datatable'] = new simpleDatatables.DataTable('#' + tableId);
+            });
+        });
+
+        // Handle modal auto-open from URL
         const urlParams = new URLSearchParams(window.location.search);
         const modalId = urlParams.get('openModal');
         if (modalId) {

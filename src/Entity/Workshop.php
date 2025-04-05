@@ -187,4 +187,16 @@ class Workshop
 
         return $this;
     }
+
+    public function getTotalSessionsCapacity(): int
+    {
+        return $this->sessions->reduce(function (int $total, Session $session) {
+            return $total + $session->getCapacity();
+        }, 0);
+    }
+
+    public function getRemainingCapacity(): int
+    {
+        return $this->capacity - $this->getTotalSessionsCapacity();
+    }
 }
