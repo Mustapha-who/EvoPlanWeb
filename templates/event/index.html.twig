@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Event Management{% endblock %}
+
+{% block body %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="calendar"></i></div>
+                            Events
+                        </h1>
+                        <div class="page-header-subtitle">Event management and overview</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">Event List</div>
+            <div class="card-body">
+                <table id="datatablesSimple" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for event in events %}
+                        <tr>
+                            <td>{{ event.id_event }}</td>
+                            <td>
+                                {% if event.imageEvent %}
+                                    <img src="{{ asset('uploads/' ~ event.imageEvent) }}" alt="Event Image" width="60" height="60" class="rounded">
+                                {% else %}
+                                    <span class="text-muted">No Image</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ event.nom }}</td>
+                            <td>{{ event.dateDebut ? event.dateDebut|date('Y-m-d') : '' }}</td>
+                            <td>{{ event.dateFin ? event.dateFin|date('Y-m-d') : '' }}</td>
+                            <td>{{ event.prix }} TND</td>
+                            <td>
+                                {% if event.statut.value == 'DISPONIBLE' %}
+                                    <span class="badge bg-success">{{ event.statut.value }}</span>
+                                {% else %}
+                                    <span class="badge bg-danger">{{ event.statut.value }}</span>
+                                {% endif %}
+                            </td>
+                           <td>
+                               <button class="btn btn-datatable btn-icon btn-transparent-dark me-2" onclick="location.href='{{ path('app_event_edit', {'id_event': event.id_event}) }}'">
+                                   <i data-feather="edit"></i>
+                               </button>
+                               <button class="btn btn-datatable btn-icon btn-transparent-dark me-2" onclick="location.href='{{ path('app_reservations_event', {'id_event': event.id_event}) }}'">
+                                   <i data-feather="users"></i>
+                               </button>
+                               <form method="post" action="{{ path('app_event_delete', {'id_event': event.id_event}) }}" style="display: inline-block" onsubmit="return confirm('Are you sure you want to delete this event?');">
+                                   <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.id_event) }}">
+                                   <button type="submit" class="btn btn-datatable btn-icon btn-transparent-dark">
+                                       <i data-feather="trash-2"></i>
+                                   </button>
+                               </form>
+                           </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">No records found</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="mt-4">
+                    <a class="btn btn-primary" href="{{ path('app_event_new') }}">Create New Event</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

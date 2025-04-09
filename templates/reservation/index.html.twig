@@ -1,0 +1,101 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reservation Management{% endblock %}
+
+{% block body %}
+    <!-- Header -->
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="users"></i></div>
+                            Reservations
+                        </h1>
+                        <div class="page-header-subtitle">Manage event reservations</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">Reservation List</div>
+            <div class="card-body">
+                <table id="datatablesSimple" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Client Phone</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for reservation in reservations %}
+                        <tr>
+                            <td>{{ reservation.idReservation }}</td>
+                            <td>{{ reservation.client ? reservation.client.id }}</td>
+                            <td>
+                                {% if reservation.statut.value == 'CONFIRMÉE' %}
+                                    <span class="badge bg-success">{{ reservation.statut.value }}</span>
+                                {% elseif reservation.statut.value == 'ANNULÉE' %}
+                                    <span class="badge bg-danger">{{ reservation.statut.value }}</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">{{ reservation.statut.value }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-datatable btn-icon btn-transparent-dark me-2"
+                                        onclick="location.href='{{ path('app_reservation_edit', {'id_reservation': reservation.idReservation}) }}'">
+                                    <i data-feather="edit"></i>
+                                </button>
+                                <form method="post" class="delete-form"
+                                      action="{{ path('app_reservation_delete', {'id_reservation': reservation.idReservation}) }}"
+                                      style="display: inline-block;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation.idReservation) }}">
+                                    <button type="submit" class="btn btn-datatable btn-icon btn-transparent-dark">
+                                        <i data-feather="trash-2"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No reservations found for this event</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feather Icons + SweetAlert2 -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.querySelectorAll(".delete-form").forEach(form => {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "This action cannot be undone!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.submit(); // => Re-envoie le formulaire vers app_reservation_delete
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

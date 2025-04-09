@@ -1,0 +1,8 @@
+<form method="post" class="delete-form"
+      action="{{ path('app_reservation_delete', {'id_reservation': reservation.idReservation}) }}"
+      style="display: inline-block;">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation.idReservation) }}">
+    <button type="submit" class="btn btn-datatable btn-icon btn-transparent-dark">
+        <i data-feather="trash-2"></i>
+    </button>
+</form>

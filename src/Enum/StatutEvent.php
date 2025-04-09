@@ -3,7 +3,6 @@
 namespace App\Enum;
 
 
-
 namespace App\Enum;
 
 enum StatutEvent: string
