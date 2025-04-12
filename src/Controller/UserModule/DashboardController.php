@@ -24,6 +24,8 @@ class DashboardController extends AbstractController
             return $this->redirectToRoute('admin_dashboard');
         } elseif ($this->isGranted('ROLE_EVENTPLANNER')) {
             return $this->render('User/eventplannerDashboard.html.twig');
+        }elseif ($this->isGranted('ROLE_CLIENT')) {
+            return $this->redirectToRoute('app_event_home');
         }
 
         throw $this->createAccessDeniedException('Access Denied.');
