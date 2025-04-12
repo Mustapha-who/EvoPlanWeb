@@ -1,164 +1,113 @@
 <?php
-
 namespace App\Repository\UserModule;
 
 use App\Entity\UserModule\EventPlanner;
-use App\Entity\UserModule\User;
 use App\Service\UserModule\PasswordEncryption;
 use App\Service\UserModule\ValidationService;
-use Doctrine\ORM\EntityManagerInterface;
-use Exception;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\DBAL\Exception;
 
-class EventPlannerRepository
+class EventPlannerRepository extends ServiceEntityRepository
 {
-    private EntityManagerInterface $entityManager;
     private ValidationService $validationService;
     private PasswordEncryption $passwordEncryption;
 
-    public function __construct(EntityManagerInterface $entityManager, ValidationService $validationService, PasswordEncryption $passwordEncryption)
-    {
-        $this->entityManager = $entityManager;
+    public function __construct(
+        ManagerRegistry $registry,
+        ValidationService $validationService,
+        PasswordEncryption $passwordEncryption
+    ) {
+        parent::__construct($registry, EventPlanner::class);
         $this->validationService = $validationService;
         $this->passwordEncryption = $passwordEncryption;
     }
 
     public function displayUsers(): array
     {
-        $qb = $this->entityManager->createQueryBuilder();
-        $qb->select('u.id, u.name, u.email, u.password, e.specialization, e.assignedModule')
-            ->from('App\Entity\UserModule\User', 'u')
-            ->innerJoin('App\Entity\UserModule\EventPlanner', 'e', 'WITH', 'u.id = e.id');
-
-        $query = $qb->getQuery();
-        $result = $query->getResult();
-        $eventPlanners = [];
-
-        foreach ($result as $row) {
-            $eventPlanner = new EventPlanner();
-            $eventPlanner->setId($row['id']);
-            $eventPlanner->setName($row['name']);
-            $eventPlanner->setEmail($row['email']);
-            $eventPlanner->setPassword($row['password']);
-            $eventPlanner->setSpecialization($row['specialization']);
-            $eventPlanner->setAssignedModule($row['assignedModule']);
-            $eventPlanners[] = $eventPlanner;
-        }
-
-        return $eventPlanners;
+        return $this->createQueryBuilder('e')
+            ->innerJoin('e.user', 'u')
+            ->select(
+                'e.id',
+                'u.name',
+                'u.email',
+                'u.password',
+                'e.specialization',
+                'e.assignedModule'
+            )
+            ->getQuery()
+            ->getResult();
     }
 
-    /**
-     * @throws Exception
-     */
     public function addUser(EventPlanner $eventPlanner): void
     {
         if (!$this->validationService->isValidEmail($eventPlanner->getEmail())) {
-            echo "❌ Invalid email format.";
-            return;
+            throw new \InvalidArgumentException("Invalid email format.");
         }
 
         if (!$this->validationService->isValidPassword($eventPlanner->getPassword())) {
-            echo "❌ Invalid password format.";
-            return;
+            throw new \InvalidArgumentException("Invalid password format.");
         }
 
-        // Check if the email already exists
-        $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $eventPlanner->getEmail()]);
-        if ($existingUser) {
-            echo "❌ Error: Email already exists.";
-            return;
+        if ($this->findOneBy(['email' => $eventPlanner->getEmail()])) {
+            throw new \InvalidArgumentException("Email already exists.");
         }
 
-        $this->entityManager->getConnection()->beginTransaction();
-        try {
-            $encryptedPassword = $this->passwordEncryption->hashPassword($eventPlanner->getPassword());
+        $eventPlanner->setPassword(
+            $this->passwordEncryption->hashPassword($eventPlanner->getPassword())
+        );
 
-            // Create and persist EventPlanner entity
-            $eventPlanner->setPassword($encryptedPassword);
-            $this->entityManager->persist($eventPlanner);
-            $this->entityManager->flush();
-
-            $this->entityManager->getConnection()->commit();
-            echo "✅ EventPlanner added successfully.";
-        } catch (Exception $e) {
-            $this->entityManager->getConnection()->rollBack();
-            echo "❌ Error adding EventPlanner: " . $e->getMessage();
-        }
+        $this->getEntityManager()->persist($eventPlanner);
+        $this->getEntityManager()->flush();
     }
 
     public function updateUser(EventPlanner $eventPlanner): void
     {
-        $this->entityManager->getConnection()->beginTransaction();
-        try {
-            $user = $this->entityManager->getRepository(User::class)->find($eventPlanner->getId());
-            if ($user) {
-                if ($eventPlanner->getName()) {
-                    $user->setName($eventPlanner->getName());
-                }
-                if ($eventPlanner->getEmail()) {
-                    $user->setEmail($eventPlanner->getEmail());
-                }
-                if ($eventPlanner->getPassword() && $this->validationService->isValidPassword($eventPlanner->getPassword())) {
-                    $user->setPassword($this->passwordEncryption->hashPassword($eventPlanner->getPassword()));
-                }
-                $this->entityManager->flush();
-            }
+        $existingEventPlanner = $this->find($eventPlanner->getId());
 
-            $this->entityManager->persist($eventPlanner);
-            $this->entityManager->flush();
-
-            $this->entityManager->getConnection()->commit();
-            echo "✅ EventPlanner updated successfully.";
-        } catch (Exception $e) {
-            $this->entityManager->getConnection()->rollBack();
-            echo "❌ Error updating EventPlanner: " . $e->getMessage();
+        if (!$existingEventPlanner) {
+            throw new \InvalidArgumentException("Event planner not found.");
         }
+
+        // Update common fields
+        if ($eventPlanner->getName()) {
+            $existingEventPlanner->setName($eventPlanner->getName());
+        }
+
+        if ($eventPlanner->getEmail() && $this->validationService->isValidEmail($eventPlanner->getEmail())) {
+            $existingEventPlanner->setEmail($eventPlanner->getEmail());
+        }
+
+        if ($eventPlanner->getPassword() && $this->validationService->isValidPassword($eventPlanner->getPassword())) {
+            $existingEventPlanner->setPassword(
+                $this->passwordEncryption->hashPassword($eventPlanner->getPassword())
+            );
+        }
+
+        // Update event planner specific fields
+        if ($eventPlanner->getSpecialization() !== null) {
+            $existingEventPlanner->setSpecialization($eventPlanner->getSpecialization());
+        }
+
+        if ($eventPlanner->getAssignedModule() !== null) {
+            $existingEventPlanner->setAssignedModule($eventPlanner->getAssignedModule());
+        }
+
+        $this->getEntityManager()->flush();
     }
 
-    /**
-     * @throws Exception
-     */
     public function deleteUser(int $id): void
     {
-        $this->entityManager->getConnection()->beginTransaction();
-        try {
-            $user = $this->entityManager->getRepository(User::class)->findOneBy(['id' => $id]);
-            if ($user) {
-                $this->entityManager->remove($user);
-                $this->entityManager->flush();
-            }
+        $eventPlanner = $this->find($id);
 
-            $this->entityManager->getConnection()->commit();
-            echo "✅ EventPlanner deleted successfully.";
-        } catch (Exception $e) {
-            $this->entityManager->getConnection()->rollBack();
-            echo "❌ Error deleting EventPlanner: " . $e->getMessage();
+        if ($eventPlanner) {
+            $this->getEntityManager()->remove($eventPlanner);
+            $this->getEntityManager()->flush();
         }
     }
 
     public function getUser(int $id): ?EventPlanner
     {
-        $qb = $this->entityManager->createQueryBuilder();
-        $qb->select('u.id, u.name, u.email, u.password, e.specialization, e.assignedModule')
-            ->from('App\Entity\UserModule\User', 'u')
-            ->innerJoin('App\Entity\UserModule\EventPlanner', 'e', 'WITH', 'u.id = e.id')
-            ->where('u.id = :id')
-            ->setParameter('id', $id);
-
-        $query = $qb->getQuery();
-        $result = $query->getOneOrNullResult();
-
-        if ($result) {
-            $eventPlanner = new EventPlanner();
-            $eventPlanner->setId($result['id']);
-            $eventPlanner->setName($result['name']);
-            $eventPlanner->setEmail($result['email']);
-            $eventPlanner->setPassword($result['password']);
-            $eventPlanner->setSpecialization($result['specialization']);
-            $eventPlanner->setAssignedModule($result['assignedModule']);
-            return $eventPlanner;
-        }
-
-        return null;
+        return $this->find($id);
     }
 }

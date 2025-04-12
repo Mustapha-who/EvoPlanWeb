@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Reservation{% endblock %}
+
+{% block body %}
+    <!-- Header -->
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="edit"></i></div>
+                            Edit Reservation
+                        </h1>
+                        <div class="page-header-subtitle">Modify reservation status</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container-xl px-4 mt-n10">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i data-feather="edit" class="me-2"></i> Edit Reservation #{{ reservation.idReservation }}
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form, {'attr': {'id': 'reservation-form'}}) }}
+
+                        <div class="mb-3">
+                            <label class="form-label">Reservation ID</label>
+                            <input type="text" class="form-control" value="{{ reservation.idReservation }}" disabled>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            {{ form_widget(form.statut, {'attr': {'class': 'form-select'}}) }}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ path('app_reservations_event', {'id_event': reservation.event.idEvent}) }}" class="btn btn-outline-secondary">
+                                <i data-feather="arrow-left"></i> Back
+                            </a>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i data-feather="save"></i> Save
+                            </button>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feather Icons & SweetAlert2 -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            feather.replace();
+
+            document.getElementById("reservation-form").addEventListener("submit", function (event) {
+                event.preventDefault();
+                Swal.fire({
+                    title: "Confirm Update",
+                    text: "Are you sure you want to update this reservation?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, update it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.submit();
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

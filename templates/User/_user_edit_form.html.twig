@@ -1,0 +1,53 @@
+{% block body %}
+    <form action="{{ path('admin_edit_user', { id: userId }) }}" method="post">
+        {{ form_start(form) }}
+        <div class="form-group">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name, { 'attr': { 'class': 'form-control' } }) }}
+            {{ form_errors(form.name) }}
+        </div>
+        <div class="form-group">
+            {{ form_label(form.email) }}
+            {{ form_widget(form.email, { 'attr': { 'class': 'form-control' } }) }}
+            {{ form_errors(form.email) }}
+        </div>
+        {% if form.phoneNumber is defined %}
+            <div class="form-group">
+                {{ form_label(form.phoneNumber) }}
+                {{ form_widget(form.phoneNumber, { 'attr': { 'class': 'form-control' } }) }}
+                {{ form_errors(form.phoneNumber) }}
+            </div>
+        {% endif %}
+        {% if form.specialization is defined %}
+            <div class="form-group">
+                {{ form_label(form.specialization) }}
+                {{ form_widget(form.specialization, { 'attr': { 'class': 'form-control' } }) }}
+                {{ form_errors(form.specialization) }}
+            </div>
+        {% endif %}
+        {% if form.assignedModule is defined %}
+            <div class="form-group">
+                {{ form_label(form.assignedModule) }}
+                {{ form_widget(form.assignedModule, { 'attr': { 'class': 'form-control' } }) }}
+                {{ form_errors(form.assignedModule) }}
+            </div>
+        {% endif %}
+        {% if form.certificate is defined %}
+            <div class="form-group">
+                {{ form_label(form.certificate) }}
+                {{ form_widget(form.certificate, { 'attr': { 'class': 'form-control' } }) }}
+                {{ form_errors(form.certificate) }}
+            </div>
+        {% endif %}
+
+        {% if form.isApproved is defined %}
+            <div class="form-check">
+                {{ form_widget(form.isApproved, { 'attr': { 'class': 'form-check-input' } }) }}
+                {{ form_label(form.isApproved, null, { 'label_attr': { 'class': 'form-check-label' } }) }}
+                {{ form_errors(form.isApproved) }}
+            </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        {{ form_end(form) }}
+    </form>
+{% endblock %}

@@ -6,25 +6,30 @@ use App\Entity\UserModule\Client;
 use App\Entity\UserModule\User;
 use App\Service\UserModule\PasswordEncryption;
 use App\Service\UserModule\ValidationService;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 
-class ClientRepository
+class ClientRepository extends ServiceEntityRepository
 {
     private EntityManagerInterface $entityManager;
     private ValidationService $validationService;
     private PasswordEncryption $passwordEncryption;
 
-    public function __construct(EntityManagerInterface $entityManager, ValidationService $validationService, PasswordEncryption $passwordEncryption)
-    {
-        $this->entityManager = $entityManager;
+    public function __construct(
+        ManagerRegistry $registry,
+        ValidationService $validationService,
+        PasswordEncryption $passwordEncryption
+    ) {
+        parent::__construct($registry, Client::class);
         $this->validationService = $validationService;
         $this->passwordEncryption = $passwordEncryption;
     }
 
     public function displayUsers(): array
     {
-        $qb = $this->entityManager->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('u.id, u.name, u.email, u.password, c.phoneNumber')
             ->from('App\Entity\UserModule\User', 'u')
             ->innerJoin('App\Entity\UserModule\Client', 'c', 'WITH', 'u.id = c.id');
@@ -58,97 +63,93 @@ class ClientRepository
             return;
         }
 
-        $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $client->getEmail()]);
+        $existingUser = $this->getEntityManager()->getRepository(User::class)->findOneBy(['email' => $client->getEmail()]);
         if ($existingUser) {
             echo "❌ Error: Email already exists.";
             return;
         }
 
-        $this->entityManager->getConnection()->beginTransaction();
+        $this->getEntityManager()->getConnection()->beginTransaction();
         try {
             $encryptedPassword = $this->passwordEncryption->hashPassword($client->getPassword());
 
             $client->setPassword($encryptedPassword);
-            $this->entityManager->persist($client);
-            $this->entityManager->flush();
+            $this->getEntityManager()->persist($client);
+            $this->getEntityManager()->flush();
 
-            $this->entityManager->getConnection()->commit();
+            $this->getEntityManager()->getConnection()->commit();
             echo "✅ Client added successfully.";
         } catch (Exception $e) {
-            $this->entityManager->getConnection()->rollBack();
+            $this->getEntityManager()->getConnection()->rollBack();
             echo "❌ Error adding Client: " . $e->getMessage();
         }
     }
 
     public function updateUser(Client $client): void
     {
-        $this->entityManager->getConnection()->beginTransaction();
+        // Get the managed User entity
+        $user = $this->getEntityManager()->getRepository(User::class)->find($client->getId());
+
+        // Get the managed Client entity (important!)
+        $managedClient = $this->getEntityManager()->getRepository(Client::class)->find($client->getId());
+
+        if (!$user || !$managedClient) {
+            echo "❌ Error: User not found";
+            return;
+        }
+
         try {
-            $user = $this->entityManager->getRepository(User::class)->find($client->getId());
-            if ($user) {
-                if ($client->getName()) {
-                    $user->setName($client->getName());
-                }
-                if ($client->getEmail()) {
-                    $user->setEmail($client->getEmail());
-                }
-                if ($client->getPassword() && $this->validationService->isValidPassword($client->getPassword())) {
-                    $user->setPassword($this->passwordEncryption->hashPassword($client->getPassword()));
-                }
-                $this->entityManager->flush();
+            // Update common User fields
+            if ($client->getName()) {
+                $user->setName($client->getName());
+                $managedClient->setName($client->getName());
             }
 
-            $this->entityManager->persist($client);
-            $this->entityManager->flush();
+            if ($client->getEmail()) {
+                $user->setEmail($client->getEmail());
+                $managedClient->setEmail($client->getEmail());
+            }
 
-            $this->entityManager->getConnection()->commit();
+            if ($client->getPassword() && $this->validationService->isValidPassword($client->getPassword())) {
+                $hashedPassword = $this->passwordEncryption->hashPassword($client->getPassword());
+                $user->setPassword($hashedPassword);
+                $managedClient->setPassword($hashedPassword);
+            }
+
+            // Update Client-specific fields
+            if ($client->getPhoneNumber() !== null) {
+                $managedClient->setPhoneNumber($client->getPhoneNumber());
+            }
+
+            // Single flush operation
+            $this->getEntityManager()->flush();
             echo "✅ Client updated successfully.";
         } catch (Exception $e) {
-            $this->entityManager->getConnection()->rollBack();
             echo "❌ Error updating Client: " . $e->getMessage();
         }
     }
 
     public function deleteUser(int $id): void
     {
-        $this->entityManager->getConnection()->beginTransaction();
+        $this->getEntityManager()->getConnection()->beginTransaction();
         try {
-            $user = $this->entityManager->getRepository(User::class)->findOneBy(['id' => $id]);
+            $user = $this->getEntityManager()->getRepository(User::class)->findOneBy(['id' => $id]);
             if ($user) {
-                $this->entityManager->remove($user);
-                $this->entityManager->flush();
+                $this->getEntityManager()->remove($user);
+                $this->getEntityManager()->flush();
             }
 
-            $this->entityManager->getConnection()->commit();
+            $this->getEntityManager()->getConnection()->commit();
             echo "✅ Client deleted successfully.";
         } catch (Exception $e) {
-            $this->entityManager->getConnection()->rollBack();
+            $this->getEntityManager()->getConnection()->rollBack();
             echo "❌ Error deleting Client: " . $e->getMessage();
         }
     }
 
     public function getUser(int $id): ?Client
     {
-        $qb = $this->entityManager->createQueryBuilder();
-        $qb->select('u.id, u.name, u.email, u.password, c.phoneNumber')
-            ->from('App\Entity\UserModule\User', 'u')
-            ->innerJoin('App\Entity\UserModule\Client', 'c', 'WITH', 'u.id = c.id')
-            ->where('u.id = :id')
-            ->setParameter('id', $id);
-
-        $query = $qb->getQuery();
-        $result = $query->getOneOrNullResult();
-
-        if ($result) {
-            $client = new Client();
-            $client->setId($result['id']);
-            $client->setName($result['name']);
-            $client->setEmail($result['email']);
-            $client->setPassword($result['password']);
-            $client->setPhoneNumber($result['phoneNumber']);
-            return $client;
-        }
-
-        return null;
+        // Return the actual managed entity, don't create new one
+        return $this->getEntityManager()->getRepository(Client::class)->find($id);
     }
 }

@@ -1,0 +1,99 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true, 'name': 'contract'}}) }}
+    {% if form.vars.errors is not empty %}
+        <div class="alert alert-danger">
+            {{ form_errors(form) }}
+        </div>
+    {% endif %}
+    
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                {{ form_label(form.id_partner) }}
+                {{ form_widget(form.id_partner) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.id_partner) }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                {{ form_label(form.id_partnership) }}
+                {{ form_widget(form.id_partnership) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.id_partnership) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                {{ form_label(form.date_debut) }}
+                {{ form_widget(form.date_debut) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.date_debut) }}
+                </div>
+                {% if form.date_debut.vars.errors is not empty %}
+                    <div class="alert alert-danger mt-2">
+                        {{ form_errors(form.date_debut) }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                {{ form_label(form.date_fin) }}
+                {{ form_widget(form.date_fin) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.date_fin) }}
+                </div>
+                {% if form.date_fin.vars.errors is not empty %}
+                    <div class="alert alert-danger mt-2">
+                        {{ form_errors(form.date_fin) }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="form-group">
+                {{ form_label(form.status) }}
+                {{ form_widget(form.status) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.status) }}
+                </div>
+                {% if form.status.vars.errors is not empty %}
+                    <div class="alert alert-danger mt-2">
+                        {{ form_errors(form.status) }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="form-group">
+                {{ form_label(form.terms) }}
+                {{ form_widget(form.terms) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.terms) }}
+                </div>
+                {% if form.terms.vars.errors is not empty %}
+                    <div class="alert alert-danger mt-2">
+                        {{ form_errors(form.terms) }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <button class="btn {{ button_class|default('btn-success') }}">{{ button_label|default('Save') }}</button>
+        </div>
+    </div>
+{{ form_end(form) }}

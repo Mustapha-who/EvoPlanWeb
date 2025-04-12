@@ -1,0 +1,23 @@
+{% extends 'User/base_dashboard.html.twig' %}
+
+{% block title %}New Partner - EvoPlan{% endblock %}
+
+{% block page_title %}New Partner{% endblock %}
+
+{% block page_subtitle %}Create a new partner{% endblock %}
+
+{% block header_actions %}
+    <a href="{{ path('app_partner_index') }}" class="btn btn-light lift">
+        <i data-feather="arrow-left" class="me-1"></i>
+        Back to List
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="card mb-4">
+        <div class="card-header">Create Partner</div>
+        <div class="card-body">
+            {{ include('partner/_form.html.twig') }}
+        </div>
+    </div>
+{% endblock %}

@@ -24,7 +24,7 @@ class UserRepository extends ServiceEntityRepository
             $user = $this->entityManager->getRepository(User::class)->find($userId);
             return $user ? $user->getName() : 'Unknown User';
         } catch (Exception $e) {
-            // Log the exception message
+
             return 'Unknown User';
         }
     }
@@ -49,4 +49,12 @@ class UserRepository extends ServiceEntityRepository
         }
         return $clientNames;
     }
+
+    public function getUser(int $id): ?User
+    {
+        return $this->find($id);
+    }
+
+
+
 }

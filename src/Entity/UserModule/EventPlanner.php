@@ -10,24 +10,24 @@ use Doctrine\ORM\Mapping as ORM;
 class EventPlanner extends User
 {
     #[ORM\Column(type: 'string', length: 255)]
-    private ?string $specialization;
+    private ?string $specialization ='';
 
     #[ORM\Column(enumType: EventPlannerModule::class)]
-    private EventPlannerModule $assignedModule;
+    private ?EventPlannerModule $assignedModule = null;
 
     public function getSpecialization(): ?string
     {
         return $this->specialization;
     }
 
-    public function setSpecialization(string $specialization): self
+    public function setSpecialization(?string $specialization): self
     {
         $this->specialization = $specialization;
 
         return $this;
     }
 
-    public function getAssignedModule(): EventPlannerModule
+    public function getAssignedModule(): ?EventPlannerModule
     {
         return $this->assignedModule;
     }
@@ -37,7 +37,10 @@ class EventPlanner extends User
         $this->assignedModule = $assignedModule;
     }
 
-
+    public function getRoles(): array
+    {
+        return ['ROLE_EVENTPLANNER'];
+    }
 
 
 }

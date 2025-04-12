@@ -11,10 +11,16 @@ services:
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    App\Service\UserModule\UserService:
+        arguments:
+            $administratorRepository: '@App\Repository\UserModule\AdministratorRepository'
+            $eventPlannerRepository: '@App\Repository\UserModule\EventPlannerRepository'
+            $clientRepository: '@App\Repository\UserModule\ClientRepository'
+            $instructorRepository: '@App\Repository\UserModule\InstructorRepository'
     App\Form\WorkshopType:
         arguments: ['@doctrine.orm.entity_manager']
         tags: [form.type]
-    
+
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     App\:

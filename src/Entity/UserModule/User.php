@@ -4,6 +4,7 @@ namespace App\Entity\UserModule;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\DiscriminatorMap;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: 'App\Repository\UserModule\UserRepository')]
@@ -16,8 +17,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
     "instructor" => Instructor::class,
     "client" => Client::class,
 ])]
-class User
-{
+class User implements UserInterface,PasswordAuthenticatedUserInterface {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id', type: 'integer')]
@@ -31,6 +31,7 @@ class User
 
     #[ORM\Column(name: 'name', type: 'string', length: 255)]
     private string $name = '';
+
 
     public function getId(): ?int
     {
@@ -78,6 +79,47 @@ class User
     public function getUserIdentifier(): string
     {
         return $this->email;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = [];
+
+        if ($this instanceof Administrator) {
+            $roles[] = 'ROLE_ADMIN';
+        } elseif ($this instanceof EventPlanner) {
+            $roles[] = 'ROLE_EVENTPLANNER';
+        } elseif ($this instanceof Instructor) {
+            $roles[] = 'ROLE_INSTRUCTOR';
+        } elseif ($this instanceof Client) {
+            $roles[] = 'ROLE_CLIENT';
+        }
+
+        return $roles;
+    }
+
+    public function eraseCredentials()
+    {
+        // TODO: Implement eraseCredentials() method.
+    }
+
+    public function __serialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'email' => $this->email,
+            'password' => $this->password,
+            'name' => $this->name,
+            'roles' => $this->getRoles(),
+        ];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->id = $data['id'];
+        $this->email = $data['email'];
+        $this->password = $data['password'];
+        $this->name = $data['name'];
     }
 
 

@@ -1,0 +1,100 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Contract Details - EvoPlan{% endblock %}
+
+{% block page_title %}Contract Details{% endblock %}
+
+{% block page_subtitle %}View contract information{% endblock %}
+
+{% block header_actions %}
+    <a href="{{ path('app_contract_edit', {'id_contract': contract.id_contract}) }}" class="btn btn-primary lift">
+        <i class="fas fa-edit me-1"></i>
+        Edit Contract
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header">Contract Information</div>
+                <div class="card-body">
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label fw-bold">Partner:</label>
+                        <div class="col-md-9">
+                            <p class="form-control-plaintext">
+                                {{ contract.idPartner ? contract.idPartner.email : 'N/A' }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label fw-bold">Partnership:</label>
+                        <div class="col-md-9">
+                            <p class="form-control-plaintext">
+                                {% if contract.idPartnership and contract.idPartnership.idEvent %}
+                                    {{ contract.idPartnership.idEvent.nom }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label fw-bold">Start Date:</label>
+                        <div class="col-md-9">
+                            <p class="form-control-plaintext">{{ contract.dateDebut ? contract.dateDebut|date('Y-m-d') : 'N/A' }}</p>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label fw-bold">End Date:</label>
+                        <div class="col-md-9">
+                            <p class="form-control-plaintext">{{ contract.dateFin ? contract.dateFin|date('Y-m-d') : 'N/A' }}</p>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label fw-bold">Status:</label>
+                        <div class="col-md-9">
+                            <p class="form-control-plaintext">
+                                <div class="badge bg-{{ 
+                                    contract.status == 'active' ? 'success' : 
+                                    (contract.status == 'suspended' ? 'warning' : 'danger')
+                                }}">
+                                    {{ contract.status|capitalize }}
+                                </div>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mb-0 row">
+                        <label class="col-md-3 col-form-label fw-bold">Terms:</label>
+                        <div class="col-md-9">
+                            <p class="form-control-plaintext">{{ contract.terms|nl2br }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card mb-4">
+                <div class="card-header">Actions</div>
+                <div class="card-body">
+                    <a href="{{ path('app_contract_index') }}" class="btn btn-primary w-100 mb-2">
+                        <i class="fas fa-arrow-left me-1"></i> Back to List
+                    </a>
+                    <a href="{{ path('app_contract_edit', {'id_contract': contract.id_contract}) }}" class="btn btn-warning w-100 mb-2">
+                        <i class="fas fa-edit me-1"></i> Edit
+                    </a>
+                    {{ include('contract/_delete_form.html.twig', {'button_class': 'btn-danger w-100'}) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        window.addEventListener('DOMContentLoaded', event => {
+            feather.replace();
+        });
+    </script>
+{% endblock %}
