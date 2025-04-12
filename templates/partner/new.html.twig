@@ -2,22 +2,32 @@
 
 {% block title %}New Partner - EvoPlan{% endblock %}
 
-{% block page_title %}New Partner{% endblock %}
-
-{% block page_subtitle %}Create a new partner{% endblock %}
-
-{% block header_actions %}
-    <a href="{{ path('app_partner_index') }}" class="btn btn-light lift">
-        <i data-feather="arrow-left" class="me-1"></i>
-        Back to List
-    </a>
-{% endblock %}
-
 {% block content %}
-    <div class="card mb-4">
-        <div class="card-header">Create Partner</div>
-        <div class="card-body">
-            {{ include('partner/_form.html.twig') }}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">New Partner</h1>
+                        <div class="page-header-subtitle">Create a new partner</div>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <a href="{{ path('app_partner_index') }}" class="btn btn-white lift">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Main page content-->
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">Create Partner</div>
+            <div class="card-body">
+                {{ include('partner/_form.html.twig') }}
+            </div>
         </div>
     </div>
 {% endblock %}

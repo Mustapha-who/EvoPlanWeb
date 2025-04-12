@@ -1,35 +1,44 @@
-{% extends 'base.html.twig' %}
+{% extends 'User/base_dashboard.html.twig' %}
 
 {% block title %}Contracts - EvoPlan{% endblock %}
 
-{% block page_title %}Contracts{% endblock %}
-
-{% block page_subtitle %}View and manage contract information{% endblock %}
-
-{% block header_actions %}
-    {# Removed "Add New Contract" button since contracts are created automatically with partnerships #}
-{% endblock %}
-
 {% block content %}
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ label }} alert-icon mb-4" role="alert">
-                <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
-                <div class="alert-icon-aside">
-                    <i class="{% if label == 'success' %}far fa-check-circle{% else %}far fa-times-circle{% endif %}"></i>
-                </div>
-                <div class="alert-icon-content">
-                    {{ message }}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">Contracts</h1>
+                        <div class="page-header-subtitle">View and manage contract information</div>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        {# Empty div to maintain alignment #}
+                    </div>
                 </div>
             </div>
+        </div>
+    </header>
+    <!-- Main page content-->
+    <div class="container-xl px-4 mt-n10">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-icon mb-4" role="alert">
+                    <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <div class="alert-icon-aside">
+                        <i class="{% if label == 'success' %}far fa-check-circle{% else %}far fa-times-circle{% endif %}"></i>
+                    </div>
+                    <div class="alert-icon-content">
+                        {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
         {% endfor %}
-    {% endfor %}
-    
-    <div class="card mb-4">
-        <div class="card-header">Contracts List</div>
-        <div class="card-body">
-            <table id="datatablesSimple">
-                <thead>
+
+        <div class="card mb-4">
+            <div class="card-header">Contracts List</div>
+            <div class="card-body">
+                <table id="datatablesSimple">
+                    <thead>
                     <tr>
                         <th>Partner</th>
                         <th>Partnership</th>
@@ -38,65 +47,70 @@
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
-                </thead>
-                <tbody>
-                {% for contract in contracts %}
-                    <tr>
-                        <td>{{ contract.idPartner ? contract.idPartner.email : 'N/A' }}</td>
-                        <td>
-                            {% if contract.idPartnership and contract.idPartnership.idEvent %}
-                                {{ contract.idPartnership.idEvent.nom }}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </td>
-                        <td>{{ contract.dateDebut ? contract.dateDebut|date('Y-m-d') : 'N/A' }}</td>
-                        <td>{{ contract.dateFin ? contract.dateFin|date('Y-m-d') : 'N/A' }}</td>
-                        <td>
-                            <div class="badge bg-{{ 
-                                contract.status == 'active' ? 'success' : 
-                                (contract.status == 'suspended' ? 'warning' : 'danger') 
-                            }}">
-                                {{ contract.status|capitalize }}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex">
-                                <a href="{{ path('app_contract_show', {'id_contract': contract.id_contract}) }}" 
-                                   class="btn btn-primary me-1">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{{ path('app_contract_edit', {'id_contract': contract.id_contract}) }}" 
-                                   class="btn btn-warning me-1">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="#" 
-                                   class="btn btn-danger"
-                                   onclick="if(confirm('Are you sure you want to delete this contract?')) document.getElementById('delete-form-{{ contract.id_contract }}').submit();">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                                <form id="delete-form-{{ contract.id_contract }}" method="post" action="{{ path('app_contract_delete', {'id_contract': contract.id_contract}) }}" style="display: none;">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ contract.id_contract) }}">
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="7" class="text-center">No contracts found</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    {% for contract in contracts %}
+                        <tr>
+                            <td>{{ contract.idPartner ? contract.idPartner.email : 'N/A' }}</td>
+                            <td>
+                                {% if contract.idPartnership and contract.idPartnership.idEvent %}
+                                    {{ contract.idPartnership.idEvent.nom }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>{{ contract.dateDebut ? contract.dateDebut|date('Y-m-d') : 'N/A' }}</td>
+                            <td>{{ contract.dateFin ? contract.dateFin|date('Y-m-d') : 'N/A' }}</td>
+                            <td>
+                                <div class="badge bg-{{
+                                contract.status == 'active' ? 'success' :
+                                (contract.status == 'suspended' ? 'warning' : 'danger')
+                                }}">
+                                    {{ contract.status|capitalize }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex">
+                                    <a href="{{ path('app_contract_show', {'id_contract': contract.id_contract}) }}"
+                                       class="btn btn-primary btn-sm me-1">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_contract_edit', {'id_contract': contract.id_contract}) }}"
+                                       class="btn btn-warning btn-sm me-1">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="#"
+                                       class="btn btn-danger btn-sm"
+                                       onclick="if(confirm('Are you sure you want to delete this contract?')) document.getElementById('delete-form-{{ contract.id_contract }}').submit();">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    <form id="delete-form-{{ contract.id_contract }}" method="post" action="{{ path('app_contract_delete', {'id_contract': contract.id_contract}) }}" style="display: none;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ contract.id_contract) }}">
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="{{ asset('js/scripts.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+    <script src="{{ asset('js/datatables/datatables-simple-demo.js') }}"></script>
 {% endblock %}
 
 {% block javascripts %}
+
     {{ parent() }}
     <script>
         window.addEventListener('DOMContentLoaded', event => {
-            feather.replace();
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
         });
     </script>
 {% endblock %}
