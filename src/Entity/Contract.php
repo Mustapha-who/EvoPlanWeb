@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ContractRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
 
 #[ORM\Entity(repositoryClass: ContractRepository::class)]
 class Contract
@@ -15,16 +16,18 @@ class Contract
     private ?int $id_contract = null;
 
     #[ORM\ManyToOne(inversedBy: 'contracts')]
-    private ?partnership $id_partnership = null;
+    #[ORM\JoinColumn(name: 'id_partnership', referencedColumnName: 'id_partnership')]
+    private ?Partnership $id_partnership = null;
 
     #[ORM\ManyToOne(inversedBy: 'contracts')]
-    private ?partner $id_partner = null;
+    #[ORM\JoinColumn(name: 'id_partner', referencedColumnName: 'id_partner')]
+    private ?Partner $id_partner = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $date_debut = null;
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTimeInterface $date_debut = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $date_fin = null;
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTimeInterface $date_fin = null;
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $terms = null;
@@ -37,48 +40,53 @@ class Contract
         return $this->id_contract;
     }
 
-    public function getIdPartnership(): ?partnership
+    public function getId_contract(): ?int
+    {
+        return $this->id_contract;
+    }
+
+    public function getIdPartnership(): ?Partnership
     {
         return $this->id_partnership;
     }
 
-    public function setIdPartnership(?partnership $id_partnership): static
+    public function setIdPartnership(?Partnership $id_partnership): static
     {
         $this->id_partnership = $id_partnership;
 
         return $this;
     }
 
-    public function getIdPartner(): ?partner
+    public function getIdPartner(): ?Partner
     {
         return $this->id_partner;
     }
 
-    public function setIdPartner(?partner $id_partner): static
+    public function setIdPartner(?Partner $id_partner): static
     {
         $this->id_partner = $id_partner;
 
         return $this;
     }
 
-    public function getDateDebut(): ?string
+    public function getDateDebut(): ?\DateTimeInterface
     {
         return $this->date_debut;
     }
 
-    public function setDateDebut(string $date_debut): static
+    public function setDateDebut(\DateTimeInterface $date_debut): static
     {
         $this->date_debut = $date_debut;
 
         return $this;
     }
 
-    public function getDateFin(): ?string
+    public function getDateFin(): ?\DateTimeInterface
     {
         return $this->date_fin;
     }
 
-    public function setDateFin(string $date_fin): static
+    public function setDateFin(\DateTimeInterface $date_fin): static
     {
         $this->date_fin = $date_fin;
 
@@ -90,7 +98,7 @@ class Contract
         return $this->terms;
     }
 
-    public function setTerms(string $terms): static
+    public function setTerms(?string $terms): static
     {
         $this->terms = $terms;
 

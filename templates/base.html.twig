@@ -70,9 +70,17 @@
                                 Dashboard
                             </a>
                             <!-- Sidenav Link (Projects)-->
-                            <a class="nav-link" href="{{ path('app_projects') }}">
-                                <div class="nav-link-icon"><i data-feather="folder"></i></div>
+                            <a class="nav-link" href="{{ path('app_partner_index') }}">
+                                <div class="nav-link-icon"><i data-feather="users"></i></div>
                                 Partners
+                            </a>
+                            <a class="nav-link" href="{{ path('app_partnership_index') }}">
+                                <div class="nav-link-icon"><i data-feather="handshake"></i></div>
+                                Partnerships
+                            </a>
+                            <a class="nav-link" href="{{ path('app_contract_index') }}">
+                                <div class="nav-link-icon"><i data-feather="file-text"></i></div>
+                                Contracts
                             </a>
                             <!-- Sidenav Link (Tasks)-->
                             <a class="nav-link" href="{{ path('app_tasks') }}">
@@ -87,6 +95,7 @@
                         </div>
                     </div>
                     <!-- Sidenav Footer-->
+
                     <div class="sidenav-footer">
                         <div class="sidenav-footer-content">
                             <div class="sidenav-footer-subtitle">Logged in as:</div>
@@ -117,6 +126,7 @@
                     {% endblock %}
                     <!-- Main page content-->
                     <div class="container-xl px-4 mt-n10">
+                        {% include '_flash_messages.html.twig' %}
                         {% block content %}{% endblock %}
                     </div>
                 </main>
@@ -139,6 +149,7 @@
         <script src="{{ asset('js/scripts.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
         <script src="{{ asset('js/datatables/datatables-simple-demo.js') }}"></script>
+        <script src="{{ asset('js/form-validation.js') }}"></script>
         {% endblock %}
     </body>
 </html>

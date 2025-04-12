@@ -1,0 +1,10 @@
+<form method="post" action="{{ path('app_contract_delete', {'id_contract': contract.id_contract}) }}" onsubmit="return confirm('Are you sure you want to delete this contract? This action cannot be undone.');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ contract.id_contract) }}">
+    <button class="btn {{ button_class|default('btn-sm btn-danger') }}" title="Delete">
+        {% if button_class is defined %}
+            <i class="fas fa-trash-alt me-1"></i> Delete
+        {% else %}
+            <i class="fas fa-trash-alt"></i> Delete
+        {% endif %}
+    </button>
+</form>

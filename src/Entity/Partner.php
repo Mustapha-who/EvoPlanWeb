@@ -6,6 +6,7 @@ use App\Repository\PartnerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PartnerRepository::class)]
 class Partner
@@ -16,27 +17,33 @@ class Partner
     private ?int $id_partner = null;
 
     #[ORM\Column(length: 200)]
+    #[Assert\NotBlank(message: 'Type is required')]
     private ?string $type_partner = null;
 
-    #[ORM\Column(length: 200)]
+    #[ORM\Column(length: 200, unique: true)]
+    #[Assert\NotBlank(message: 'Email is required')]
+    #[Assert\Email(message: 'The email {{ value }} is not a valid email.')]
     private ?string $email = null;
 
-    #[ORM\Column(length: 13)]
+    #[ORM\Column(length: 13, unique: true)]
+    #[Assert\NotBlank(message: 'Phone number is required')]
+    #[Assert\Length(max: 8, maxMessage: 'Phone number cannot be longer than {{ limit }} digits')]
+    #[Assert\Regex(pattern: '/^\d+$/', message: 'Phone number must contain only digits')]
     private ?string $phone_Number = null;
 
-    #[ORM\Column(length: 200)]
+    #[ORM\Column(length: 255, nullable: true, unique: true)]
     private ?string $logo = null;
 
     /**
      * @var Collection<int, Partnership>
      */
-    #[ORM\OneToMany(targetEntity: Partnership::class, mappedBy: 'id_partner')]
+    #[ORM\OneToMany(targetEntity: Partnership::class, mappedBy: 'id_partner', cascade: ['remove'])]
     private Collection $partnerships;
 
     /**
      * @var Collection<int, Contract>
      */
-    #[ORM\OneToMany(targetEntity: Contract::class, mappedBy: 'id_partner')]
+    #[ORM\OneToMany(targetEntity: Contract::class, mappedBy: 'id_partner', cascade: ['remove'])]
     private Collection $contracts;
 
     public function __construct()
@@ -45,7 +52,7 @@ class Partner
         $this->contracts = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getId_partner(): ?int
     {
         return $this->id_partner;
     }
@@ -91,7 +98,7 @@ class Partner
         return $this->logo;
     }
 
-    public function setLogo(string $logo): static
+    public function setLogo(?string $logo): static
     {
         $this->logo = $logo;
 

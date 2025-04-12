@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Partnership - EvoPlan{% endblock %}
+
+{% block page_title %}New Partnership{% endblock %}
+
+{% block page_subtitle %}Create a new partnership{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">Create Partnership</div>
+        <div class="card-body">
+            {{ include('partnership/_form.html.twig') }}
+        </div>
+        <div class="card-footer">
+            <a href="{{ path('app_partnership_index') }}" class="btn btn-light">
+                <i data-feather="arrow-left" class="me-1"></i>
+                Back to list
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+            
+            // Initialize form validation for date fields
+            const startDateField = document.querySelector('[name$="[date_debut]"]');
+            const endDateField = document.querySelector('[name$="[date_fin]"]');
+            
+            if (startDateField) {
+                startDateField.addEventListener('change', function() {
+                    validateDate(this);
+                    // When start date changes, revalidate end date
+                    if (endDateField && endDateField.value) {
+                        validateDate(endDateField);
+                    }
+                });
+            }
+            
+            if (endDateField) {
+                endDateField.addEventListener('change', function() {
+                    validateDate(this);
+                });
+            }
+        });
+    </script>
+{% endblock %}

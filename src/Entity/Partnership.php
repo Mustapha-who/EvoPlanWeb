@@ -7,34 +7,56 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: PartnershipRepository::class)]
+#[UniqueEntity(
+    fields: ['id_partner', 'id_event'],
+    message: 'This partner is already associated with this event.'
+)]
 class Partnership
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private ?int $id_partnership = null;
 
-    #[ORM\ManyToOne(inversedBy: 'partnerships')]
-    private ?partner $id_partner = null;
+    #[ORM\ManyToOne(targetEntity: Partner::class, inversedBy: 'partnerships')]
+    #[ORM\JoinColumn(name: 'id_partner', referencedColumnName: 'id_partner')]
+    #[Assert\NotNull(message: 'Please select a partner.')]
+    private ?Partner $id_partner = null;
 
-    #[ORM\ManyToOne(inversedBy: 'partnerships')]
+    #[ORM\ManyToOne(targetEntity: Event::class, inversedBy: 'partnerships')]
+    #[ORM\JoinColumn(name: 'id_event', referencedColumnName: 'id_event')]
+    #[Assert\NotNull(message: 'Please select an event.')]
     private ?Event $id_event = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotNull(message: 'Start date is required.')]
+    #[Assert\Type("\DateTimeInterface", message: 'Please enter a valid date.')]
+    #[Assert\GreaterThanOrEqual(
+        value: "today",
+        message: "Start date must be today or in the future."
+    )]
     private ?\DateTimeInterface $date_debut = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Assert\Type("\DateTimeInterface", message: 'Please enter a valid date.')]
+    #[Assert\Expression(
+        "this.getDateFin() === null or this.getDateFin() > this.getDateDebut()",
+        message: "End date must be after start date."
+    )]
     private ?\DateTimeInterface $date_fin = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: 'Terms and conditions are required.')]
     private ?string $terms = null;
 
     /**
      * @var Collection<int, Contract>
      */
-    #[ORM\OneToMany(targetEntity: Contract::class, mappedBy: 'id_partnership')]
+    #[ORM\OneToMany(targetEntity: Contract::class, mappedBy: 'id_partnership', cascade: ['remove'])]
     private Collection $contracts;
 
     public function __construct()
@@ -44,18 +66,22 @@ class Partnership
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->id_partnership;
     }
 
-    public function getIdPartner(): ?partner
+    public function getIdPartnership(): ?int
+    {
+        return $this->id_partnership;
+    }
+
+    public function getIdPartner(): ?Partner
     {
         return $this->id_partner;
     }
 
-    public function setIdPartner(?partner $id_partner): static
+    public function setIdPartner(?Partner $id_partner): static
     {
         $this->id_partner = $id_partner;
-
         return $this;
     }
 
@@ -88,7 +114,7 @@ class Partnership
         return $this->date_fin;
     }
 
-    public function setDateFin(\DateTimeInterface $date_fin): static
+    public function setDateFin(?\DateTimeInterface $date_fin): static
     {
         $this->date_fin = $date_fin;
 

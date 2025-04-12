@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Contract - EvoPlan{% endblock %}
+
+{% block page_title %}New Contract{% endblock %}
+
+{% block page_subtitle %}Create a new contract{% endblock %}
+
+{% block header_actions %}
+    <a href="{{ path('app_contract_index') }}" class="btn btn-primary lift">
+        <i data-feather="arrow-left" class="me-1"></i>
+        Back to List
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header">Create New Contract</div>
+                <div class="card-body">
+                    {{ include('contract/_form.html.twig', {'button_label': 'Save', 'button_class': 'btn-primary'}) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        window.addEventListener('DOMContentLoaded', event => {
+            feather.replace();
+        });
+    </script>
+{% endblock %}
