@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\SessionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -32,6 +34,17 @@ class Session
     #[ORM\ManyToOne(targetEntity: Workshop::class, inversedBy: 'sessions')]
     #[ORM\JoinColumn(name: "id_workshop", referencedColumnName: "id_workshop")]
     private ?Workshop $id_workshop = null;
+
+    /**
+     * @var Collection<int, ReservationSession>
+     */
+    #[ORM\OneToMany(targetEntity: ReservationSession::class, mappedBy: 'id_session')]
+    private Collection $reservationSessions;
+
+    public function __construct()
+    {
+        $this->reservationSessions = new ArrayCollection();
+    }
 
     public function getid_session(): ?int
     {
@@ -86,10 +99,9 @@ class Session
         return $this->participant_count;
     }
 
-    public function setParticipantCount(int $participant_count): static
+    public function setParticipantCount(?int $participantCount): self
     {
-        $this->participant_count = $participant_count;
-
+        $this->participant_count = $participantCount ?? 0;
         return $this;
     }
 
@@ -113,6 +125,36 @@ class Session
     public function setIdWorkshop(?workshop $id_workshop): static
     {
         $this->id_workshop = $id_workshop;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ReservationSession>
+     */
+    public function getReservationSessions(): Collection
+    {
+        return $this->reservationSessions;
+    }
+
+    public function addReservationSession(ReservationSession $reservationSession): static
+    {
+        if (!$this->reservationSessions->contains($reservationSession)) {
+            $this->reservationSessions->add($reservationSession);
+            $reservationSession->setIdSession($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservationSession(ReservationSession $reservationSession): static
+    {
+        if ($this->reservationSessions->removeElement($reservationSession)) {
+            // set the owning side to null (unless already changed)
+            if ($reservationSession->getIdSession() === $this) {
+                $reservationSession->setIdSession(null);
+            }
+        }
 
         return $this;
     }

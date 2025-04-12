@@ -11,14 +11,6 @@ enum Lieu: string
     case BIZERTE = 'Bizerte';
     case GABES = 'Gabès';
     case GAFSA = 'Gafsa';
-    case JENDOUBA = 'Jendouba';
-    case KAIROUAN = 'Kairouan';
-    case KASSERINE = 'Kasserine';
-    case KEBILI = 'Kébili';
-    case KEF = 'Kef';
-    case MAHDIA = 'Mahdia';
-    case MANOUBA = 'Manouba';
-    case MEDENINE = 'Médenine';
     case MONASTIR = 'Monastir';
     case NABEUL = 'Nabeul';
     case SFAX = 'Sfax';

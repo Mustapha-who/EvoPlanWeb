@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ReservationSession index{% endblock %}
+
+{% block body %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="filter"></i></div>
+                            Reservations
+                        </h1>
+                        <div class="page-header-subtitle">Reservation management and overview</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">Reservation List</div>
+            <div class="card-body">
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>Participant ID</th>
+                            <th>Session ID</th>
+                            <th>Participant Name</th>
+                            <th>Participant Email</th>
+                            <th>Phone Number</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for reservation_session in reservation_sessions %}
+                        <tr>
+                            <td>{{ reservation_session.participant.id }}</td>
+                            <td>{{ reservation_session.idSession.id_session }}</td>
+                            <td>{{ reservation_session.participant.name }}</td>
+                            <td>{{ reservation_session.participant.email }}</td>
+                            <td>{{ reservation_session.participant.phoneNumber }}</td>
+                            <td>
+                                <button class="btn btn-datatable btn-icon btn-transparent-dark me-2" onclick="location.href='{{ path('app_reservation_session_show', {'id': reservation_session.id}) }}'">
+                                    <i data-feather="eye"></i>
+                                </button>
+                                <button class="btn btn-datatable btn-icon btn-transparent-dark me-2" onclick="location.href='{{ path('app_reservation_session_edit', {'id': reservation_session.id}) }}'">
+                                    <i data-feather="edit"></i>
+                                </button>
+                                <form method="post" action="{{ path('app_reservation_session_delete', {'id': reservation_session.id}) }}" style="display: inline-block" onsubmit="return confirm('Are you sure you want to delete this reservation?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation_session.id) }}">
+                                    <button type="submit" class="btn btn-datatable btn-icon btn-transparent-dark">
+                                        <i data-feather="trash-2"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">No reservations found</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                
+                <div class="mt-4">
+                    <a class="btn btn-primary" href="{{ path('app_reservation_session_new') }}">Create New Reservation</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

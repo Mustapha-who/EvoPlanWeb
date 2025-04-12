@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-
 use App\Repository\EventRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -10,7 +9,6 @@ use App\Enum\Lieu;
 use App\Enum\StatutEvent;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
@@ -32,6 +30,12 @@ class Event
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $dateFin = null;
 
+    #[ORM\Column(type: "string", enumType: Lieu::class)]
+    private ?Lieu $lieu = null;
+
+    #[ORM\Column(type: "string", enumType: StatutEvent::class)]
+    private ?StatutEvent $statut = null;
+
     #[ORM\Column]
     private ?int $capacite = null;
 
@@ -44,36 +48,16 @@ class Event
     #[ORM\Column]
     private ?int $nombreVisites = 0;
 
-    #[ORM\Column(type: "string", enumType: Lieu::class)]
-    private ?Lieu $lieu = null;
-
-    #[ORM\Column(type: "string", enumType: StatutEvent::class)]
-    private ?StatutEvent $statut = null;
-
-    /**
-     * @var Collection<int, Partnership>
-     */
-    #[ORM\OneToMany(targetEntity: Partnership::class, mappedBy: 'id_event')]
-    private Collection $partnerships;
-    /**
-
-     * @var Collection<int, Workshop>
-     */
-    #[ORM\OneToMany(targetEntity: Workshop::class, mappedBy: 'id_event')]
-    private Collection $workshops;
-
+    /*#[ORM\OneToMany(mappedBy: "event", targetEntity: Reservation::class)]
+    private Collection $reservations;*/
+    /*$this->reservations = new ArrayCollection();*/
     public function __construct()
     {
-
-        $this->partnerships = new ArrayCollection();
-        $this->workshops = new ArrayCollection();
         $this->nombreVisites = 0;
         $this->statut = StatutEvent::DISPONIBLE;
     }
 
-
-    public function getid_Event(): ?int
-
+    public function getId_event(): ?int
     {
         return $this->id_event;
     }
@@ -122,6 +106,28 @@ class Event
         return $this;
     }
 
+    public function getLieu(): ?Lieu
+    {
+        return $this->lieu;
+    }
+
+    public function setLieu(Lieu $lieu): static
+    {
+        $this->lieu = $lieu;
+        return $this;
+    }
+
+    public function getStatut(): ?StatutEvent
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(StatutEvent $statut): static
+    {
+        $this->statut = $statut;
+        return $this;
+    }
+
     public function getCapacite(): ?int
     {
         return $this->capacite;
@@ -163,89 +169,6 @@ class Event
     public function setNombreVisites(int $nombreVisites): static
     {
         $this->nombreVisites = $nombreVisites;
-        return $this;
-    }
-
-    public function getLieu(): ?Lieu
-    {
-        return $this->lieu;
-    }
-
-    public function setLieu(Lieu $lieu): static
-    {
-        $this->lieu = $lieu;
-        return $this;
-    }
-
-    public function getStatut(): ?StatutEvent
-    {
-        return $this->statut;
-    }
-
-    public function setStatut(StatutEvent $statut): static
-    {
-        $this->statut = $statut;
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Workshop>
-     */
-    public function getWorkshops(): Collection
-    {
-        return $this->workshops;
-    }
-
-    public function addWorkshop(Workshop $workshop): static
-    {
-        if (!$this->workshops->contains($workshop)) {
-            $this->workshops->add($workshop);
-            $workshop->setIdEvent($this);
-        }
-
-        return $this;
-    }
-
-    public function removeWorkshop(Workshop $workshop): static
-    {
-        if ($this->workshops->removeElement($workshop)) {
-            // set the owning side to null (unless already changed)
-            if ($workshop->getIdEvent() === $this) {
-                $workshop->setIdEvent(null);
-            }
-        }
-
-        return $this;
-    }
-
-
-    /**
-     * @return Collection<int, Partnership>
-     */
-    public function getPartnerships(): Collection
-    {
-        return $this->partnerships;
-    }
-
-    public function addPartnership(Partnership $partnership): static
-    {
-        if (!$this->partnerships->contains($partnership)) {
-            $this->partnerships->add($partnership);
-            $partnership->setIdEvent($this);
-        }
-
-        return $this;
-    }
-
-    public function removePartnership(Partnership $partnership): static
-    {
-        if ($this->partnerships->removeElement($partnership)) {
-            // set the owning side to null (unless already changed)
-            if ($partnership->getIdEvent() === $this) {
-                $partnership->setIdEvent(null);
-            }
-        }
-
         return $this;
     }
 }

@@ -1,0 +1,158 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Evoplan - Réservation pour {{ event.nom }}{% endblock %}
+
+{% block body %}
+<!-- Navbar -->
+<nav class="topnav navbar navbar-expand-lg navbar-light bg-white shadow">
+    <div class="container-fluid justify-content-between">
+        <a class="navbar-brand d-flex align-items-center pe-3 ps-3" href="{{ path('app_event_home') }}">
+            <img src="{{ asset('assets/img/hexatech.png') }}" alt="Evoplan Logo" class="me-2" style="height: 60px;" />
+            <span class="h3 mb-0 text-primary">Evoplan</span>
+        </a>
+
+        <div class="mx-auto">
+            <ul class="navbar-nav flex-row gap-4">
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold fs-5 text-dark" href="{{ path('app_event_home') }}">Accueil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold fs-5 text-dark" href="#">Feedback</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold fs-5 text-dark" href="#">Report</a>
+                </li>
+            </ul>
+        </div>
+
+        <ul class="navbar-nav align-items-center">
+            <li class="nav-item">
+                <a class="nav-link text-secondary" href="#!">Help Center</a>
+            </li>
+            <li class="nav-item dropdown no-caret dropdown-user me-3 me-lg-4">
+                <a class="btn btn-icon btn-transparent-dark dropdown-toggle" id="navbarDropdownUserImage" href="#" data-bs-toggle="dropdown">
+                    <img class="img-fluid rounded-circle" src="{{ asset('assets/img/illustrations/profiles/profile-1.png') }}" />
+                </a>
+                <div class="dropdown-menu dropdown-menu-end shadow animated--fade-in-up">
+                    <h6 class="dropdown-header d-flex align-items-center">
+                        <img class="dropdown-user-img" src="{{ asset('assets/img/illustrations/profiles/profile-1.png') }}" />
+                        <div class="dropdown-user-details">
+                            <div class="dropdown-user-details-name">Utilisateur</div>
+                            <div class="dropdown-user-details-email">user@example.com</div>
+                        </div>
+                    </h6>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#"><i data-feather="user"></i> Mon profil</a>
+                    <a class="dropdown-item" href="#"><i data-feather="calendar"></i> Mes événements</a>
+                    <a class="dropdown-item" href="#"><i data-feather="settings"></i> Paramètres</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#"><i data-feather="log-out"></i> Déconnexion</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container-xl px-4 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-lg mb-5">
+                <div class="col-md-6">
+                                        <a href="{{ path('app_event_show', {'id_event': event.id_event}) }}"
+                                           class="btn btn-outline-secondary btn-lg px-4">
+                                            <i class="fas fa-arrow-left me-2"></i> Retour
+                                        </a>
+                                    </div>
+                <!-- En-tête -->
+                <div class="card-header bg-white border-0 text-center py-4">
+                    <h1 class="display-5 fw-bold mb-3 text-primary">RESERVE YOUR SPOT</h1>
+                </div>
+
+                <div class="card-body p-5">
+                    <!-- Texte informatif déplacé ici -->
+                    <div class="alert alert-light border-0 mb-5 text-center">
+                        <p class="mb-1">Once your booking is confirmed, you will receive a ticket for <strong>{{ event.nom }}</strong>.</p>
+                        <p class="mb-0">Your ticket will be sent to: <strong>{{ app.user ? app.user.email : 'your@email.com' }}</strong></p>
+                        <p class="mt-2 text-muted">Please check your inbox (and spam folder) for the confirmation email. 🎫✨</p>
+                    </div>
+
+                    <!-- Image encore ici juste au-dessus de ORDER SUMMARY -->
+                    <div class="mb-5 text-center">
+                        <img src="{{ asset('uploads/' ~ event.imageEvent) }}" alt="Image de l'événement" class="img-fluid rounded shadow" style="max-height: 250px; object-fit: cover; width: 100%;" />
+                    </div>
+
+                    <!-- ORDER SUMMARY -->
+                    <div class="mb-5">
+                        <h2 class="h4 mb-4 fw-bold">ORDER SUMMARY</h2>
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Event Date:</span>
+                                <strong>{{ event.dateDebut ? event.dateDebut|date('Y-m-d\\TH:i') : '' }}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Ticket For:</span>
+                                <strong>{{ event.nom }}</strong>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="text-end mt-4">
+                            <h3 class="h4">TOTAL AMOUNT <span class="fw-bold">0.0 €</span></h3>
+                            <p class="text-muted small">All taxes included</p>
+                        </div>
+
+                        <div class="text-center mt-4 pt-3">
+                            <small class="text-muted">powered by evoplan</small>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire -->
+                    <div class="mt-2 pt-1">
+                        {{ form_start(form) }}
+                            <div class="mb-2">
+                                {{ form_widget(form) }}
+                            </div>
+
+                            <div class="d-flex justify-content-center mt-1">
+                                <button type="submit" class="btn btn-primary btn-lg px-5">
+                                    <i class="fas fa-check-circle me-2"></i> Confirmer la réservation
+                                </button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .topnav {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+    }
+    .card {
+        border-radius: 12px;
+    }
+    .alert-light {
+        background-color: #f8f9fa;
+        border-left: 4px solid #28a745;
+    }
+    .btn-lg {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    feather.replace();
+</script>
+{% endblock %}

@@ -7,6 +7,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\UserModule\Instructor;
+use App\Entity\User;
 
 #[ORM\Entity(repositoryClass: WorkshopRepository::class)]
 class Workshop
@@ -25,9 +27,10 @@ class Workshop
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $enddate = null;
 
-    #[ORM\Column]
-    private ?int $instructor = null;
-
+    #[ORM\ManyToOne(targetEntity: Instructor::class)]
+    #[ORM\JoinColumn(name: "instructor", referencedColumnName: "id")]
+    private ?Instructor $instructor = null;
+    
 
     #[ORM\Column]
     private ?int $capacity = null;
@@ -44,6 +47,7 @@ class Workshop
     #[ORM\OneToMany(targetEntity: Session::class, mappedBy: 'id_workshop')]
     private Collection $sessions;
 
+
     #[ORM\ManyToOne(targetEntity: Event::class, inversedBy: 'workshops')]
     #[ORM\JoinColumn(name: "id_event", referencedColumnName: "id_event")]
     private ?event $id_event = null;
@@ -55,9 +59,8 @@ class Workshop
 
     public function getid_workshop(): ?int
     {
-    return $this->id_workshop;
+        return $this->id_workshop;
     }
-
 
     public function getTitle(): ?string
     {
@@ -95,19 +98,17 @@ class Workshop
         return $this;
     }
 
-    public function getInstructor(): ?int
+    public function getInstructor(): ?Instructor
     {
         return $this->instructor;
     }
 
-    public function setInstructor(int $instructor): static
+    public function setInstructor(?Instructor $instructor): static
     {
         $this->instructor = $instructor;
 
         return $this;
     }
-
-   
 
     public function getCapacity(): ?int
     {
@@ -185,5 +186,17 @@ class Workshop
         $this->id_event = $id_event;
 
         return $this;
+    }
+
+    public function getTotalSessionsCapacity(): int
+    {
+        return $this->sessions->reduce(function (int $total, Session $session) {
+            return $total + $session->getCapacity();
+        }, 0);
+    }
+
+    public function getRemainingCapacity(): int
+    {
+        return $this->capacity - $this->getTotalSessionsCapacity();
     }
 }
