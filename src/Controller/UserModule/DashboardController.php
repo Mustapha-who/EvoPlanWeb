@@ -20,8 +20,13 @@ class DashboardController extends AbstractController
     #[Route('/userdash', name: 'user_dashboard')]
     public function index(): Response
     {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            return $this->redirectToRoute('admin_dashboard');
+        } elseif ($this->isGranted('ROLE_EVENTPLANNER')) {
+            return $this->render('User/eventplannerDashboard.html.twig');
+        }
 
-        return $this->redirectToRoute("admin_dashboard");
+        throw $this->createAccessDeniedException('Access Denied.');
     }
 
 }
