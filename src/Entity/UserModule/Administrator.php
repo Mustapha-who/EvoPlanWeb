@@ -9,7 +9,9 @@ use Doctrine\ORM\Mapping as ORM;
 class Administrator extends User
 {
 
-    // Add specific fields for Administrator if needed
-
+    public function getRoles(): array
+    {
+        return ['ROLE_ADMIN'];
+    }
 
 }

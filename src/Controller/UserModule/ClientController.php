@@ -123,7 +123,7 @@ class ClientController extends AbstractController
         $this->clientRepository->updateUser($client);
 
         // Delete Client
-        $this->clientRepository->deleteUser($client->getId());
+        //$this->clientRepository->deleteUser($client->getId());
 
         return $this->json(['message' => 'CRUD operations tested successfully.']);
     }

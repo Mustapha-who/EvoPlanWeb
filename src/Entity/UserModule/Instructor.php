@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Instructor extends User
 {
     #[ORM\Column(type: 'string', length: 255)]
-    private ?string $certification;
+    private ?string $certification=null;
 
     #[ORM\Column(type: 'boolean')]
     private bool $isApproved = false;
@@ -19,7 +19,7 @@ class Instructor extends User
         return $this->certification;
     }
 
-    public function setCertification(string $certification): self
+    public function setCertification(?string $certification): self
     {
         $this->certification = $certification;
 
@@ -36,5 +36,10 @@ class Instructor extends User
         $this->isApproved = $isApproved;
 
         return $this;
+    }
+
+    public function getRoles(): array
+    {
+        return ['ROLE_INSTRUCTOR'];
     }
 }

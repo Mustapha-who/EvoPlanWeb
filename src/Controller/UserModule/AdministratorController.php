@@ -97,7 +97,7 @@ class AdministratorController extends AbstractController
         $administrator = new Administrator();
         $administrator->setName('Test User');
         $administrator->setEmail('test.us2er@example.com');
-        $administrator->setPassword('TestPassword@123'); // Assume password is already hashed
+        $administrator->setPassword('Password@123'); // Assume password is already hashed
         $this->administratorRepository->addUser($administrator);
 
         // List Administrators
@@ -118,7 +118,7 @@ class AdministratorController extends AbstractController
         $this->administratorRepository->updateUser($administrator);
 
         // Delete Administrator
-        //$this->administratorRepository->deleteUser($administrator->getId());
+        $this->administratorRepository->deleteUser($administrator->getId());
 
         return $this->json(['message' => 'CRUD operations tested successfully.']);
     }

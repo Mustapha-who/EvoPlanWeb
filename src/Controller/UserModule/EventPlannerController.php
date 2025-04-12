@@ -129,7 +129,7 @@ class EventPlannerController extends AbstractController
         $this->eventPlannerRepository->updateUser($eventPlanner);
 
         // Delete EventPlanner
-        $this->eventPlannerRepository->deleteUser(42);
+        //$this->eventPlannerRepository->deleteUser(42);
 
         return $this->json(['message' => 'CRUD operations tested successfully.']);
     }
