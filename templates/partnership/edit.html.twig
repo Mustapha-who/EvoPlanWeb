@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Partnership - EvoPlan{% endblock %}
+
+{% block page_title %}Edit Partnership{% endblock %}
+
+{% block page_subtitle %}Modify partnership information{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">Edit Partnership</div>
+        <div class="card-body">
+            {{ include('partnership/_form.html.twig', {'button_label': 'Update'}) }}
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+            <a href="{{ path('app_partnership_index') }}" class="btn btn-light">
+                <i data-feather="arrow-left" class="me-1"></i>
+                Back to list
+            </a>
+            {{ include('partnership/_delete_form.html.twig', {'id_partnership': partnership.id}) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+            
+            // Initialize form validation for date fields
+            const startDateField = document.querySelector('[name$="[date_debut]"]');
+            const endDateField = document.querySelector('[name$="[date_fin]"]');
+            
+            if (startDateField) {
+                startDateField.addEventListener('change', function() {
+                    validateDate(this);
+                    // When start date changes, revalidate end date
+                    if (endDateField && endDateField.value) {
+                        validateDate(endDateField);
+                    }
+                });
+            }
+            
+            if (endDateField) {
+                endDateField.addEventListener('change', function() {
+                    validateDate(this);
+                });
+            }
+        });
+    </script>
+{% endblock %}

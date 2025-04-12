@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Partners - EvoPlan{% endblock %}
+
+{% block page_title %}Partners{% endblock %}
+
+{% block page_subtitle %}Manage your partners{% endblock %}
+
+{% block header_actions %}
+    <a href="{{ path('app_partner_new') }}" class="btn btn-primary lift">
+        <i class="fas fa-plus me-1"></i>
+        Add New Partner
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="card mb-4">
+        <div class="card-header">Partners List</div>
+        <div class="card-body">
+            <table id="datatablesSimple">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
+                        <th>Logo</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for partner in partners %}
+                    <tr>
+                        <td>{{ partner.typePartner }}</td>
+                        <td>{{ partner.email }}</td>
+                        <td>{{ partner.phoneNumber }}</td>
+                        {# In your table row where you display the logo #}
+                        <td>
+                            {% if partner.logo %}
+                                <img src="{{ asset(partner.logo) }}" alt="Partner logo" style="height: 50px; width: auto;">
+                            {% else %}
+                                No logo
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex">
+                                <a href="{{ path('app_partner_show', {'id_partner': partner.id_partner}) }}"
+                                   class="btn btn-primary me-1">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ path('app_partner_edit', {'id_partner': partner.id_partner}) }}"
+                                   class="btn btn-warning me-1">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="#" 
+                                   class="btn btn-danger"
+                                   onclick="if(confirm('Are you sure you want to delete this partner?')) document.getElementById('delete-form-{{ partner.id_partner }}').submit();">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                                <form id="delete-form-{{ partner.id_partner }}" method="post" action="{{ path('app_partner_delete', {'id_partner': partner.id_partner}) }}" style="display: none;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ partner.id_partner) }}">
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">No partners found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        window.addEventListener('DOMContentLoaded', event => {
+            feather.replace();
+        });
+    </script>
+{% endblock %}

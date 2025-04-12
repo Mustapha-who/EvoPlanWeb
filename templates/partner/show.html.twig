@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Partner Details - EvoPlan{% endblock %}
+
+{% block page_title %}Partner Details{% endblock %}
+
+{% block page_subtitle %}View partner information{% endblock %}
+
+{% block header_actions %}
+    <a href="{{ path('app_partner_edit', {'id_partner': partner.id_partner}) }}" class="btn btn-primary lift me-2">
+        <i data-feather="edit" class="me-1"></i>
+        Edit
+    </a>
+    <a href="{{ path('app_partner_index') }}" class="btn btn-light lift">
+        <i data-feather="arrow-left" class="me-1"></i>
+        Back to List
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="card mb-4">
+        <div class="card-header">Partner Information</div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="table-responsive">
+                        <table class="table table-borderless mb-0">
+                            <tbody>
+                                <tr>
+                                    <th>Type:</th>
+                                    <td>{{ partner.typePartner }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>{{ partner.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Phone Number:</th>
+                                    <td>{{ partner.phoneNumber }}</td>
+                                </tr>
+                                <tr>
+                                    {# Where you display the logo #}
+                                    <tr>
+                                        <th>Logo:</th>
+                                        <td>
+                                            {% if partner.logo %}
+                                                <img src="{{ asset(partner.logo) }}" alt="Partner logo" style="height: 100px; width: auto;">
+                                            {% else %}
+                                                No logo
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            {{ include('partner/_delete_form.html.twig') }}
+        </div>
+    </div>
+{% endblock %}

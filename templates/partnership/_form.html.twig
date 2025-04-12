@@ -1,0 +1,66 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'name': 'partnership', 'novalidate': 'novalidate'}}) }}
+    {% if form.vars.errors is not empty %}
+        <div class="alert alert-danger">
+            {{ form_errors(form) }}
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                {{ form_label(form.id_partner) }}
+                {{ form_widget(form.id_partner, {'attr': {'data-error-required': 'Please select a partner'}}) }}
+                {{ form_errors(form.id_partner) }}
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                {{ form_label(form.id_event) }}
+                {{ form_widget(form.id_event, {'attr': {'data-error-required': 'Please select an event'}}) }}
+                {{ form_errors(form.id_event) }}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                {{ form_label(form.date_debut) }}
+                {{ form_widget(form.date_debut, {'attr': {
+                    'data-error-required': 'Start date is required',
+                    'data-error-format': 'Please enter a valid date',
+                    'data-error-future': 'Start date must be today or in the future'
+                }}) }}
+                {{ form_errors(form.date_debut) }}
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                {{ form_label(form.date_fin) }}
+                {{ form_widget(form.date_fin, {'attr': {
+                    'data-error-format': 'Please enter a valid date',
+                    'data-error-after': 'End date must be after start date'
+                }}) }}
+                <small class="form-text text-muted">{{ form_help(form.date_fin) }}</small>
+                {{ form_errors(form.date_fin) }}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 mb-3">
+            <div class="form-group">
+                {{ form_label(form.terms) }}
+                {{ form_widget(form.terms, {'attr': {'data-error-required': 'Terms and conditions are required'}}) }}
+                {{ form_errors(form.terms) }}
+            </div>
+        </div>
+    </div>
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">
+            <i data-feather="save" class="me-1"></i>
+            {{ button_label|default('Save') }}
+        </button>
+        <a href="{{ path('app_partnership_index') }}" class="btn btn-light ms-2">
+            <i data-feather="x" class="me-1"></i>
+            Cancel
+        </a>
+    </div>
+{{ form_end(form) }}

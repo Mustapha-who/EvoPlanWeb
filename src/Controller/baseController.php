@@ -35,14 +35,11 @@ class baseController extends AbstractController
         ]);
     }
 
-    #[Route('/Partners', name: 'app_projects')]
-    public function projects(PartnerRepository $partnerRepository): Response
+    #[Route('/partners-old', name: 'app_projects')]
+    public function projects(): Response
     {
-        $partners = $partnerRepository->findAll();
-
         return $this->render('tables.html.twig', [
             'controller_name' => 'baseController',
-            'partners' => $partners,
         ]);
     }
 
