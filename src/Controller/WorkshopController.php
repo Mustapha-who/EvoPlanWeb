@@ -42,13 +42,6 @@ final class WorkshopController extends AbstractController
         ]);
     }
 
-    #[Route('/{id_workshop}', name: 'app_workshop_show', methods: ['GET'])]
-    public function show(Workshop $workshop): Response
-    {
-        return $this->render('workshop/show.html.twig', [
-            'workshop' => $workshop,
-        ]);
-    }
 
     #[Route('/{id_workshop}/edit', name: 'app_workshop_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Workshop $workshop, EntityManagerInterface $entityManager): Response
@@ -77,5 +70,16 @@ final class WorkshopController extends AbstractController
         }
 
         return $this->redirectToRoute('app_workshop_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/charts', name: 'app_workshop_charts', methods: ['GET'])]
+    public function charts(WorkshopRepository $workshopRepository): Response
+    {
+        return $this->render('workshop/charts.html.twig', [
+            'sessionsData' => $workshopRepository->getSessionsPerWorkshop(),
+            'workshopsPerEvent' => $workshopRepository->getWorkshopsPerEvent(),
+            'capacityData' => $workshopRepository->getCapacityVsAttendance(),
+            'attendanceRates' => $workshopRepository->getAttendanceRates()
+        ]);
     }
 }
