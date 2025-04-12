@@ -20,4 +20,13 @@ enum EventPlannerModule: string
             self::SCHEDULE => 'Schedule',
         };
     }
+    public static function getChoices(): array
+    {
+        return [
+            'Logistics' => self::LOGISTICS,
+            'Resources' => self::RESSOURCES,
+            'Workshops' => self::WORKSHOPS,
+            'Schedule' => self::SCHEDULE,
+        ];
+    }
 }

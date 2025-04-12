@@ -9,9 +9,9 @@ use Doctrine\ORM\Mapping as ORM;
 class Client extends User
 {
     #[ORM\Column(type: 'string', length: 255)]
-    private ?string $phoneNumber;
+    private string $phoneNumber= '';
 
-    public function getPhoneNumber(): ?string
+    public function getPhoneNumber(): string
     {
         return $this->phoneNumber;
     }
@@ -22,4 +22,5 @@ class Client extends User
 
         return $this;
     }
+
 }

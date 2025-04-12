@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Authentication{% endblock %}</title>
+    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+    {% block stylesheets %}{% endblock %}
+</head>
+<body class="bg-primary">
+{% block body %}{% endblock %}
+<script src="{{ asset('js/scripts.js') }}"></script>
+{% block javascripts %}{% endblock %}
+</body>
+</html>
