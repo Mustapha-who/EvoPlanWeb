@@ -1,18 +1,24 @@
-{% extends 'base.html.twig' %}
+{% extends 'User/base_dashboard.html.twig' %}
 
-{% block title %}Edit Event{% endblock %}
+{% block title %}Edit Event - EvoPlan{% endblock %}
 
-{% block body %}
+{% block content %}
 <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
     <div class="container-xl px-4">
         <div class="page-header-content pt-4">
             <div class="row align-items-center justify-content-between">
                 <div class="col-auto mt-4">
                     <h1 class="page-header-title">
-                        <div class="page-header-icon"><i data-feather="edit"></i></div>
+                        <div class="page-header-icon"><i class="fas fa-edit"></i></div>
                         Edit Event
                     </h1>
                     <div class="page-header-subtitle">Modify the details of your event</div>
+                </div>
+                <div class="col-12 col-xl-auto mt-4">
+                    <a href="{{ path('app_event_index') }}" class="btn btn-white lift">
+                        <i class="fas fa-arrow-left me-1"></i>
+                        Back to List
+                    </a>
                 </div>
             </div>
         </div>
@@ -25,121 +31,73 @@
             <div class="card mb-4">
                 <div class="card-header">Event Details</div>
                 <div class="card-body">
-                    {% for message in app.flashes('error') %}
-                        <div class="alert alert-danger">{{ message }}</div>
-                    {% endfor %}
+                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
 
-                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'id': 'eventForm'}}) }}
-
-                    <!-- Champ d'upload d'image -->
+                    <!-- Image upload field -->
                     <div class="mb-3">
                         <label class="form-label">Event Image</label>
-                        {{ form_widget(form.imageEvent, {
-                            'attr': {
-                                'class': 'form-control',
-                                'onchange': 'previewImage(event)'
-                            }
-                        }) }}
-                        <small class="text-muted">Leave empty to keep current image</small>
+                        {{ form_widget(form.imageEvent, { 'attr': {'class': 'form-control', 'onchange': 'previewImage(event)'} }) }}
 
+                        <!-- Show existing image if it exists -->
                         {% if event.imageEvent %}
-                            <img id="imagePreview" src="{{ asset('uploads/' ~ event.imageEvent) }}" class="mt-3" style="max-width: 200px;" />
+                        <img id="imagePreview" src="{{ asset('uploads/' ~ event.imageEvent) }}" class="mt-3" style="max-width: 200px;" />
                         {% else %}
-                            <img id="imagePreview" src="" class="mt-3" style="max-width: 200px; display: none;" />
+                        <img id="imagePreview" src="" class="mt-3" style="max-width: 200px; display: none;" />
                         {% endif %}
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Event Name</label>
-                        {{ form_widget(form.nom, { 'attr': {
-                            'class': 'form-control',
-                            'placeholder': 'Enter event name',
-                            'required': 'required'
-                        } }) }}
-                        <div class="invalid-feedback">Please provide an event name.</div>
+                        {{ form_widget(form.nom, { 'attr': {'class': 'form-control', 'placeholder': 'Enter event name'} }) }}
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Description</label>
-                        {{ form_widget(form.description, { 'attr': {
-                            'class': 'form-control',
-                            'rows': 3,
-                            'placeholder': 'Describe the event',
-                            'required': 'required'
-                        } }) }}
-                        <div class="invalid-feedback">Please provide a description.</div>
+                        {{ form_widget(form.description, { 'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Describe the event'} }) }}
                     </div>
 
-                    <!-- Section Date inchangée comme dans la page d'ajout -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Start Date</label>
-                                {{ form_widget(form.dateDebut, { 'attr': {'class': 'form-control'} }) }}
-                                <div class="date-error text-danger small mt-1" id="startDateError" style="display: none;">
-                                    <i class="fas fa-exclamation-circle me-1"></i>
-                                    <span>La date de début doit être égale ou supérieure à aujourd'hui</span>
-                                </div>
+                                {{ form_widget(form.dateDebut, { 'attr': {'class': 'form-control datetimepicker'} }) }}
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">End Date</label>
-                                {{ form_widget(form.dateFin, { 'attr': {'class': 'form-control'} }) }}
-                                <div class="date-error text-danger small mt-1" id="endDateError" style="display: none;">
-                                    <i class="fas fa-exclamation-circle me-1"></i>
-                                    <span>La date de fin doit être supérieure à la date de début</span>
-                                </div>
+                                {{ form_widget(form.dateFin, { 'attr': {'class': 'form-control datetimepicker'} }) }}
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Location</label>
-                        {{ form_widget(form.lieu, { 'attr': {
-                            'class': 'form-control',
-                            'placeholder': 'Enter event location',
-                            'required': 'required'
-                        } }) }}
-                        <div class="invalid-feedback">Please provide a location.</div>
+                        {{ form_widget(form.lieu, { 'attr': {'class': 'form-control', 'placeholder': 'Enter event location'} }) }}
                     </div>
 
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Price (TND)</label>
-                                {{ form_widget(form.prix, { 'attr': {
-                                    'class': 'form-control',
-                                    'placeholder': 'Enter price',
-                                    'required': 'required'
-                                } }) }}
-                                <div class="invalid-feedback">Please provide a price.</div>
+                                {{ form_widget(form.prix, { 'attr': {'class': 'form-control', 'placeholder': 'Enter price'} }) }}
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Capacity</label>
-                                {{ form_widget(form.capacite, { 'attr': {
-                                    'class': 'form-control',
-                                    'placeholder': 'Enter max capacity',
-                                    'required': 'required'
-                                } }) }}
-                                <div class="invalid-feedback">Please provide a capacity.</div>
+                                {{ form_widget(form.capacite, { 'attr': {'class': 'form-control', 'placeholder': 'Enter max capacity'} }) }}
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Event Status</label>
-                        {{ form_widget(form.statut, { 'attr': {
-                            'class': 'form-control',
-                            'required': 'required'
-                        } }) }}
-                        <div class="invalid-feedback">Please select a status.</div>
+                        {{ form_widget(form.statut, { 'attr': {'class': 'form-control'} }) }}
                     </div>
 
-                    <button type="submit" class="btn btn-primary">
-                        <i data-feather="save"></i> Update Event
+                    <button type="submit" class="btn btn-primary lift">
+                        <i class="fas fa-save me-1"></i> Update Event
                     </button>
 
                     {{ form_end(form) }}
@@ -148,68 +106,33 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+{% block javascripts %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+    <script>
+        function previewImage(event) {
+            var input = event.target;
+            var reader = new FileReader();
+            reader.onload = function(){
+                var imgElement = document.getElementById("imagePreview");
+                imgElement.src = reader.result;
+                imgElement.style.display = "block";
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            // Reset des erreurs de date
-            document.getElementById('startDateError').style.display = 'none';
-            document.getElementById('endDateError').style.display = 'none';
-
-            // Validation des dates
-            const startDateInput = document.getElementById('{{ form.dateDebut.vars.id }}');
-            const endDateInput = document.getElementById('{{ form.dateFin.vars.id }}');
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            let isValid = true;
-
-            if (startDateInput && startDateInput.value) {
-                const startDate = new Date(startDateInput.value);
-                if (startDate < today) {
-                    document.getElementById('startDateError').style.display = 'block';
-                    isValid = false;
-                }
-            }
-
-            if (endDateInput && endDateInput.value && startDateInput && startDateInput.value) {
-                const endDate = new Date(endDateInput.value);
-                const startDate = new Date(startDateInput.value);
-                if (endDate <= startDate) {
-                    document.getElementById('endDateError').style.display = 'block';
-                    isValid = false;
-                }
-            }
-
-            if (!isValid) {
-                e.preventDefault();
-                // Scroll vers la première erreur
-                const firstError = document.querySelector('.date-error[style="display: block;"]');
-                if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr('.datetimepicker', {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                time_24hr: true,
+                locale: "fr",
+                minDate: "today"
+            });
         });
-    }
-});
-</script>
-
-<style>
-.date-error {
-    background-color: rgba(220, 53, 69, 0.1);
-    padding: 4px 8px;
-    border-radius: 4px;
-    display: inline-flex;
-    align-items: center;
-}
-.date-error i {
-    font-size: 0.75rem;
-}
-</style>
+    </script>
 {% endblock %}
