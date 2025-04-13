@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Form\EventType;
 use App\Repository\EventRepository;
+use App\Repository\WorkshopRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,6 +14,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\Form\FormError;
+use App\Enum\StatutEvent;
+use App\Enum\Lieu;
 
 
 #[Route('/event')]
@@ -27,11 +30,65 @@ final class EventController extends AbstractController
     }
 
     #[Route('/home', name: 'app_event_home', methods: ['GET'])]
-    public function home(EventRepository $eventRepository): Response
+    public function home(Request $request, EventRepository $eventRepository): Response
     {
-        $events = $eventRepository->findAll();
+        // Récupérer les paramètres de recherche
+        $lieu = $request->query->get('lieu');
+        $date = $request->query->get('date');
+
+        // Créer la requête de base
+        $query = $eventRepository->createQueryBuilder('e')
+            ->where('e.statut = :statut')
+            ->setParameter('statut', StatutEvent::DISPONIBLE);
+
+        // Appliquer le filtre par lieu si spécifié
+        if ($lieu) {
+            $query->andWhere('e.lieu = :lieu')
+                ->setParameter('lieu', Lieu::from($lieu));
+        }
+
+        // Appliquer le filtre par date si spécifié
+        if ($date) {
+            $now = new \DateTime();
+            switch ($date) {
+                case 'today':
+                    $query->andWhere('e.dateDebut BETWEEN :start AND :end')
+                        ->setParameter('start', $now->format('Y-m-d 00:00:00'))
+                        ->setParameter('end', $now->format('Y-m-d 23:59:59'));
+                    break;
+                case 'tomorrow':
+                    $tomorrow = (clone $now)->modify('+1 day');
+                    $query->andWhere('e.dateDebut BETWEEN :start AND :end')
+                        ->setParameter('start', $tomorrow->format('Y-m-d 00:00:00'))
+                        ->setParameter('end', $tomorrow->format('Y-m-d 23:59:59'));
+                    break;
+                case 'week':
+                    $endOfWeek = (clone $now)->modify('next sunday');
+                    $query->andWhere('e.dateDebut BETWEEN :start AND :end')
+                        ->setParameter('start', $now->format('Y-m-d 00:00:00'))
+                        ->setParameter('end', $endOfWeek->format('Y-m-d 23:59:59'));
+                    break;
+                case 'weekend':
+                    $saturday = (clone $now)->modify('next saturday');
+                    $sunday = (clone $saturday)->modify('+1 day');
+                    $query->andWhere('e.dateDebut BETWEEN :start AND :end')
+                        ->setParameter('start', $saturday->format('Y-m-d 00:00:00'))
+                        ->setParameter('end', $sunday->format('Y-m-d 23:59:59'));
+                    break;
+                case 'month':
+                    $endOfMonth = (clone $now)->modify('last day of this month');
+                    $query->andWhere('e.dateDebut BETWEEN :start AND :end')
+                        ->setParameter('start', $now->format('Y-m-d 00:00:00'))
+                        ->setParameter('end', $endOfMonth->format('Y-m-d 23:59:59'));
+                    break;
+            }
+        }
+
+        $events = $query->getQuery()->getResult();
+
         return $this->render('event/acceuil.html.twig', [
             'events' => $events,
+            'lieux' => Lieu::cases() // Envoie tous les cas de l'enum au template
         ]);
     }
 
@@ -66,7 +123,7 @@ final class EventController extends AbstractController
             try {
                 $entityManager->persist($event);
                 $entityManager->flush();
-                $this->addFlash('success', 'Événement créé avec succès!');
+                $this->addFlash('event_success', 'Événement créé avec succès!');
                 return $this->redirectToRoute('app_event_index');
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Erreur lors de l\'enregistrement: '.$e->getMessage());
@@ -78,7 +135,7 @@ final class EventController extends AbstractController
         ]);
     }
 
-    #[Route('/event/{id_event}', name: 'app_event_show', methods: ['GET'])]
+    #[Route('/{id_event}', name: 'app_event_show', methods: ['GET'])]
     public function show(int $id_event, EventRepository $eventRepository): Response
     {
         $event = $eventRepository->find($id_event);
@@ -97,28 +154,59 @@ final class EventController extends AbstractController
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $imageFile = $form->get('imageEvent')->getData();
+        if ($form->isSubmitted()) {
+            // Validation manuelle des dates
+            $now = new \DateTime();
+            $startDate = $event->getDateDebut();
+            $endDate = $event->getDateFin();
 
-            if ($imageFile) {
-                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+            $isValid = true;
 
-                try {
-                    $imageFile->move(
-                        $this->getParameter('event_images_directory'),
-                        $newFilename
-                    );
-                    $event->setImageEvent($newFilename);
-                } catch (FileException $e) {
-                    // Handle error
+            if (!$startDate || $startDate < $now) {
+                $form->get('dateDebut')->addError(new FormError('La date de début doit être supérieure à maintenant'));
+                $isValid = false;
+            }
+
+            if (!$endDate || ($startDate && $endDate <= $startDate)) {
+                $form->get('dateFin')->addError(new FormError('La date de fin doit être supérieure à la date de début'));
+                $isValid = false;
+            }
+
+            // Vérification supplémentaire que tous les champs requis sont remplis
+            if ($isValid) {
+                $requiredFields = ['nom', 'description', 'lieu', 'prix', 'capacite', 'statut'];
+                foreach ($requiredFields as $field) {
+                    if (empty($form->get($field)->getData())) {
+                        $form->get($field)->addError(new FormError('Ce champ est obligatoire'));
+                        $isValid = false;
+                    }
                 }
             }
 
-            $entityManager->flush();
+            if ($isValid && $form->isValid()) {
+                // Gérer l'upload de l'image seulement si un nouveau fichier est fourni
+                $imageFile = $form->get('imageEvent')->getData();
+                if ($imageFile) {
+                    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    $safeFilename = $slugger->slug($originalFilename);
+                    $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
 
-            return $this->redirectToRoute('app_event_index');
+                    try {
+                        $imageFile->move(
+                            $this->getParameter('event_images_directory'),
+                            $newFilename
+                        );
+                        $event->setImageEvent($newFilename);
+                    } catch (FileException $e) {
+                        $this->addFlash('error', 'Erreur lors de l\'upload de l\'image');
+                    }
+                }
+                // Si aucun fichier n'est uploadé, on conserve l'ancienne image
+
+                $entityManager->flush();
+                $this->addFlash('success', 'Événement mis à jour avec succès!');
+                return $this->redirectToRoute('app_event_index');
+            }
         }
 
         return $this->render('event/edit.html.twig', [

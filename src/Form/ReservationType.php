@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Reservation;
 use App\Enum\StatutReservation;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -22,6 +23,7 @@ class ReservationType extends AbstractType
                 'attr' => ['style' => 'display:none'],
                 'label' => false
             ]);// Si vous voulez garder ce champ éditable
+
     }
 
     public function configureOptions(OptionsResolver $resolver): void

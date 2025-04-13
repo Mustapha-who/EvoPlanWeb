@@ -1,32 +1,32 @@
-{% extends 'base.html.twig' %}
+{% extends 'User/base_dashboard.html.twig' %}
 
 {% block title %}Edit Session{% endblock %}
 
-{% block body %}
-    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+{% block content %}
+    <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
         <div class="container-xl px-4">
-            <div class="page-header-content pt-4">
-                <div class="row align-items-center justify-content-between">
-                    <div class="col-12 mb-3">
-                        <a class="btn btn-outline-light" href="{{ path('app_session_index', {'workshop_id': workshop_id}) }}">
-                            <i data-feather="arrow-left" class="me-1"></i>
-                            Back to Sessions
-                        </a>
-                    </div>
-                    <div class="col-auto">
+            <div class="page-header-content">
+                <div class="row align-items-center justify-content-between pt-3">
+                    <div class="col-auto mb-3">
                         <h1 class="page-header-title">
                             <div class="page-header-icon"><i data-feather="edit"></i></div>
                             Edit Session
                         </h1>
+                    </div>
+                    <div class="col-12 col-xl-auto mb-3">
+                        <a class="btn btn-sm btn-light text-primary" href="{{ path('app_session_index', {'workshop_id': workshop_id}) }}">
+                            <i class="me-1" data-feather="arrow-left"></i>
+                            Back to Sessions
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="container-xl px-4 mt-n10">
-        <div class="card mb-4">
-            <div class="card-header">Edit Session</div>
+    <div class="container-xl px-4">
+        <div class="card">
+            <div class="card-header">Edit Session Details</div>
             <div class="card-body">
                 {{ form_start(form) }}
                 <div class="row">
@@ -90,9 +90,23 @@
                         {% endif %}
                     </div>
                 </div>
-                <button class="btn btn-primary">{{ button_label|default('Update') }}</button>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="me-1" data-feather="save"></i>
+                        {{ button_label|default('Update Session') }}
+                    </button>
+                </div>
                 {{ form_end(form) }}
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+        });
+    </script>
 {% endblock %}

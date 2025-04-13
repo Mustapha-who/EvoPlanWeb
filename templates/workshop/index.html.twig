@@ -1,26 +1,92 @@
-{% extends 'base.html.twig' %}
+{% extends 'User/base_dashboard.html.twig' %}
 
-{% block title %}Workshop index{% endblock %}
+{% block title %}Workshop Management{% endblock %}
 
-{% block body %}
-    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" />
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+        }
+        
+        .notification .alert {
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid;
+            animation: slideIn 0.5s forwards;
+        }
+        
+        .notification .alert-success {
+            border-left-color: #198754;
+        }
+        
+        .notification .alert-danger {
+            border-left-color: #dc3545;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <!-- Notification Area -->
+    <div class="notification">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {% if label == 'success' %}
+                        <i class="fas fa-check-circle me-2"></i>
+                    {% elseif label == 'danger' %}
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                    {% endif %}
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
         <div class="container-xl px-4">
-            <div class="page-header-content pt-4">
-                <div class="row align-items-center justify-content-between">
-                    <div class="col-auto mt-4">
+            <div class="page-header-content">
+                <div class="row align-items-center justify-content-between pt-3">
+                    <div class="col-auto mb-3">
                         <h1 class="page-header-title">
                             <div class="page-header-icon"><i data-feather="filter"></i></div>
-                            Workshops
+                            Workshop Management
                         </h1>
-                        <div class="page-header-subtitle">Workshop management and overview</div>
+                    </div>
+                    <div class="col-12 col-xl-auto mb-3">
+                        <a href="{{ path('app_workshop_charts') }}" class="btn btn-sm btn-light text-primary me-2">
+                            <i class="me-1" data-feather="bar-chart-2"></i>
+                            View Charts
+                        </a>
+                        <a href="{{ path('app_workshop_new') }}" class="btn btn-sm btn-primary">
+                            <i class="me-1" data-feather="plus"></i>
+                            Create New Workshop
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="container-xl px-4 mt-n10">
-        <div class="card mb-4">
+    <div class="container-xl px-4">
+        <div class="card">
             <div class="card-header">Workshop List</div>
             <div class="card-body">
                 <table id="datatablesSimple" class="table table-bordered table-striped table-hover">
@@ -75,11 +141,54 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                
-                <div class="mt-4">
-                    <a class="btn btn-primary" href="{{ path('app_workshop_new') }}">Create New Workshop</a>
-                </div>
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize DataTable
+            const dataTable = new simpleDatatables.DataTable("#datatablesSimple", {
+                perPage: 10,
+                perPageSelect: [5, 10, 15, 20],
+                labels: {
+                    placeholder: "Search...",
+                    searchTitle: "Search within table",
+                    perPage: "entries per page",
+                    noRows: "No entries found",
+                    info: "Showing {start} to {end} of {rows} entries"
+                }
+            });
+            
+            // Initialize Feather icons
+            feather.replace();
+            
+            // Refresh icons whenever the table updates
+            dataTable.on('datatable.update', function() {
+                feather.replace();
+            });
+            
+            // Also refresh icons after page change
+            dataTable.on('datatable.page', function() {
+                feather.replace();
+            });
+            
+            // And after sorting
+            dataTable.on('datatable.sort', function() {
+                feather.replace();
+            });
+
+            // Auto-dismiss notifications after 3 seconds
+            setTimeout(function() {
+                document.querySelectorAll('.notification .alert').forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 3000);
+        });
+    </script>
 {% endblock %}

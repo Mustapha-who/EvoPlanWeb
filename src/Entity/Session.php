@@ -26,7 +26,7 @@ class Session
     private ?\DateTimeInterface $dateheurefin = null;
 
     #[ORM\Column]
-    private ?int $participant_count = null;
+    private int $participant_count = 0;
 
     #[ORM\Column]
     private ?int $capacity = null;
@@ -102,6 +102,20 @@ class Session
     public function setParticipantCount(?int $participantCount): self
     {
         $this->participant_count = $participantCount ?? 0;
+        return $this;
+    }
+
+    public function incrementParticipantCount(): self
+    {
+        $this->participant_count++;
+        return $this;
+    }
+
+    public function decrementParticipantCount(): self
+    {
+        if ($this->participant_count > 0) {
+            $this->participant_count--;
+        }
         return $this;
     }
 
