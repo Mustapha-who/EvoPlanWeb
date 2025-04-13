@@ -1,8 +1,18 @@
 {% extends 'base.html.twig' %}
 
+
 {% block title %}Event Management{% endblock %}
 
+
 {% block body %}
+    <div class="container-xl px-4 mt-3">
+        {% for message in app.flashes('event_success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-calendar-check me-2"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
         <div class="container-xl px-4">
             <div class="page-header-content pt-4">
@@ -26,7 +36,6 @@
                 <table id="datatablesSimple" class="table table-striped">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Image</th>
                             <th>Name</th>
                             <th>Start Date</th>
@@ -39,7 +48,6 @@
                     <tbody>
                     {% for event in events %}
                         <tr>
-                            <td>{{ event.id_event }}</td>
                             <td>
                                 {% if event.imageEvent %}
                                     <img src="{{ asset('uploads/' ~ event.imageEvent) }}" alt="Event Image" width="60" height="60" class="rounded">

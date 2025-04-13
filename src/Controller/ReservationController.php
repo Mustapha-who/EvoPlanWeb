@@ -14,6 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Bundle\SecurityBundle\Security;
 
 #[Route('/reservation')]
 final class ReservationController extends AbstractController
@@ -43,16 +44,17 @@ final class ReservationController extends AbstractController
         Request $request,
         int $id_event,
         EntityManagerInterface $entityManager,
-        EventRepository $eventRepository
+        EventRepository $eventRepository,
+        Security $security
     ): Response {
         $event = $eventRepository->find($id_event);
         if (!$event) {
             throw $this->createNotFoundException('Événement non trouvé');
         }
 
-        // Vérification des places disponibles
+        // Vérification des places disponibles (modifié pour utiliser id_event)
         $reservationsCount = $entityManager->getRepository(Reservation::class)
-            ->count(['id_event' => $event]);
+            ->count(['id_event' => $event]); // Changé 'event' en 'id_event'
 
         if ($event->getCapacite() <= $reservationsCount) {
             $this->addFlash('danger', 'Désolé, plus de places disponibles pour cet événement.');
@@ -60,8 +62,16 @@ final class ReservationController extends AbstractController
         }
 
         $reservation = new Reservation();
-        $reservation->setEvent($event);
+        // Modification pour utiliser setId_event() au lieu de setEvent()
+        $reservation->setEvent($event); // Changé setEvent() en setId_event()
         $reservation->setStatut(StatutReservation::CONFIRMEE);
+
+        // Si l'utilisateur est connecté et est un Client
+        $user = $security->getUser();
+        if ($user instanceof Client) {
+            // Modification pour utiliser setId_client() au lieu de setClient()
+            $reservation->setClient($user); // Changé setClient() en setId_client()
+        }
 
         $form = $this->createForm(ReservationType::class, $reservation);
         $form->handleRequest($request);
@@ -70,10 +80,7 @@ final class ReservationController extends AbstractController
             $entityManager->persist($reservation);
             $entityManager->flush();
 
-            // Message de succès
-            $this->addFlash('success', 'Votre réservation a été confirmée avec succès!');
-
-            // Redirection vers la page de l'événement
+            $this->addFlash('reservation_success', 'Votre réservation a été confirmée avec succès!');
             return $this->redirectToRoute('app_event_show', [
                 'id_event' => $event->getId_event()
             ]);
@@ -82,7 +89,8 @@ final class ReservationController extends AbstractController
         return $this->render('reservation/new.html.twig', [
             'event' => $event,
             'form' => $form->createView(),
-            'remaining_seats' => $event->getCapacite() - $reservationsCount
+            'remaining_seats' => $event->getCapacite() - $reservationsCount,
+            'current_user' => $user
         ]);
     }
     #[Route('/{id_reservation}/edit', name: 'app_reservation_edit', methods: ['GET', 'POST'])]
