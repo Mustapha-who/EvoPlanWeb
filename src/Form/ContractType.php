@@ -38,9 +38,11 @@ class ContractType extends AbstractType
                 'placeholder' => 'Select a partnership...',
                 'attr' => [
                     'class' => 'form-select',
-                    'data-error-required' => 'Partnership is required'
+                    'data-error-required' => 'Partnership is required',
+                    'disabled' => $options['is_edit']
                 ],
                 'required' => true,
+                'disabled' => $options['is_edit'],
                 'constraints' => [
                     new NotBlank(['message' => 'Please select a partnership.'])
                 ]
@@ -54,9 +56,11 @@ class ContractType extends AbstractType
                 'placeholder' => 'Select a partner...',
                 'attr' => [
                     'class' => 'form-select',
-                    'data-error-required' => 'Partner is required'
+                    'data-error-required' => 'Partner is required',
+                    'disabled' => $options['is_edit']
                 ],
                 'required' => true,
+                'disabled' => $options['is_edit'],
                 'constraints' => [
                     new NotBlank(['message' => 'Please select a partner.'])
                 ]
@@ -140,6 +144,7 @@ class ContractType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Contract::class,
+            'is_edit' => false,
         ]);
     }
 }

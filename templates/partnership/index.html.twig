@@ -34,6 +34,7 @@
                         <th>Event</th>
                         <th>Start Date</th>
                         <th>End Date</th>
+                        <th>Terms</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -51,6 +52,13 @@
                             <td>{{ partnership.idEvent ? partnership.idEvent.nom : '' }}</td>
                             <td>{{ partnership.dateDebut ? partnership.dateDebut|date('Y-m-d') : '' }}</td>
                             <td>{{ partnership.dateFin ? partnership.dateFin|date('Y-m-d') : '' }}</td>
+                            <td>
+                                {% if partnership.terms %}
+                                    {{ partnership.terms|length > 50 ? partnership.terms|slice(0, 50) ~ '...' : partnership.terms }}
+                                {% else %}
+                                    No terms specified
+                                {% endif %}
+                            </td>
                             <td>
                                 <div class="d-flex">
                                     <a href="{{ path('app_partnership_show', {'id_partnership': partnership.getId()}) }}"

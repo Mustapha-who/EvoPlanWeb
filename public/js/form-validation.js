@@ -1,21 +1,32 @@
 function showError(input, message) {
     input.classList.add('is-invalid');
-    let errorDiv = input.nextElementSibling;
-    if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
-        errorDiv = document.createElement('div');
-        errorDiv.className = 'invalid-feedback';
-        input.parentNode.insertBefore(errorDiv, input.nextSibling);
-    }
+    
+    // First, remove any existing error messages to prevent duplication
+    const parentElement = input.parentNode;
+    const existingErrors = parentElement.querySelectorAll('.invalid-feedback, .text-danger');
+    existingErrors.forEach(error => {
+        error.remove();
+    });
+    
+    // Create new error message
+    let errorDiv = document.createElement('div');
+    errorDiv.className = 'text-danger';
     errorDiv.textContent = message;
     errorDiv.style.display = 'block';
+    
+    // Insert after the input
+    input.parentNode.insertBefore(errorDiv, input.nextSibling);
 }
 
 function clearError(input) {
     input.classList.remove('is-invalid');
-    const errorDiv = input.nextElementSibling;
-    if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
-        errorDiv.style.display = 'none';
-    }
+    
+    // Remove all error messages for this input
+    const parentElement = input.parentNode;
+    const existingErrors = parentElement.querySelectorAll('.invalid-feedback, .text-danger');
+    existingErrors.forEach(error => {
+        error.remove();
+    });
 }
 
 function validateType(input) {
@@ -61,36 +72,36 @@ function validatePhone(input) {
 }
 
 function validateLogo(input) {
-    // If not required and no file selected, it's valid
-    if (input.required === false && (!input.files || input.files.length === 0)) {
-        clearError(input);
-        return true;
+    if (!input) return true;
+    
+    // Check if this is an edit form
+    const isEditForm = document.querySelector('.card-header')?.textContent.includes('Edit');
+    
+    // For empty input (no file selected)
+    if (!input.files || input.files.length === 0) {
+        // Only require logo for new forms, not edit forms
+        if (!isEditForm) {
+            showError(input, input.dataset.errorRequired || 'Logo is required');
+            return false;
+        }
+        return true; // In edit mode, empty is valid
     }
     
-    // Required check
-    if (input.required && (!input.files || input.files.length === 0)) {
-        showError(input, input.dataset.errorRequired);
-        return false;
-    }
-    
-    // If a file is selected, validate it regardless of required status
-    if (input.files && input.files.length > 0) {
-        const file = input.files[0];
-        const validTypes = ['image/jpeg', 'image/png'];
+    // For file that was selected, validate file type and size
+    const file = input.files[0];
+    if (file) {
+        const fileType = file.type;
+        if (!fileType.match('image/jpeg') && !fileType.match('image/png')) {
+            showError(input, input.dataset.errorType || 'Only JPEG or PNG files are allowed');
+            return false;
+        }
         
-        if (!validTypes.includes(file.type)) {
-            showError(input, input.dataset.errorType);
+        if (file.size > 1024 * 1024) { // 1MB
+            showError(input, input.dataset.errorSize || 'File size must not exceed 1MB');
             return false;
-        } else if (file.size > 1024 * 1024) { // 1MB
-            showError(input, input.dataset.errorSize);
-            return false;
-        } else {
-            clearError(input);
-            return true;
         }
     }
     
-    // Default case - if we get here, it's valid
     clearError(input);
     return true;
 }
@@ -156,26 +167,11 @@ function validatePartnerForm(form) {
     const phoneField = form.querySelector('[name="partner[phone_Number]"]');
     const logoField = form.querySelector('[name="partner[logoFile]"]');
     
-    // Determine if this is a new partner form or edit form
-    // For edit form, we don't require the logo to be present
-    const isEditForm = document.querySelector('.card-header')?.textContent.includes('Edit');
-    
     // Validate each field and capture the result
     const typeValid = validateType(typeField);
     const emailValid = validateEmail(emailField);
     const phoneValid = validatePhone(phoneField);
-    
-    // For logo validation, handle differently for new vs edit form
-    let logoValid = true;
-    if (logoField) {
-        if (isEditForm) {
-            // For edit form, validate logo only if one is provided
-            logoValid = validateLogo(logoField);
-        } else {
-            // For new form, logo is required
-            logoValid = validateLogo(logoField);
-        }
-    }
+    const logoValid = validateLogo(logoField);
     
     // Form is valid only if all fields are valid
     return typeValid && emailValid && phoneValid && logoValid;
@@ -317,101 +313,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Find the partnership form
+    // Find the partnership form - we'll disable client-side validation for this form
     const partnershipForm = document.querySelector('form[name="partnership"]');
     
     if (partnershipForm) {
-        // Add event listeners for date fields to validate as they change
-        const startDateField = partnershipForm.querySelector('[name$="[date_debut]"]');
-        const endDateField = partnershipForm.querySelector('[name$="[date_fin]"]');
-        
-        if (startDateField) {
-            startDateField.addEventListener('change', function() {
-                validateDate(this);
-            });
-        }
-        
-        if (endDateField) {
-            endDateField.addEventListener('change', function() {
-                validateDate(this);
-            });
-        }
-        
-        // Add submit event listener
-        partnershipForm.addEventListener('submit', function(event) {
-            // Validate the form
-            if (!validatePartnershipForm(this)) {
-                // Prevent form submission if validation fails
-                event.preventDefault();
-                event.stopPropagation();
-                
-                // Show a message at the top of the form
-                let errorAlert = document.getElementById('form-error-alert');
-                if (!errorAlert) {
-                    errorAlert = document.createElement('div');
-                    errorAlert.id = 'form-error-alert';
-                    errorAlert.className = 'alert alert-danger mt-3';
-                    errorAlert.textContent = 'Please fix all errors before submitting the form.';
-                    partnershipForm.insertAdjacentElement('afterbegin', errorAlert);
-                }
-                
-                // Scroll to the top of the form
-                window.scrollTo({
-                    top: partnershipForm.getBoundingClientRect().top + window.pageYOffset - 20,
-                    behavior: 'smooth'
-                });
-            }
-        });
+        // We'll disable client-side validation for the partnership form
+        // and let Symfony handle validation to avoid duplicate error messages
     }
     
-    // Find the contract form
+    // Find the contract form - we'll disable client-side validation for this form too
     const contractForm = document.querySelector('form[name="contract"]');
     
     if (contractForm) {
-        // Add event listeners for date fields to validate as they change
-        const startDateField = contractForm.querySelector('[name$="[date_debut]"]');
-        const endDateField = contractForm.querySelector('[name$="[date_fin]"]');
-        
-        if (startDateField) {
-            startDateField.addEventListener('change', function() {
-                validateDate(this);
-                // When start date changes, revalidate end date
-                if (endDateField && endDateField.value) {
-                    validateDate(endDateField);
-                }
-            });
-        }
-        
-        if (endDateField) {
-            endDateField.addEventListener('change', function() {
-                validateDate(this);
-            });
-        }
-        
-        // Add submit event listener
-        contractForm.addEventListener('submit', function(event) {
-            // Validate the form
-            if (!validateContractForm(this)) {
-                // Prevent form submission if validation fails
-                event.preventDefault();
-                event.stopPropagation();
-                
-                // Show a message at the top of the form
-                let errorAlert = document.getElementById('form-error-alert');
-                if (!errorAlert) {
-                    errorAlert = document.createElement('div');
-                    errorAlert.id = 'form-error-alert';
-                    errorAlert.className = 'alert alert-danger mt-3';
-                    errorAlert.textContent = 'Please fix all errors before submitting the form.';
-                    contractForm.insertAdjacentElement('afterbegin', errorAlert);
-                }
-                
-                // Scroll to the top of the form
-                window.scrollTo({
-                    top: contractForm.getBoundingClientRect().top + window.pageYOffset - 20,
-                    behavior: 'smooth'
-                });
-            }
-        });
+        // We'll disable client-side validation for the contract form
+        // and let Symfony handle validation to avoid duplicate error messages
     }
 }); 

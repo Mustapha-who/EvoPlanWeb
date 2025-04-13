@@ -1,6 +1,70 @@
 {% extends 'User/base_dashboard.html.twig' %}
 
-{% block title %}New Partner - EvoPlan{% endblock %}
+{% block title %}New Partner{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Hide server-side error messages on field change */
+        .form-group.field-changed .invalid-feedback {
+            display: none !important;
+        }
+        
+        /* Apply special styling to error messages */
+        .invalid-feedback {
+            color: #dc3545;
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+    </style>
+{% endblock %}
+
+{% block form_errors %}
+    {# Show errors regardless of method to ensure validation errors display #}
+    {% if errors|length > 0 %}
+        {% for error in errors %}
+            <div class="invalid-feedback d-block mb-2">
+                {{ error.message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock form_errors %}
+
+{# Override form_row to include the error display #}
+{% block form_row %}
+    {% set widget_attr = {} %}
+    {% if help is defined %}
+        {% set widget_attr = {attr: {'aria-describedby': id ~ "_help"}} %}
+    {% endif %}
+    
+    {% set row_class = row_attr.class|default('') %}
+    <div class="form-group {{ row_class }}">
+        {{ form_label(form) }}
+        
+        {# Add is-invalid class when there are errors #}
+        {% if not form.vars.valid %}
+            {% set attr = attr|merge({class: (attr.class|default('') ~ ' is-invalid')|trim}) %}
+        {% endif %}
+        
+        {# Merge placeholder if it exists in attr #}
+        {% if attr.placeholder is defined %}
+            {% set attr = widget_attr.attr|default({})|merge({'placeholder': attr.placeholder}) %}
+            {% set widget_attr = widget_attr|merge({'attr': attr}) %}
+        {% endif %}
+        
+        {{ form_widget(form, widget_attr) }}
+        
+        {# Show errors #}
+        {{ form_errors(form) }}
+        
+        {# Show help text for non-empty help only #}
+        {% if help is defined and help is not empty %}
+            <div id="{{ id }}_help" class="form-text text-muted">
+                {{ help }}
+            </div>
+        {% endif %}
+    </div>
+{% endblock form_row %}
 
 {% block content %}
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
@@ -26,8 +90,196 @@
         <div class="card mb-4">
             <div class="card-header">Create Partner</div>
             <div class="card-body">
+                {# Set this to avoid duplicate error messages #}
+                {% form_theme form _self %}
                 {{ include('partner/_form.html.twig') }}
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get form elements
+            const partnerForm = document.querySelector('form');
+            const emailField = document.querySelector('[name$="[email]"]');
+            const typePartnerField = document.querySelector('[name$="[type_partner]"]');
+            const phoneNumberField = document.querySelector('[name$="[phone_Number]"]');
+            const logoFileField = document.querySelector('[name$="[logoFile]"]');
+            
+            // Function to clear error message for a specific field
+            function clearErrorForField(field) {
+                if (!field) return;
+                
+                field.classList.remove('is-invalid');
+                
+                // Find the closest container and add field-changed class
+                const parentContainer = field.closest('.form-group');
+                if (parentContainer) {
+                    parentContainer.classList.add('field-changed');
+                    const errorElements = parentContainer.querySelectorAll('.invalid-feedback');
+                    errorElements.forEach(error => {
+                        error.style.display = 'none';
+                    });
+                }
+            }
+            
+            // Add event listeners to clear errors on any field interaction
+            const allFields = [emailField, typePartnerField, phoneNumberField, logoFileField];
+            
+            allFields.forEach(field => {
+                if (!field) return;
+                
+                // Clear errors on input/change for all fields
+                field.addEventListener('input', function() {
+                    clearErrorForField(this);
+                });
+                
+                field.addEventListener('change', function() {
+                    clearErrorForField(this);
+                    
+                    // Special handling for selects
+                    if (this.tagName === 'SELECT' && this.value !== '') {
+                        this.classList.remove('is-invalid');
+                        clearErrorForField(this);
+                    }
+                });
+            });
+            
+            // Form submission validation
+            if (partnerForm) {
+                partnerForm.addEventListener('submit', function(e) {
+                    let hasErrors = false;
+                    
+                    // Validate email field
+                    if (emailField && emailField.value.trim() === '') {
+                        emailField.classList.add('is-invalid');
+                        const parentContainer = emailField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed'); // Remove field-changed to allow error display
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Email is required.';
+                        hasErrors = true;
+                    }
+                    
+                    // Validate type partner field
+                    if (typePartnerField && typePartnerField.value.trim() === '') {
+                        typePartnerField.classList.add('is-invalid');
+                        const parentContainer = typePartnerField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed'); // Remove field-changed to allow error display
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Partner type is required.';
+                        hasErrors = true;
+                    }
+                    
+                    // Validate phone number field
+                    if (phoneNumberField && phoneNumberField.value.trim() === '') {
+                        phoneNumberField.classList.add('is-invalid');
+                        const parentContainer = phoneNumberField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed'); // Remove field-changed to allow error display
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Phone number is required.';
+                        hasErrors = true;
+                    } else if (phoneNumberField && phoneNumberField.value.trim() !== '' && !/^\d+$/.test(phoneNumberField.value.trim())) {
+                        phoneNumberField.classList.add('is-invalid');
+                        const parentContainer = phoneNumberField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed');
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Phone number must contain only digits.';
+                        hasErrors = true;
+                    } else if (phoneNumberField && phoneNumberField.value.trim().length !== 8) {
+                        phoneNumberField.classList.add('is-invalid');
+                        const parentContainer = phoneNumberField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed');
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Phone number must be exactly 8 digits.';
+                        hasErrors = true;
+                    }
+                    
+                    // Validate logo file field (required for new partner)
+                    if (logoFileField && !logoFileField.files.length) {
+                        logoFileField.classList.add('is-invalid');
+                        const parentContainer = logoFileField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed');
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Logo is required.';
+                        hasErrors = true;
+                    } else if (logoFileField && logoFileField.files.length > 0) {
+                        // Validate file type if a file is selected
+                        const file = logoFileField.files[0];
+                        const fileType = file.type;
+                        if (!fileType.match('image/jpeg') && !fileType.match('image/png')) {
+                            logoFileField.classList.add('is-invalid');
+                            const parentContainer = logoFileField.closest('.form-group');
+                            parentContainer.classList.remove('field-changed');
+                            let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                            if (!errorDisplay) {
+                                errorDisplay = document.createElement('div');
+                                errorDisplay.className = 'invalid-feedback d-block mb-2';
+                                parentContainer.appendChild(errorDisplay);
+                            }
+                            errorDisplay.style.display = 'block';
+                            errorDisplay.textContent = 'Only JPEG or PNG files are allowed.';
+                            hasErrors = true;
+                        } else if (file.size > 1048576) { // 1MB in bytes
+                            logoFileField.classList.add('is-invalid');
+                            const parentContainer = logoFileField.closest('.form-group');
+                            parentContainer.classList.remove('field-changed');
+                            let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                            if (!errorDisplay) {
+                                errorDisplay = document.createElement('div');
+                                errorDisplay.className = 'invalid-feedback d-block mb-2';
+                                parentContainer.appendChild(errorDisplay);
+                            }
+                            errorDisplay.style.display = 'block';
+                            errorDisplay.textContent = 'File size must not exceed 1MB.';
+                            hasErrors = true;
+                        }
+                    }
+                    
+                    // Prevent form submission if there are any errors
+                    if (hasErrors) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+    </script>
 {% endblock %}

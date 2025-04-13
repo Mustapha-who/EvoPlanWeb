@@ -71,8 +71,8 @@ class PartnerType extends AbstractType
             ->add('logoFile', FileType::class, [
                 'label' => 'Logo',
                 'mapped' => false,
-                'required' => false,
-                'constraints' => [
+                'required' => $options['is_edit'] ? false : true,
+                'constraints' => array_filter([
                     new File([
                         'maxSize' => '1024k',
                         'mimeTypes' => [
@@ -80,8 +80,9 @@ class PartnerType extends AbstractType
                             'image/png',
                         ],
                         'mimeTypesMessage' => 'Please upload a valid image (JPEG or PNG)',
-                    ])
-                ],
+                    ]),
+                    $options['is_edit'] ? null : new NotBlank(['message' => 'Logo is required']),
+                ]),
                 'attr' => [
                     'class' => 'form-control',
                     'accept' => 'image/*',
@@ -97,6 +98,7 @@ class PartnerType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Partner::class,
+            'is_edit' => false,
         ]);
     }
 }

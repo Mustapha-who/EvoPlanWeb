@@ -1,4 +1,4 @@
-{{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
+{{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'novalidate': 'novalidate', 'name': 'partner-form'}}) }}
     {% if form.vars.errors is not empty %}
         <div class="alert alert-danger">
             {{ form_errors(form) }}
@@ -6,26 +6,36 @@
     {% endif %}
     <div class="row">
         <div class="col-md-6 mb-3">
-            {{ form_label(form.type_partner) }}
-            {{ form_widget(form.type_partner, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.type_partner) }}
+            {{ form_row(form.type_partner, {
+                'attr': {'placeholder': 'Enter partner type...'},
+                'row_attr': {'class': 'form-field-container'}
+            }) }}
         </div>
         <div class="col-md-6 mb-3">
-            {{ form_label(form.email) }}
-            {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.email) }}
+            {{ form_row(form.email, {
+                'attr': {'placeholder': 'Enter email address...'},
+                'row_attr': {'class': 'form-field-container'}
+            }) }}
         </div>
     </div>
     <div class="row">
         <div class="col-md-6 mb-3">
-            {{ form_label(form.phone_Number) }}
-            {{ form_widget(form.phone_Number, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.phone_Number) }}
+            {{ form_row(form.phone_Number, {
+                'attr': {'placeholder': 'Enter phone number...'},
+                'row_attr': {'class': 'form-field-container'}
+            }) }}
         </div>
         <div class="col-md-6 mb-3">
-            {{ form_label(form.logoFile) }}
-            {{ form_widget(form.logoFile) }}
-            {{ form_errors(form.logoFile) }}
+            {{ form_row(form.logoFile, {
+                'help': 'Upload partner logo (optional)',
+                'row_attr': {'class': 'form-field-container'}
+            }) }}
+            {% if form.parent.vars.data.logo is defined and form.parent.vars.data.logo %}
+                <div class="mt-2 current-logo-preview">
+                    <img src="{{ asset(form.parent.vars.data.logo) }}" alt="Current logo" style="height: 80px; width: auto;" class="mt-2">
+                    <p class="text-muted small">Current logo (leave empty to keep)</p>
+                </div>
+            {% endif %}
         </div>
     </div>
     <div class="mt-4">
@@ -33,5 +43,9 @@
             <i data-feather="save" class="me-1"></i>
             {{ button_label|default('Save') }}
         </button>
+        <a href="{{ path('app_partner_index') }}" class="btn btn-light lift ms-2">
+            <i data-feather="x" class="me-1"></i>
+            Cancel
+        </a>
     </div>
 {{ form_end(form) }}

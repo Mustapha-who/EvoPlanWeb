@@ -44,6 +44,7 @@
                         <th>Partnership</th>
                         <th>Start Date</th>
                         <th>End Date</th>
+                        <th>Terms</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -61,6 +62,13 @@
                             </td>
                             <td>{{ contract.dateDebut ? contract.dateDebut|date('Y-m-d') : 'N/A' }}</td>
                             <td>{{ contract.dateFin ? contract.dateFin|date('Y-m-d') : 'N/A' }}</td>
+                            <td>
+                                {% if contract.terms %}
+                                    {{ contract.terms|length > 50 ? contract.terms|slice(0, 50) ~ '...' : contract.terms }}
+                                {% else %}
+                                    No terms specified
+                                {% endif %}
+                            </td>
                             <td>
                                 <div class="badge bg-{{
                                 contract.status == 'active' ? 'success' :

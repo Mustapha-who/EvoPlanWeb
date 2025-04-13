@@ -26,6 +26,8 @@
         <div class="card mb-4">
             <div class="card-header">Create Partnership</div>
             <div class="card-body">
+                {# Set this to avoid duplicate error messages #}
+                {% form_theme form _self %}
                 {{ include('partnership/_form.html.twig') }}
             </div>
             <div class="card-footer">
@@ -38,27 +40,260 @@
     </div>
 {% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Hide server-side error messages on field change */
+        .form-group.field-changed .invalid-feedback {
+            display: none !important;
+        }
+        
+        /* Apply special styling to error messages */
+        .invalid-feedback {
+            color: #dc3545;
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+    </style>
+{% endblock %}
+
+{% block form_errors %}
+    {# Show errors regardless of method to ensure validation errors display #}
+    {% if errors|length > 0 %}
+        {% for error in errors %}
+            <div class="invalid-feedback d-block mb-2">
+                {{ error.message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock form_errors %}
+
+{# Override form_row to include the error display #}
+{% block form_row %}
+    {% set widget_attr = {} %}
+    {% if help is defined %}
+        {% set widget_attr = {attr: {'aria-describedby': id ~ "_help"}} %}
+    {% endif %}
+    
+    {% set row_class = row_attr.class|default('') %}
+    <div class="form-group {{ row_class }}">
+        {{ form_label(form) }}
+        
+        {# Add is-invalid class when there are errors #}
+        {% if app.request.method == 'POST' and not form.vars.valid %}
+            {% set attr = attr|merge({class: (attr.class|default('') ~ ' is-invalid')|trim}) %}
+        {% endif %}
+        
+        {# Merge placeholder if it exists in attr #}
+        {% if attr.placeholder is defined %}
+            {% set attr = widget_attr.attr|default({})|merge({'placeholder': attr.placeholder}) %}
+            {% set widget_attr = widget_attr|merge({'attr': attr}) %}
+        {% endif %}
+        
+        {{ form_widget(form, widget_attr) }}
+        
+        {# Show errors only after submission #}
+        {{ form_errors(form) }}
+        
+        {# Show help text for non-empty help only #}
+        {% if help is defined and help is not empty %}
+            <div id="{{ id }}_help" class="form-text text-muted">
+                {{ help }}
+            </div>
+        {% endif %}
+    </div>
+{% endblock form_row %}
+
 {% block javascripts %}
     {{ parent() }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize form validation for date fields
+            feather.replace();
+            
+            // Get form elements
+            const partnershipForm = document.querySelector('form[name="partnership"]');
             const startDateField = document.querySelector('[name$="[date_debut]"]');
             const endDateField = document.querySelector('[name$="[date_fin]"]');
-
-            if (startDateField) {
-                startDateField.addEventListener('change', function() {
-                    validateDate(this);
-                    // When start date changes, revalidate end date
-                    if (endDateField && endDateField.value) {
-                        validateDate(endDateField);
+            const partnerField = document.querySelector('[name$="[id_partner]"]');
+            const eventField = document.querySelector('[name$="[id_event]"]');
+            const termsField = document.querySelector('[name$="[terms]"]');
+            
+            // Function to clear error message for a specific field
+            function clearErrorForField(field) {
+                if (!field) return;
+                
+                field.classList.remove('is-invalid');
+                
+                // Find the closest container and add field-changed class
+                const parentContainer = field.closest('.form-group');
+                if (parentContainer) {
+                    parentContainer.classList.add('field-changed');
+                    const errorElements = parentContainer.querySelectorAll('.invalid-feedback');
+                    errorElements.forEach(error => {
+                        error.style.display = 'none';
+                    });
+                }
+            }
+            
+            // Add event listeners to clear errors on any field interaction
+            const allFields = [partnerField, eventField, startDateField, endDateField, termsField];
+            
+            allFields.forEach(field => {
+                if (!field) return;
+                
+                // Clear errors on input/change for all fields
+                field.addEventListener('input', function() {
+                    clearErrorForField(this);
+                });
+                
+                field.addEventListener('change', function() {
+                    clearErrorForField(this);
+                    
+                    // Special handling for selects
+                    if (this.tagName === 'SELECT' && this.value !== '') {
+                        this.classList.remove('is-invalid');
+                        clearErrorForField(this);
+                    }
+                    
+                    // For date fields, run the date validation
+                    if (this === startDateField || this === endDateField) {
+                        validateDates();
                     }
                 });
+            });
+            
+            // Client-side date validation
+            function validateDates() {
+                // Validate start date is today or in the future
+                if (startDateField && startDateField.value) {
+                    const startDate = new Date(startDateField.value);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    if (startDate < today) {
+                        startDateField.setCustomValidity('Start date must be today or in the future.');
+                        startDateField.classList.add('is-invalid');
+                        
+                        // Show the error message
+                        const parentContainer = startDateField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed'); // Remove field-changed to show error
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Start date must be today or in the future.';
+                    } else {
+                        startDateField.setCustomValidity('');
+                        clearErrorForField(startDateField);
+                    }
+                }
+                
+                // Validate end date is after start date
+                if (endDateField && endDateField.value && startDateField && startDateField.value) {
+                    const endDate = new Date(endDateField.value);
+                    const startDate = new Date(startDateField.value);
+                    
+                    if (endDate <= startDate) {
+                        endDateField.setCustomValidity('End date must be after start date.');
+                        endDateField.classList.add('is-invalid');
+                        
+                        // Show the error message
+                        const parentContainer = endDateField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed'); // Remove field-changed to show error
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'End date must be after start date.';
+                    } else {
+                        endDateField.setCustomValidity('');
+                        clearErrorForField(endDateField);
+                    }
+                } else if (endDateField) {
+                    endDateField.setCustomValidity('');
+                    clearErrorForField(endDateField);
+                }
             }
-
-            if (endDateField) {
-                endDateField.addEventListener('change', function() {
-                    validateDate(this);
+            
+            // Form submission validation
+            if (partnershipForm) {
+                partnershipForm.addEventListener('submit', function(e) {
+                    let hasErrors = false;
+                    
+                    // Validate partner field
+                    if (partnerField && partnerField.value === '') {
+                        partnerField.classList.add('is-invalid');
+                        const parentContainer = partnerField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed'); // Remove field-changed to allow error display
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Sélectionnez un élément dans la liste.';
+                        hasErrors = true;
+                    }
+                    
+                    // Validate event field
+                    if (eventField && eventField.value === '') {
+                        eventField.classList.add('is-invalid');
+                        const parentContainer = eventField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed'); // Remove field-changed to allow error display
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Sélectionnez un élément dans la liste.';
+                        hasErrors = true;
+                    }
+                    
+                    // Validate terms field
+                    if (termsField && termsField.value.trim() === '') {
+                        termsField.classList.add('is-invalid');
+                        const parentContainer = termsField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed'); // Remove field-changed to allow error display
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Terms and conditions are required.';
+                        hasErrors = true;
+                    }
+                    
+                    // Validate dates
+                    validateDates();
+                    
+                    // Check for any date validation errors
+                    if (startDateField && startDateField.validity.customError) {
+                        hasErrors = true;
+                        const parentContainer = startDateField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed'); // Remove field-changed to allow error display
+                    }
+                    
+                    if (endDateField && endDateField.validity.customError) {
+                        hasErrors = true;
+                        const parentContainer = endDateField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed'); // Remove field-changed to allow error display
+                    }
+                    
+                    // Prevent form submission if there are any errors
+                    if (hasErrors) {
+                        e.preventDefault();
+                    }
                 });
             }
         });
