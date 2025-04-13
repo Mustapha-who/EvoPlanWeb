@@ -183,7 +183,7 @@
                 <div class="mx-auto">
                     <ul class="navbar-nav flex-row gap-4">
                         <li class="nav-item">
-                            <a class="nav-link fw-semibold fs-5 text-dark" href="index.html">Accueil</a>
+                            <a class="nav-link fw-semibold fs-5 text-dark" href="{{ path('app_event_home') }}">Accueil</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link fw-semibold fs-5 text-dark" href="feedback.html">Feedback</a>
@@ -201,11 +201,11 @@
                     </li>
                     <li class="nav-item dropdown no-caret dropdown-user me-3 me-lg-4">
                         <a class="btn btn-icon btn-transparent-dark dropdown-toggle" id="navbarDropdownUserImage" href="javascript:void(0);" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <img class="img-fluid rounded-circle" src="assets/img/illustrations/profiles/profile-1.png" />
+                            <img class="img-fluid rounded-circle" src={{ asset('assets/img/illustrations/profiles/profile-1.png')}} />
                         </a>
                         <div class="dropdown-menu dropdown-menu-end border-0 shadow animated--fade-in-up" aria-labelledby="navbarDropdownUserImage">
                             <h6 class="dropdown-header d-flex align-items-center">
-                                <img class="dropdown-user-img" src="assets/img/illustrations/profiles/profile-1.png" />
+                                <img class="dropdown-user-img" src={{ asset('assets/img/illustrations/profiles/profile-1.png')}} />
                                 <div class="dropdown-user-details">
                                     <div class="dropdown-user-details-name">Utilisateur</div>
                                     <div class="dropdown-user-details-email">user@example.com</div>
@@ -281,43 +281,54 @@
                 <div class="card mb-4 border-0 shadow-sm">
                     <div class="card-body py-4">
                         <h5 class="card-title text-dark mb-4">Trouver l'événement parfait</h5>
-                        <div class="row g-3 align-items-center">
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Lieu</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                    <input type="text" class="form-control" placeholder="Paris, France">
+                        <form action="{{ path('app_event_home') }}" method="get">
+                            <div class="row g-3 align-items-center">
+                                <!-- Filtre par lieu -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Lieu</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                        <select name="lieu" class="form-select">
+                                            <option value="">Tous les lieux</option>
+                                            {% for lieu in lieux %}
+                                                <option value="{{ lieu.value }}"
+                                                    {% if app.request.query.get('lieu') == lieu.value %}selected{% endif %}>
+                                                    {{ lieu.value }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Filtre par date -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Date</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                        <select name="date" class="form-select">
+                                            <option value="">Toutes les dates</option>
+                                            <option value="today" {% if app.request.query.get('date') == 'today' %}selected{% endif %}>Aujourd'hui</option>
+                                            <option value="tomorrow" {% if app.request.query.get('date') == 'tomorrow' %}selected{% endif %}>Demain</option>
+                                            <option value="week" {% if app.request.query.get('date') == 'week' %}selected{% endif %}>Cette semaine</option>
+                                            <option value="weekend" {% if app.request.query.get('date') == 'weekend' %}selected{% endif %}>Ce week-end</option>
+                                            <option value="month" {% if app.request.query.get('date') == 'month' %}selected{% endif %}>Ce mois-ci</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Boutons -->
+                                <div class="col-12 mt-3">
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        <i class="fas fa-search me-2"></i>Rechercher
+                                    </button>
+                                    {% if app.request.query.get('lieu') or app.request.query.get('date') %}
+                                        <a href="{{ path('app_event_home') }}" class="btn btn-outline-secondary ms-2">
+                                            Réinitialiser
+                                        </a>
+                                    {% endif %}
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Date</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                                    <select class="form-select">
-                                        <option>Toutes les dates</option>
-                                        <option>Aujourd'hui</option>
-                                        <option>Demain</option>
-                                        <option>Cette semaine</option>
-                                        <option>Ce week-end</option>
-                                        <option>Ce mois-ci</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Catégorie</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-tag"></i></span>
-                                    <select class="form-select">
-                                        <option>Toutes les catégories</option>
-                                        <option>Conférences médicales</option>
-                                        <option>Formations santé</option>
-                                        <option>Ateliers bien-être</option>
-                                        <option>Séminaires recherche</option>
-                                        <option>Salons professionnels</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
 
@@ -325,7 +336,6 @@
             <section id="upcoming-events">
                 <div class="container-xl px-4">
                     <div class="events-header">
-                        <h2>Événements à venir</h2>
                         <p>Découvrez nos prochains événements dans le domaine de la santé et du bien-être</p>
                     </div>
 
@@ -348,18 +358,17 @@
                                 <div class="card-body">
                                     <h3 class="card-title">{{ event.nom }}</h3>
                                     <div class="event-meta">
-                                        <i class="fas fa-calendar-alt"></i>
-                                        <span>{{ event.dateDebut|date('d M Y - H:i') }}</span>
+                                        <i class="fas fa-calendar-alt me-2"></i>
+                                        <span class="fs-6">{{ event.dateDebut|date('d M Y - H:i') }}</span>
                                     </div>
                                     <div class="event-meta">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                        <span>{{ event.lieu.value }}</span>
+                                        <i class="fas fa-map-marker-alt me-2"></i>
+                                        <span class="fs-6">{{ event.lieu.value }}</span>
                                     </div>
-                                    <p class="card-text">{{ event.description|slice(0, 100) ~ '...' }}</p>
                                     <div class="event-footer">
                                         <span class="event-participants">
-                                            <i class="fas fa-users me-1"></i>
-                                            {{ event.capacite }} places
+                                            <i class="fas fa-euro-sign me-1"></i>  <!-- Changé l'icône pour € au lieu de users -->
+                                            {{ event.prix }}  <!-- Supposant que la propriété est "prix" -->
                                         </span>
                                         <a href="{{ path('app_event_show', {'id_event': event.id_Event}) }}" class="btn btn-sm btn-primary rounded-pill px-3">S'inscrire</a>
                                     </div>
