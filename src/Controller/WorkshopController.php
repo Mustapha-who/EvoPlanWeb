@@ -30,8 +30,17 @@ final class WorkshopController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($workshop);
-            $entityManager->flush();
+            try {
+                $entityManager->persist($workshop);
+                $entityManager->flush();
+                
+                $this->addFlash('success', sprintf(
+                    'Workshop "%s" has been created successfully!',
+                    $workshop->getTitle()
+                ));
+            } catch (\Exception $e) {
+                $this->addFlash('danger', 'An error occurred while creating the workshop.');
+            }
 
             return $this->redirectToRoute('app_workshop_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -42,14 +51,6 @@ final class WorkshopController extends AbstractController
         ]);
     }
 
-    #[Route('/{id_workshop}', name: 'app_workshop_show', methods: ['GET'])]
-    public function show(Workshop $workshop): Response
-    {
-        return $this->render('workshop/show.html.twig', [
-            'workshop' => $workshop,
-        ]);
-    }
-
     #[Route('/{id_workshop}/edit', name: 'app_workshop_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Workshop $workshop, EntityManagerInterface $entityManager): Response
     {
@@ -57,7 +58,15 @@ final class WorkshopController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+            try {
+                $entityManager->flush();
+                $this->addFlash('success', sprintf(
+                    'Workshop "%s" has been updated successfully!',
+                    $workshop->getTitle()
+                ));
+            } catch (\Exception $e) {
+                $this->addFlash('danger', 'An error occurred while updating the workshop.');
+            }
 
             return $this->redirectToRoute('app_workshop_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -72,10 +81,45 @@ final class WorkshopController extends AbstractController
     public function delete(Request $request, Workshop $workshop, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$workshop->getid_workshop(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($workshop);
-            $entityManager->flush();
+            try {
+                $workshopTitle = $workshop->getTitle(); // Save title before deletion
+                $entityManager->remove($workshop);
+                $entityManager->flush();
+                
+                $this->addFlash('success', sprintf(
+                    'Workshop "%s" has been deleted successfully!',
+                    $workshopTitle
+                ));
+            } catch (\Exception $e) {
+                $this->addFlash('danger', 'An error occurred while deleting the workshop.');
+            }
         }
 
         return $this->redirectToRoute('app_workshop_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/charts', name: 'app_workshop_charts', methods: ['GET'])]
+    public function charts(WorkshopRepository $workshopRepository): Response
+    {
+        return $this->render('workshop/charts.html.twig', [
+            'sessionsData' => $workshopRepository->getSessionsPerWorkshop(),
+            'workshopsPerEvent' => $workshopRepository->getWorkshopsPerEvent(),
+            'capacityData' => $workshopRepository->getCapacityVsAttendance(),
+            'attendanceRates' => $workshopRepository->getAttendanceRates()
+        ]);
+    }
+
+    #[Route('/front/{id_event}', name: 'app_workshop_front', methods: ['GET'])]
+    public function front(int $id_event, WorkshopRepository $workshopRepository): Response
+    {
+        // Get current user
+        $user = $this->getUser();
+        $userId = $user ? $user->getId() : null;
+
+        return $this->render('workshop/front.html.twig', [
+            'workshops' => $workshopRepository->findBy(['id_event' => $id_event]),
+            'event_id' => $id_event,
+            'user_id' => $userId
+        ]);
     }
 }

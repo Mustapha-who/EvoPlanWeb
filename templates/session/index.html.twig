@@ -1,35 +1,95 @@
-{% extends 'base.html.twig' %}
+{% extends 'User/base_dashboard.html.twig' %}
 
-{% block title %}Session index{% endblock %}
+{% block title %}Session Management{% endblock %}
 
-{% block body %}
-    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" />
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+        }
+        
+        .notification .alert {
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid;
+            animation: slideIn 0.5s forwards;
+        }
+        
+        .notification .alert-success {
+            border-left-color: #198754;
+        }
+        
+        .notification .alert-danger {
+            border-left-color: #dc3545;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <!-- Notification Area -->
+    <div class="notification">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {% if label == 'success' %}
+                        <i class="fas fa-check-circle me-2"></i>
+                    {% elseif label == 'danger' %}
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                    {% endif %}
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
         <div class="container-xl px-4">
-            <div class="page-header-content pt-4">
-                <div class="row align-items-center justify-content-between">
-                    <div class="col-12 mb-3">
-                        <a class="btn btn-outline-light" href="{{ path('app_workshop_index') }}">
-                            <i data-feather="arrow-left" class="me-1"></i>
-                            Back to Workshops
-                        </a>
-                    </div>
-                    <div class="col-auto">
+            <div class="page-header-content">
+                <div class="row align-items-center justify-content-between pt-3">
+                    <div class="col-auto mb-3">
                         <h1 class="page-header-title">
-                            <div class="page-header-icon"><i data-feather="filter"></i></div>
+                            <div class="page-header-icon"><i data-feather="calendar"></i></div>
                             Sessions
                             {% if workshop_id %}
                                 for Workshop #{{ workshop_id }}
                             {% endif %}
                         </h1>
-                        <div class="page-header-subtitle">Session management and overview</div>
+                    </div>
+                    <div class="col-12 col-xl-auto mb-3">
+                        <a class="btn btn-sm btn-light text-primary me-2" href="{{ path('app_workshop_index') }}">
+                            <i class="me-1" data-feather="arrow-left"></i>
+                            Back to Workshops
+                        </a>
+                        <a href="{{ path('app_session_new', {'workshop_id': workshop_id}) }}" class="btn btn-sm btn-primary">
+                            <i class="me-1" data-feather="plus"></i>
+                            Create New Session
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="container-xl px-4 mt-n10">
-        <div class="card mb-4">
+    <div class="container-xl px-4">
+        <div class="card">
             <div class="card-header">Session List</div>
             <div class="card-body">
                 <table id="datatablesSimple" class="table table-bordered table-striped table-hover">
@@ -77,15 +137,10 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                
-                <div class="mt-4">
-                    <a class="btn btn-primary" href="{{ path('app_session_new', {'workshop_id': workshop_id}) }}">Create New Session</a>
-                </div>
             </div>
         </div>
     </div>
 
-    {# Modals section - outside the main table #}
     {% for session in sessions %}
         <div class="modal fade" id="clientModal{{ session.id_session }}" tabindex="-1" aria-labelledby="clientModalLabel{{ session.id_session }}" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -98,7 +153,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="table-responsive">
-                            <table id="modalDatatable{{ session.id_session }}" class="table table-bordered table-striped table-hover">
+                            <table class="modalDatatable table table-bordered table-striped table-hover">
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="text-center">ID</th>
@@ -123,6 +178,7 @@
                                                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation.id) }}">
                                                 <input type="hidden" name="session_id" value="{{ session.id_session }}">
                                                 <input type="hidden" name="workshop_id" value="{{ workshop_id }}">
+                                                <input type="hidden" name="modal" value="{{ session.id_session }}">
                                                 <button type="submit" class="btn btn-sm btn-datatable btn-icon btn-transparent-dark">
                                                     <i data-feather="trash-2"></i>
                                                 </button>
@@ -148,29 +204,96 @@
 {% endblock %}
 
 {% block javascripts %}
-{{ parent() }}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize modal tables
-        document.querySelectorAll('[id^="clientModal"]').forEach(modal => {
-            modal.addEventListener('shown.bs.modal', function() {
-                const tableId = this.querySelector('table').id;
-                // Destroy existing datatable if any
-                if (window[tableId + '_datatable']) {
-                    window[tableId + '_datatable'].destroy();
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check URL for modal parameter
+            const params = new URLSearchParams(window.location.search);
+            const modalId = params.get('openModal');
+            
+            // If modal ID exists, open the modal
+            if (modalId) {
+                const modalElement = document.getElementById('clientModal' + modalId);
+                if (modalElement) {
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
                 }
-                // Initialize new datatable
-                window[tableId + '_datatable'] = new simpleDatatables.DataTable('#' + tableId);
-            });
-        });
+            }
 
-        // Handle modal auto-open from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const modalId = urlParams.get('openModal');
-        if (modalId) {
-            const modal = new bootstrap.Modal(document.getElementById('clientModal' + modalId));
-            modal.show();
-        }
-    });
-</script>
+            // Add return modal ID to delete forms in modals
+            document.querySelectorAll('.modal form').forEach(form => {
+                const modalId = form.closest('.modal').id.replace('clientModal', '');
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'returnModal';
+                input.value = modalId;
+                form.appendChild(input);
+            });
+
+            // Add hidden input to forms in modals
+            document.querySelectorAll('.modal form').forEach(form => {
+                form.addEventListener('submit', function() {
+                    const modalId = this.closest('.modal').getAttribute('id').replace('clientModal', '');
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'returnModal';
+                    input.value = modalId;
+                    this.appendChild(input);
+                });
+            });
+
+            // Initialize DataTable
+            const dataTable = new simpleDatatables.DataTable("#datatablesSimple", {
+                perPage: 10,
+                perPageSelect: [5, 10, 15, 20],
+                labels: {
+                    placeholder: "Search...",
+                    searchTitle: "Search within table",
+                    perPage: "entries per page",
+                    noRows: "No entries found",
+                    info: "Showing {start} to {end} of {rows} entries"
+                }
+            });
+            
+            // Initialize Feather icons
+            feather.replace();
+            
+            // Refresh icons after table updates
+            dataTable.on('datatable.update', () => feather.replace());
+            dataTable.on('datatable.page', () => feather.replace());
+            dataTable.on('datatable.sort', () => feather.replace());
+
+            // Initialize DataTables for modal tables
+            document.querySelectorAll('.modalDatatable').forEach(table => {
+                new simpleDatatables.DataTable(table, {
+                    perPage: 5,
+                    perPageSelect: [5, 10, 15],
+                    searchable: true,
+                    labels: {
+                        placeholder: "Search participants...",
+                        searchTitle: "Search within participants",
+                        perPage: "participants per page",
+                        noRows: "No participants found",
+                        info: "Showing {start} to {end} of {rows} participants"
+                    }
+                });
+            });
+
+            // Refresh Feather icons when modal opens
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('shown.bs.modal', function() {
+                    feather.replace();
+                });
+            });
+
+            // Auto-dismiss notifications after 3 seconds
+            setTimeout(function() {
+                document.querySelectorAll('.notification .alert').forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 3000);
+        });
+    </script>
 {% endblock %}

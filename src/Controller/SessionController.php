@@ -43,8 +43,13 @@ final class SessionController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($session);
-            $entityManager->flush();
+            try {
+                $entityManager->persist($session);
+                $entityManager->flush();
+                $this->addFlash('success', 'Session has been created successfully!');
+            } catch (\Exception $e) {
+                $this->addFlash('danger', 'An error occurred while creating the session.');
+            }
 
             return $this->redirectToRoute('app_session_index', [
                 'workshop_id' => $session->getIdWorkshop()?->getid_workshop()
@@ -74,7 +79,12 @@ final class SessionController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+            try {
+                $entityManager->flush();
+                $this->addFlash('success', 'Session has been updated successfully!');
+            } catch (\Exception $e) {
+                $this->addFlash('danger', 'An error occurred while updating the session.');
+            }
 
             return $this->redirectToRoute('app_session_index', [
                 'workshop_id' => $workshop_id
@@ -93,11 +103,19 @@ final class SessionController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete'.$session->getId_session(), $request->getPayload()->getString('_token'))) {
             $workshop_id = $session->getIdWorkshop()?->getid_workshop();
-            $entityManager->remove($session);
-            $entityManager->flush();
+            $returnModalId = $request->request->get('returnModal');
             
+            try {
+                $entityManager->remove($session);
+                $entityManager->flush();
+                $this->addFlash('success', 'Session has been deleted successfully!');
+            } catch (\Exception $e) {
+                $this->addFlash('danger', 'An error occurred while deleting the session.');
+            }
+
             return $this->redirectToRoute('app_session_index', [
-                'workshop_id' => $workshop_id
+                'workshop_id' => $workshop_id,
+                'openModal' => $returnModalId
             ], Response::HTTP_SEE_OTHER);
         }
 

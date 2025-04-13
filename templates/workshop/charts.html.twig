@@ -1,0 +1,234 @@
+{% extends 'User/base_dashboard.html.twig' %}
+
+{% block title %}Workshop Statistics{% endblock %}
+
+{% block content %}
+    <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
+        <div class="container-xl px-4">
+            <div class="page-header-content">
+                <div class="row align-items-center justify-content-between pt-3">
+                    <div class="col-auto mb-3">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="bar-chart-2"></i></div>
+                            Workshop Statistics
+                        </h1>
+                    </div>
+                    <div class="col-12 col-xl-auto mb-3">
+                        <a class="btn btn-sm btn-light text-primary" href="{{ path('app_workshop_index') }}">
+                            <i class="me-1" data-feather="arrow-left"></i>
+                            Back to Workshops
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-xl px-4">
+        <div class="row">
+            <div class="col-xl-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">Workshops per Event</div>
+                    <div class="card-body">
+                        <canvas id="workshopsPerEventChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">Sessions per Workshop</div>
+                    <div class="card-body">
+                        <canvas id="sessionsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">Workshop Capacity vs Attendance</div>
+                    <div class="card-body">
+                        <canvas id="capacityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">Session Attendance Rate (%)</div>
+                    <div class="card-body">
+                        <canvas id="attendanceRateChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // First chart (Sessions)
+            new Chart(document.getElementById('sessionsChart'), {
+                type: 'bar',
+                data: {
+                    labels: {{ sessionsData|map(d => d.workshop_title)|json_encode|raw }},
+                    datasets: [{
+                        label: 'Number of Sessions',
+                        data: {{ sessionsData|map(d => d.session_count)|json_encode|raw }},
+                        backgroundColor: 'rgba(0, 97, 242, 0.7)',
+                        borderColor: 'rgb(0, 97, 242)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+
+            // Third chart (Workshops per Event)
+            new Chart(document.getElementById('workshopsPerEventChart'), {
+                type: 'bar',
+                data: {
+                    labels: {{ workshopsPerEvent|map(d => d.event_name)|json_encode|raw }},
+                    datasets: [{
+                        label: 'Number of Workshops',
+                        data: {{ workshopsPerEvent|map(d => d.workshop_count)|json_encode|raw }},
+                        backgroundColor: 'rgba(0, 97, 242, 0.7)',
+                        borderColor: 'rgb(0, 97, 242)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Number of Workshops per Event'
+                        }
+                    }
+                }
+            });
+
+            // Capacity vs Attendance Chart
+            new Chart(document.getElementById('capacityChart'), {
+                type: 'bar',
+                data: {
+                    labels: {{ capacityData|map(d => d.title)|json_encode|raw }},
+                    datasets: [{
+                        label: 'Total Capacity',
+                        data: {{ capacityData|map(d => d.workshop_capacity)|json_encode|raw }},
+                        backgroundColor: 'rgba(0, 97, 242, 0.7)',
+                        borderColor: 'rgb(0, 97, 242)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Actual Attendance',
+                        data: {{ capacityData|map(d => d.actual_attendance)|json_encode|raw }},
+                        backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                        borderColor: 'rgb(40, 167, 69)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Participants'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Attendance Rate Pie Chart
+            new Chart(document.getElementById('attendanceRateChart'), {
+                type: 'pie',
+                data: {
+                    labels: {{ attendanceRates|map(d => d.title)|json_encode|raw }},
+                    datasets: [{
+                        data: {{ attendanceRates|map(d => d.attendance_rate)|json_encode|raw }},
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.7)',   // Green
+                            'rgba(0, 97, 242, 0.7)',    // Blue
+                            'rgba(255, 193, 7, 0.7)',   // Yellow
+                            'rgba(220, 53, 69, 0.7)',   // Red
+                            'rgba(111, 66, 193, 0.7)',  // Purple
+                            'rgba(23, 162, 184, 0.7)',  // Cyan
+                            'rgba(253, 126, 20, 0.7)',  // Orange
+                            'rgba(32, 201, 151, 0.7)',  // Teal
+                            'rgba(102, 16, 242, 0.7)',  // Indigo
+                            'rgba(214, 51, 132, 0.7)',  // Pink
+                            'rgba(0, 182, 122, 0.7)',   // Emerald
+                            'rgba(133, 146, 163, 0.7)'  // Gray
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return tooltipItems[0].label;
+                                },
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const totalParticipants = {{ attendanceRates|map(d => d.total_participants)|json_encode|raw }}[context.dataIndex];
+                                    const capacity = {{ attendanceRates|map(d => d.total_capacity)|json_encode|raw }}[context.dataIndex];
+                                    const available = capacity - totalParticipants;
+                                    const percentage = (totalParticipants / capacity * 100).toFixed(1);
+                                    
+                                    return [
+                                        `Attendance Rate: ${value}%`,
+                                        `Participants: ${totalParticipants}/${capacity}`,
+                                        `Available spots: ${available}`,
+                                        `Fill Rate: ${percentage}%`,
+                                        `Status: ${available > 0 ? 'Available' : 'Full'}`
+                                    ];
+                                }
+                            },
+                            displayColors: true,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            padding: 12
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            top: 20,
+                            bottom: 20,
+                            left: 20,
+                            right: 20
+                        }
+                    }
+                }
+            });
+        });
+    
+    </script>
+{% endblock %}

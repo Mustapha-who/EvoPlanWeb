@@ -29,12 +29,6 @@
         <!-- Navbar content from temp.html -->
         <button class="btn btn-icon btn-transparent-dark order-1 order-lg-0 me-2 ms-lg-2 me-lg-0" id="sidebarToggle"><i data-feather="menu"></i></button>
         <a class="navbar-brand pe-3 ps-4 ps-lg-2" href="index.html">SB Admin Pro</a>
-        <form class="form-inline me-auto d-none d-lg-block me-3">
-            <div class="input-group input-group-joined input-group-solid">
-                <input class="form-control pe-0" type="search" placeholder="Search" aria-label="Search" />
-                <div class="input-group-text"><i data-feather="search"></i></div>
-            </div>
-        </form>
         <ul class="navbar-nav align-items-center ms-auto">
             <!-- Add the rest of the navbar items here -->
         </ul>
@@ -128,8 +122,10 @@
                                            href="{{ path('app_contract_index') }}">Contracts</a>
                                     </nav>
                                 </div>
-
-                                <!-- Other sections (Knowledge Base, etc.) -->
+                                <!--Side navbar workshop-->
+                                <a class="nav-link" href="{{path('app_workshop_index')}}">Workshops</a>
+                                
+                                <!-- Nested Sidenav Accordion (Pages -> Knowledge Base)-->
                                 <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#pagesCollapseKnowledgeBase" aria-expanded="false" aria-controls="pagesCollapseKnowledgeBase">
                                     Knowledge Base
                                     <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
@@ -140,6 +136,8 @@
                                         <a class="nav-link" href="knowledge-base-home-2.html">Home 2</a>
                                     </nav>
                                 </div>
+                                <a class="nav-link" href="pricing.html">Pricing</a>
+                                <a class="nav-link" href="{{path('logout')}}">Logout</a>
                             </nav>
                         </div>
                 <div class="sidenav-footer">
