@@ -18,12 +18,6 @@
         <!-- Navbar content from temp.html -->
         <button class="btn btn-icon btn-transparent-dark order-1 order-lg-0 me-2 ms-lg-2 me-lg-0" id="sidebarToggle"><i data-feather="menu"></i></button>
         <a class="navbar-brand pe-3 ps-4 ps-lg-2" href="index.html">SB Admin Pro</a>
-        <form class="form-inline me-auto d-none d-lg-block me-3">
-            <div class="input-group input-group-joined input-group-solid">
-                <input class="form-control pe-0" type="search" placeholder="Search" aria-label="Search" />
-                <div class="input-group-text"><i data-feather="search"></i></div>
-            </div>
-        </form>
         <ul class="navbar-nav align-items-center ms-auto">
             <!-- Add the rest of the navbar items here -->
         </ul>
@@ -94,6 +88,9 @@
                                         <a class="nav-link" href="error-504.html">504 Error</a>
                                     </nav>
                                 </div>
+                                <!--Side navbar workshop-->
+                                <a class="nav-link" href="{{path('app_workshop_index')}}">Workshops</a>
+                                
                                 <!-- Nested Sidenav Accordion (Pages -> Knowledge Base)-->
                                 <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#pagesCollapseKnowledgeBase" aria-expanded="false" aria-controls="pagesCollapseKnowledgeBase">
                                     Knowledge Base
@@ -108,7 +105,7 @@
                                     </nav>
                                 </div>
                                 <a class="nav-link" href="pricing.html">Pricing</a>
-                                <a class="nav-link" href="invoice.html">Invoice</a>
+                                <a class="nav-link" href="{{path('logout')}}">Logout</a>
                             </nav>
                         </div>
                         <!-- Add the rest of the sidemenu items here -->

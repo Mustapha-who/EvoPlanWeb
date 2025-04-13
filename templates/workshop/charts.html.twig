@@ -1,75 +1,67 @@
-{% extends 'base.html.twig' %}
+{% extends 'User/base_dashboard.html.twig' %}
 
 {% block title %}Workshop Statistics{% endblock %}
 
-{% block body %}
-<header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+{% block content %}
+    <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
+        <div class="container-xl px-4">
+            <div class="page-header-content">
+                <div class="row align-items-center justify-content-between pt-3">
+                    <div class="col-auto mb-3">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="bar-chart-2"></i></div>
+                            Workshop Statistics
+                        </h1>
+                    </div>
+                    <div class="col-12 col-xl-auto mb-3">
+                        <a class="btn btn-sm btn-light text-primary" href="{{ path('app_workshop_index') }}">
+                            <i class="me-1" data-feather="arrow-left"></i>
+                            Back to Workshops
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
     <div class="container-xl px-4">
-        <div class="page-header-content pt-4">
-            <div class="row align-items-center justify-content-between">
-                <div class="col-12 mb-3">
-                    <a class="btn btn-outline-light" href="{{ path('app_workshop_index') }}">
-                        <i data-feather="arrow-left" class="me-1"></i>
-                        Back to Workshops
-                    </a>
+        <div class="row">
+            <div class="col-xl-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">Workshops per Event</div>
+                    <div class="card-body">
+                        <canvas id="workshopsPerEventChart"></canvas>
+                    </div>
                 </div>
-                <div class="col-auto">
-                    <h1 class="page-header-title">
-                        <div class="page-header-icon"><i data-feather="bar-chart-2"></i></div>
-                        Workshop Statistics
-                    </h1>
+            </div>
+            <div class="col-xl-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">Sessions per Workshop</div>
+                    <div class="card-body">
+                        <canvas id="sessionsChart"></canvas>
+                    </div>
                 </div>
-                 <div class="col-12 col-md-auto mt-4">
-                    <a href="{{ path('app_workshop_charts') }}" class="btn btn-success">
-                        <i class="me-1" data-feather="bar-chart-2"></i>
-                            Upload Charts
-                    </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">Workshop Capacity vs Attendance</div>
+                    <div class="card-body">
+                        <canvas id="capacityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">Session Attendance Rate (%)</div>
+                    <div class="card-body">
+                        <canvas id="attendanceRateChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</header>
-
-    
-
-<div class="container-xl px-4 mt-n10">
-    <div class="row">
-        <div class="col-xl-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header">Workshops per Event</div>
-                <div class="card-body">
-                    <canvas id="workshopsPerEventChart"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header">Sessions per Workshop</div>
-                <div class="card-body">
-                    <canvas id="sessionsChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-xl-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header">Workshop Capacity vs Attendance</div>
-                <div class="card-body">
-                    <canvas id="capacityChart"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header">Session Attendance Rate (%)</div>
-                <div class="card-body">
-                    <canvas id="attendanceRateChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block javascripts %}

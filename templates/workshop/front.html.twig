@@ -1,0 +1,499 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Workshop Overview{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
+    <style>
+        /* Navbar Styles */
+        .topnav {
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+        }
+
+        /* Custom styles for the hero section */
+        .hero-section {
+            background: linear-gradient(135deg, #0061f2 0%, #6900c7 100%);
+            padding: 6rem 0;
+            margin-top: -72px; /* Adjust based on navbar height */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: url('{{ asset('assets/img/pattern.svg') }}') repeat;
+            opacity: 0.1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+
+        /* Search section styling */
+        .search-section {
+            margin-top: -3rem;
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .search-card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+        }
+
+        /* Workshop cards styling */
+        .workshop-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .workshop-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.15);
+        }
+
+        .workshop-date {
+            background: rgba(0, 97, 242, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 500;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .card-footer {
+            background: transparent;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 1.5rem 2rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Ensure content appears below fixed navbar */
+        body {
+            padding-top: 72px; /* Adjust based on your navbar height */
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<!-- Navbar -->
+<nav class="topnav navbar navbar-expand-lg navbar-light bg-white shadow">
+    <div class="container-fluid justify-content-between">
+        <!-- Logo -->
+        <a class="navbar-brand d-flex align-items-center pe-3 ps-3" href="{{ path('app_event_home') }}">
+            <img src="{{ asset('assets/img/hexatech.png') }}" alt="Evoplan Logo" class="me-2" style="height: 60px;" />
+            <span class="h3 mb-0 text-primary">Evoplan</span>
+        </a>
+
+        <!-- Main Links -->
+        <div class="mx-auto">
+            <ul class="navbar-nav flex-row gap-4">
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold fs-5 text-dark" href="{{ path('app_event_home') }}">Accueil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold fs-5 text-dark" href="#">Feedback</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold fs-5 text-dark" href="#">Report</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- User Menu -->
+        <ul class="navbar-nav align-items-center">
+            <li class="nav-item">
+                <a class="nav-link text-secondary" href="#!">Help Center</a>
+            </li>
+            <li class="nav-item dropdown no-caret dropdown-user me-3 me-lg-4">
+                <a class="btn btn-icon btn-transparent-dark dropdown-toggle" id="navbarDropdownUserImage" href="javascript:void(0);" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <img class="img-fluid rounded-circle" src="{{ asset('assets/img/illustrations/profiles/profile-1.png') }}" />
+                </a>
+                <div class="dropdown-menu dropdown-menu-end border-0 shadow animated--fade-in-up" aria-labelledby="navbarDropdownUserImage">
+                    <h6 class="dropdown-header d-flex align-items-center">
+                        <img class="dropdown-user-img" src="{{ asset('assets/img/illustrations/profiles/profile-1.png') }}" />
+                        <div class="dropdown-user-details">
+                            <div class="dropdown-user-details-name">User</div>
+                            <div class="dropdown-user-details-email">user@example.com</div>
+                        </div>
+                    </h6>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#!"><i data-feather="user"></i> My Profile</a>
+                    <a class="dropdown-item" href="#!"><i data-feather="calendar"></i> My Events</a>
+                    <a class="dropdown-item" href="#!"><i data-feather="settings"></i> Settings</a>
+                    <a class="dropdown-item" href="{{path('logout')}}"><i data-feather="log-out"></i> Déconnexion</a>
+                    <div class="dropdown-divider"></div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Flash Messages -->
+<div class="container-xl px-4 mt-3">
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-content">
+        <div class="container px-5">
+            <div class="row gx-5 align-items-center">
+                <div class="col-lg-7">
+                    <h1 class="hero-title">Discover Our Expert-Led Workshops</h1>
+                    <p class="hero-subtitle">Join our interactive sessions designed to enhance your skills and knowledge in healthcare. Learn from industry experts and connect with peers.</p>
+                    <a href="#workshops" class="btn btn-light btn-lg px-5 py-3 rounded-pill">
+                        <i class="fas fa-search me-2"></i>Browse Workshops
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search Section -->
+<div class="container px-5 search-section">
+    <div class="card search-card">
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="small fw-500 text-muted mb-1">Search Workshops</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i data-feather="search"></i>
+                        </span>
+                        <input type="text" id="workshopSearch" class="form-control border-start-0" placeholder="Search by title, instructor, location...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="small fw-500 text-muted mb-1">Date Filter</label>
+                    <select id="dateFilter" class="form-select">
+                        <option value="">All Dates</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Workshops Section -->
+<section id="workshops" class="py-5">
+    <div class="container px-5">
+        <div class="row gx-5">
+            {% if workshops|length > 0 %}
+                {% for workshop in workshops %}
+                    <div class="col-lg-4 col-md-6 mb-5">
+                        <div class="card h-100 border-0 shadow-sm workshop-card">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="text-primary fw-500 workshop-date" data-date="{{ workshop.date ? workshop.date|date('Y-m-d') : '' }}">
+                                        <i class="far fa-calendar me-1"></i>
+                                        {{ workshop.date ? workshop.date|date('M d, Y') : '' }}
+                                    </span>
+                                </div>
+                                <h3 class="h4 fw-bold mb-3">{{ workshop.title }}</h3>
+                                <p class="card-text text-muted mb-3">{{ workshop.description }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="small text-muted mb-1">Instructor</div>
+                                        <div class="fw-500 instructor-name">{{ workshop.instructor ? workshop.instructor.name : 'No instructor assigned' }}</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="small text-muted mb-1">Capacity</div>
+                                        <div class="fw-500">{{ workshop.capacity }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent border-top-0 p-4 pt-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                        <span class="text-muted location-text">{{ workshop.location }}</span>
+                                    </div>
+                                    <a href="{{ path('app_session_index', {'workshop_id': workshop.id_workshop}) }}" 
+                                       class="btn btn-outline-primary rounded-pill px-4"
+                                       data-bs-toggle="modal" 
+                                       data-bs-target="#workshopModal{{ workshop.id_workshop }}">
+                                        View Sessions
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Workshop Modal with Sessions -->
+                    <div class="modal fade" id="workshopModal{{ workshop.id_workshop }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-xl modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-light">
+                                    <h5 class="modal-title">
+                                        <i class="fas fa-chalkboard-teacher me-2 text-primary"></i>
+                                        {{ workshop.title }}
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- Workshop Details Card -->
+                                    <div class="card mb-4 border-0 bg-light">
+                                        <div class="card-body">
+                                            <div class="row g-4">
+                                                <div class="col-md-6">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <div class="feature  me-3">
+                                                            <i class="fas fa-user text-primary"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="fw-bold mb-0">Instructor</h6>
+                                                            <small class="text-muted">{{ workshop.instructor ? workshop.instructor.name : 'No instructor assigned' }}</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <div class="feature  me-3">
+                                                            <i class="fas fa-calendar text-primary"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="fw-bold mb-0">Duration</h6>
+                                                            <small class="text-muted">{{ workshop.date|date('M d, Y') }} - {{ workshop.enddate|date('M d, Y') }}</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <div class="feature me-3">
+                                                            <i class="fas fa-users text-primary"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="fw-bold mb-0">Capacity</h6>
+                                                            <small class="text-muted">{{ workshop.capacity }} participants</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <div class="feature  me-3">
+                                                            <i class="fas fa-map-marker-alt text-primary"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="fw-bold mb-0">Location</h6>
+                                                            <small class="text-muted">{{ workshop.location }}</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="d-flex align-items-start">
+                                                        <div class="feature  me-3">
+                                                            <i class="fas fa-info-circle text-primary"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="fw-bold mb-2">Description</h6>
+                                                            <p class="text-muted mb-0 small">{{ workshop.description }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sessions Table -->
+                                    <h6 class="fw-bold mb-3">Available Sessions</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Time</th>
+                                                    <th class="text-center">Capacity</th>
+                                                    <th class="text-center">Enrolled</th>
+                                                    <th class="text-center">Status</th>
+                                                    <th class="text-center">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% if workshop.sessions|length > 0 %}
+                                                    {% for session in workshop.sessions %}
+                                                        <tr>
+                                                            <td>{{ session.date|date('M d, Y') }}</td>
+                                                            <td>{{ session.dateheuredeb|date('H:i') }} - {{ session.dateheurefin|date('H:i') }}</td>
+                                                            <td class="text-center">{{ session.capacity }}</td>
+                                                            <td class="text-center">
+                                                                <div class="d-flex align-items-center justify-content-center">
+                                                                    <div class="progress" style="width: 80px; height: 6px;">
+                                                                        {% set percentage = (session.participantCount / session.capacity) * 100 %}
+                                                                        <div class="progress-bar {{ percentage > 80 ? 'bg-danger' : 'bg-success' }}" 
+                                                                             style="width: {{ percentage }}%"></div>
+                                                                    </div>
+                                                                    <span class="ms-2">{{ session.participantCount }}/{{ session.capacity }}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {% if session.participantCount >= session.capacity %}
+                                                                    <span class="badge bg-danger">Full</span>
+                                                                {% else %}
+                                                                    <span class="badge bg-success">Available</span>
+                                                                {% endif %}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {% if session.participantCount < session.capacity %}
+                                                                    <a href="{{ path('app_reservation_session_enroll', {'id_session': session.id_session}) }}" 
+                                                                       class="btn btn-sm btn-outline-success">
+                                                                        <i class="fas fa-plus-circle me-1"></i>Enroll
+                                                                    </a>
+                                                                {% else %}
+                                                                    <span class="badge bg-danger">Full</span>
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <tr>
+                                                        <td colspan="6" class="text-center text-muted">
+                                                            <i class="fas fa-info-circle me-1"></i>
+                                                            No sessions available for this workshop
+                                                        </td>
+                                                    </tr>
+                                                {% endif %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        No workshops available for this event.
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const workshopCards = document.querySelectorAll('.workshop-card');
+            const searchInput = document.getElementById('workshopSearch');
+            const dateFilter = document.getElementById('dateFilter');
+
+            function filterWorkshops() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const dateOption = dateFilter.value;
+
+                workshopCards.forEach(card => {
+                    const title = card.querySelector('.h4').textContent.toLowerCase();
+                    const instructor = card.querySelector('.instructor-name').textContent.toLowerCase();
+                    const location = card.querySelector('.location-text').textContent.toLowerCase();
+                    const dateStr = card.querySelector('.workshop-date').getAttribute('data-date');
+                    const workshopDate = new Date(dateStr);
+                    const today = new Date();
+
+                    let showByDate = true;
+                    if (dateOption === 'today') {
+                        showByDate = isSameDay(workshopDate, today);
+                    } else if (dateOption === 'week') {
+                        showByDate = isThisWeek(workshopDate);
+                    } else if (dateOption === 'month') {
+                        showByDate = isSameMonth(workshopDate, today);
+                    }
+
+                    const matchesSearch = title.includes(searchTerm) || 
+                                       instructor.includes(searchTerm) || 
+                                       location.includes(searchTerm);
+
+                    card.closest('.col-lg-4').style.display = 
+                        (matchesSearch && showByDate) ? 'block' : 'none';
+                });
+            }
+
+            function isSameDay(date1, date2) {
+                return date1.toDateString() === date2.toDateString();
+            }
+
+            function isThisWeek(date) {
+                const today = new Date();
+                const firstDay = new Date(today.setDate(today.getDate() - today.getDay()));
+                const lastDay = new Date(firstDay);
+                lastDay.setDate(lastDay.getDate() + 6);
+                return date >= firstDay && date <= lastDay;
+            }
+
+            function isSameMonth(date1, date2) {
+                return date1.getMonth() === date2.getMonth() && 
+                       date1.getFullYear() === date2.getFullYear();
+            }
+
+            searchInput.addEventListener('input', filterWorkshops);
+            dateFilter.addEventListener('change', filterWorkshops);
+            
+            // Initialize Feather icons
+            feather.replace();
+            
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+        });
+    </script>
+{% endblock %}
+{% endblock %}
