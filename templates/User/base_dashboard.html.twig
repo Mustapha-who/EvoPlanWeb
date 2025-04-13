@@ -6,6 +6,7 @@
     'app_contract_index', 'app_contract_new', 'app_contract_show', 'app_contract_edit'
 ] %}
 {% set all_pages_routes = account_routes|merge(partner_routes) %}
+{% set dashboard_routes = ['app_event_index' , 'app_event_new' , 'app_event_edit', 'app_event_show','user_dashboard','app_reservations_event','app_reservation_edit','app_reservation_show'] %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">{% set partner_routes = [
@@ -49,18 +50,18 @@
                     <div class="nav accordion" id="accordionSidenav">
                         <!-- Sidemenu content from temp.html -->
                         <div class="sidenav-menu-heading">Core</div>
-                        <a class="nav-link {% if app.request.attributes.get('_route') in ['user_dashboard', 'dashboard_1', 'dashboard_2', 'dashboard_3'] %}active{% endif %}" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseDashboards" aria-expanded="false" aria-controls="collapseDashboards">
+                        <a class="nav-link {% if app.request.attributes.get('_route') in dashboard_routes %}active{% endif %}" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseDashboards" aria-expanded="false" aria-controls="collapseDashboards">
                             <div class="nav-link-icon"><i data-feather="activity"></i></div>
                             Dashboards
                             <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                         </a>
-                        <div class="collapse {% if app.request.attributes.get('_route') in ['user_dashboard', 'dashboard_1', 'dashboard_2', 'dashboard_3'] %}show{% endif %}" id="collapseDashboards" data-bs-parent="#accordionSidenav">
+                        <div class="collapse {% if app.request.attributes.get('_route') in dashboard_routes %}show{% endif %}" id="collapseDashboards" data-bs-parent="#accordionSidenav">
                             <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">
                                 <a class="nav-link {% if app.request.attributes.get('_route') == 'user_dashboard' %}active{% endif %}" href="{{ path('user_dashboard') }}">
                                     Default
                                     <span class="badge bg-primary-soft text-primary ms-auto">Updated</span>
                                 </a>
-                                <a class="nav-link {% if app.request.attributes.get('_route') == 'dashboard_2' %}active{% endif %}" href="">Multipurpose</a>
+                                <a class="nav-link {% if app.request.attributes.get('_route') in ['app_event_index' , 'app_event_new' , 'app_event_edit', 'app_event_show', 'app_reservations_event'] %}active{% endif %}" href="{{ path('app_event_index') }}">Events</a>
                                 <a class="nav-link {% if app.request.attributes.get('_route') == 'dashboard_3' %}active{% endif %}" href="">Affiliate</a>
                             </nav>
                         </div>

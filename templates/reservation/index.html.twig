@@ -1,19 +1,21 @@
-{% extends 'base.html.twig' %}
+{% extends 'User/base_dashboard.html.twig' %}
 
-{% block title %}Reservation Management{% endblock %}
+{% block title %}Reservation Management - EvoPlan{% endblock %}
 
-{% block body %}
-    <!-- Header -->
+{% block content %}
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
         <div class="container-xl px-4">
             <div class="page-header-content pt-4">
                 <div class="row align-items-center justify-content-between">
                     <div class="col-auto mt-4">
                         <h1 class="page-header-title">
-                            <div class="page-header-icon"><i data-feather="users"></i></div>
+                            <div class="page-header-icon"><i class="fas fa-users"></i></div>
                             Reservations
                         </h1>
                         <div class="page-header-subtitle">Manage event reservations</div>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        {# Optional: Add action button here if needed #}
                     </div>
                 </div>
             </div>
@@ -27,18 +29,18 @@
             <div class="card-body">
                 <table id="datatablesSimple" class="table table-striped">
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Client Phone</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
+                    <tr>
+                        <th>ID</th>
+                        <th>Client Phone</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
                     </thead>
                     <tbody>
                     {% for reservation in reservations %}
                         <tr>
                             <td>{{ reservation.idReservation }}</td>
-                            <td>{{ reservation.client ? reservation.client.id }}</td>
+                            <td>{{ reservation.client ? reservation.client.phoneNumber : 'N/A' }}</td>
                             <td>
                                 {% if reservation.statut.value == 'CONFIRMÉE' %}
                                     <span class="badge bg-success">{{ reservation.statut.value }}</span>
@@ -49,18 +51,20 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <button class="btn btn-datatable btn-icon btn-transparent-dark me-2"
-                                        onclick="location.href='{{ path('app_reservation_edit', {'id_reservation': reservation.idReservation}) }}'">
-                                    <i data-feather="edit"></i>
-                                </button>
-                                <form method="post" class="delete-form"
-                                      action="{{ path('app_reservation_delete', {'id_reservation': reservation.idReservation}) }}"
-                                      style="display: inline-block;">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation.idReservation) }}">
-                                    <button type="submit" class="btn btn-datatable btn-icon btn-transparent-dark">
-                                        <i data-feather="trash-2"></i>
-                                    </button>
-                                </form>
+                                <div class="d-flex">
+                                    <a href="{{ path('app_reservation_edit', {'id_reservation': reservation.idReservation}) }}"
+                                       class="btn btn-primary btn-sm me-1">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" class="delete-form"
+                                          action="{{ path('app_reservation_delete', {'id_reservation': reservation.idReservation}) }}"
+                                          style="display: inline-block;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation.idReservation) }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     {% else %}
@@ -73,11 +77,11 @@
             </div>
         </div>
     </div>
+{% endblock %}
 
-    <!-- Feather Icons + SweetAlert2 -->
-    <script src="https://unpkg.com/feather-icons"></script>
+{% block javascripts %}
+    {{ parent() }}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         document.querySelectorAll(".delete-form").forEach(form => {
             form.addEventListener("submit", function (event) {
@@ -92,7 +96,7 @@
                     confirmButtonText: "Yes, delete it!"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        this.submit(); // => Re-envoie le formulaire vers app_reservation_delete
+                        this.submit();
                     }
                 });
             });

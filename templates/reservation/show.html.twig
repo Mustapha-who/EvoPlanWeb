@@ -1,26 +1,63 @@
-{% extends 'base.html.twig' %}
+{% extends 'User/base_dashboard.html.twig' %}
 
-{% block title %}Reservation{% endblock %}
+{% block title %}Reservation Details - EvoPlan{% endblock %}
 
-{% block body %}
-    <h1>Reservation</h1>
+{% block content %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i class="fas fa-ticket-alt"></i></div>
+                            Reservation Details
+                        </h1>
+                        <div class="page-header-subtitle">View reservation information</div>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <a href="{{ path('app_reservation_edit', {'id_reservation': reservation.id_reservation}) }}" class="btn btn-white lift me-2">
+                            <i class="fas fa-edit me-1"></i>
+                            Edit
+                        </a>
+                        <a href="{{ path('app_reservations_event') }}" class="btn btn-white lift">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id_reservation</th>
-                <td>{{ reservation.idReservation }}</td>
-            </tr>
-            <tr>
-                <th>Statut</th>
-                <td>{{ reservation.statut }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_reservation_index') }}">back to list</a>
-
-    <a href="{{ path('app_reservation_edit', {'id_reservation': reservation.id_reservation}) }}">edit</a>
-
-    {{ include('reservation/_delete_form.html.twig') }}
+    <!-- Main Content -->
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">Reservation Information</div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tbody>
+                    <tr>
+                        <th class="w-25">Reservation ID</th>
+                        <td>{{ reservation.idReservation }}</td>
+                    </tr>
+                    <tr>
+                        <th>Status</th>
+                        <td>
+                            {% if reservation.statut.value == 'CONFIRMÉE' %}
+                                <span class="badge bg-success">{{ reservation.statut.value }}</span>
+                            {% elseif reservation.statut.value == 'ANNULÉE' %}
+                                <span class="badge bg-danger">{{ reservation.statut.value }}</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">{{ reservation.statut.value }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                {{ include('reservation/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
 {% endblock %}
