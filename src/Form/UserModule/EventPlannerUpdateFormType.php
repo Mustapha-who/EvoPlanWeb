@@ -4,6 +4,7 @@
 namespace App\Form\UserModule;
 
 use App\Entity\UserModule\EventPlanner;
+use App\Entity\UserModule\EventPlannerModule;
 use App\Entity\UserModule\UserDTO;
 use App\Service\UserModule\ValidationService;
 use Symfony\Component\Form\AbstractType;
@@ -42,7 +43,8 @@ class EventPlannerUpdateFormType extends AbstractType
             ])
             ->add('assignedModule', TextType::class, [
                 'required' => false,
-                'disabled' => true,
+                'disabled' => true, // Make the field non-editable
+                'data' => EventPlannerModule::getValues($options['data']->getAssignedModule()) // Set the value as a string
             ])
             ->add('originalEmail', HiddenType::class, [
                 'mapped' => false,
