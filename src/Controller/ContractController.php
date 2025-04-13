@@ -33,7 +33,7 @@ final class ContractController extends AbstractController{
     #[Route('/{id_contract}/edit', name: 'app_contract_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Contract $contract, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(ContractType::class, $contract);
+        $form = $this->createForm(ContractType::class, $contract, ['is_edit' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

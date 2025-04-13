@@ -134,7 +134,7 @@ final class PartnerController extends AbstractController
         $originalEmail = $partner->getEmail();
         $originalPhone = $partner->getPhoneNumber();
         
-        $form = $this->createForm(PartnerType::class, $partner);
+        $form = $this->createForm(PartnerType::class, $partner, ['is_edit' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -179,6 +179,20 @@ final class PartnerController extends AbstractController
             }
             
             $logoFile = $form->get('logoFile')->getData();
+            $originalLogo = $partner->getLogo();
+
+            // Handle logo validation - no longer required in edit mode
+            if (empty($logoFile) && !empty($originalLogo)) {
+                // If there's an original logo but no new logo uploaded, check if the file exists
+                $logoPath = $this->getParameter('kernel.project_dir') . '/public' . $originalLogo;
+                if (!file_exists($logoPath) || !is_file($logoPath)) {
+                    $form->get('logoFile')->addError(new FormError('The logo file is missing. Please upload a new logo.'));
+                    return $this->render('partner/edit.html.twig', [
+                        'partner' => $partner,
+                        'form' => $form,
+                    ]);
+                }
+            }
 
             if ($logoFile) {
                 // Calculate file hash for uniqueness check
@@ -219,10 +233,7 @@ final class PartnerController extends AbstractController
                 }
                 
                 // Delete old file if exists
-                $oldFile = $this->getParameter('kernel.project_dir') . '/public' . $partner->getLogo();
-                if (file_exists($oldFile)) {
-                    unlink($oldFile);
-                }
+                $this->safelyDeleteFile($partner->getLogo());
 
                 // Generate unique filename
                 $newFilename = uniqid() . '.' . $logoFile->guessExtension();
@@ -259,10 +270,7 @@ final class PartnerController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$partner->getId_partner(), $request->request->get('_token'))) {
             // Delete the image file if it exists
             if ($partner->getLogo()) {
-                $oldFile = $this->getParameter('kernel.project_dir') . '/public' . $partner->getLogo();
-                if (file_exists($oldFile)) {
-                    unlink($oldFile);
-                }
+                $this->safelyDeleteFile($partner->getLogo());
             }
             
             $entityManager->remove($partner);
@@ -270,5 +278,23 @@ final class PartnerController extends AbstractController
         }
 
         return $this->redirectToRoute('app_partner_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    /**
+     * Safely deletes a file if it exists and is a file (not a directory)
+     */
+    private function safelyDeleteFile(?string $path): bool
+    {
+        if (!$path) {
+            return false;
+        }
+        
+        $fullPath = $this->getParameter('kernel.project_dir') . '/public' . $path;
+        
+        if (file_exists($fullPath) && is_file($fullPath)) {
+            return unlink($fullPath);
+        }
+        
+        return false;
     }
 }

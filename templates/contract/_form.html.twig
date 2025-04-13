@@ -7,93 +7,68 @@
     
     <div class="row">
         <div class="col-md-6 mb-3">
-            <div class="form-group">
-                {{ form_label(form.id_partner) }}
-                {{ form_widget(form.id_partner) }}
-                <div class="invalid-feedback">
-                    {{ form_errors(form.id_partner) }}
-                </div>
-            </div>
+            {{ form_row(form.id_partner, {
+                'attr': {'placeholder': 'Select a partner...'},
+                'row_attr': {'class': 'form-field-container'},
+                'label_attr': form.vars.data.id is not null ? {'class': 'text-muted'} : {}
+            }) }}
         </div>
         <div class="col-md-6 mb-3">
-            <div class="form-group">
-                {{ form_label(form.id_partnership) }}
-                {{ form_widget(form.id_partnership) }}
-                <div class="invalid-feedback">
-                    {{ form_errors(form.id_partnership) }}
-                </div>
-            </div>
+            {{ form_row(form.id_partnership, {
+                'attr': {'placeholder': 'Select a partnership...'},
+                'row_attr': {'class': 'form-field-container'},
+                'label_attr': form.vars.data.id is not null ? {'class': 'text-muted'} : {}
+            }) }}
         </div>
     </div>
     
     <div class="row">
         <div class="col-md-6 mb-3">
-            <div class="form-group">
-                {{ form_label(form.date_debut) }}
-                {{ form_widget(form.date_debut) }}
-                <div class="invalid-feedback">
-                    {{ form_errors(form.date_debut) }}
-                </div>
-                {% if form.date_debut.vars.errors is not empty %}
-                    <div class="alert alert-danger mt-2">
-                        {{ form_errors(form.date_debut) }}
-                    </div>
-                {% endif %}
-            </div>
+            {{ form_row(form.date_debut, {
+                'attr': {'placeholder': 'Select start date...'},
+                'row_attr': {'class': 'form-field-container'},
+                'help': 'Start date of the contract'
+            }) }}
         </div>
         <div class="col-md-6 mb-3">
-            <div class="form-group">
-                {{ form_label(form.date_fin) }}
-                {{ form_widget(form.date_fin) }}
-                <div class="invalid-feedback">
-                    {{ form_errors(form.date_fin) }}
-                </div>
-                {% if form.date_fin.vars.errors is not empty %}
-                    <div class="alert alert-danger mt-2">
-                        {{ form_errors(form.date_fin) }}
-                    </div>
-                {% endif %}
-            </div>
+            {{ form_row(form.date_fin, {
+                'attr': {'placeholder': 'Select end date...'},
+                'row_attr': {'class': 'form-field-container'},
+                'help': 'End date of the contract (leave empty for indefinite)'
+            }) }}
         </div>
     </div>
     
     <div class="row mb-3">
         <div class="col-md-12">
-            <div class="form-group">
-                {{ form_label(form.status) }}
-                {{ form_widget(form.status) }}
-                <div class="invalid-feedback">
-                    {{ form_errors(form.status) }}
-                </div>
-                {% if form.status.vars.errors is not empty %}
-                    <div class="alert alert-danger mt-2">
-                        {{ form_errors(form.status) }}
-                    </div>
-                {% endif %}
-            </div>
+            {{ form_row(form.status, {
+                'attr': {'placeholder': 'Select status...'},
+                'row_attr': {'class': 'form-field-container'},
+                'help': 'Current status of the contract'
+            }) }}
         </div>
     </div>
     
     <div class="row mb-3">
         <div class="col-md-12">
-            <div class="form-group">
-                {{ form_label(form.terms) }}
-                {{ form_widget(form.terms) }}
-                <div class="invalid-feedback">
-                    {{ form_errors(form.terms) }}
-                </div>
-                {% if form.terms.vars.errors is not empty %}
-                    <div class="alert alert-danger mt-2">
-                        {{ form_errors(form.terms) }}
-                    </div>
-                {% endif %}
-            </div>
+            {{ form_row(form.terms, {
+                'attr': {'placeholder': 'Enter contract terms and conditions...', 'rows': 6},
+                'row_attr': {'class': 'form-field-container'},
+                'help': 'Legal terms and conditions of the contract'
+            }) }}
         </div>
     </div>
     
     <div class="row">
         <div class="col-12">
-            <button class="btn {{ button_class|default('btn-success') }}">{{ button_label|default('Save') }}</button>
+            <button class="btn {{ button_class|default('btn-success') }}">
+                <i data-feather="save" class="me-1"></i>
+                {{ button_label|default('Save') }}
+            </button>
+            <a href="{{ path('app_contract_index') }}" class="btn btn-light ms-2">
+                <i data-feather="x" class="me-1"></i>
+                Cancel
+            </a>
         </div>
     </div>
 {{ form_end(form) }}

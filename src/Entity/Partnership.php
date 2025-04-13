@@ -49,7 +49,7 @@ class Partnership
     )]
     private ?\DateTimeInterface $date_fin = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::TEXT, nullable: false)]
     #[Assert\NotBlank(message: 'Terms and conditions are required.')]
     private ?string $terms = null;
 
@@ -126,7 +126,7 @@ class Partnership
         return $this->terms;
     }
 
-    public function setTerms(string $terms): static
+    public function setTerms(?string $terms): static
     {
         $this->terms = $terms;
 

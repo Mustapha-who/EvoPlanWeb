@@ -31,8 +31,7 @@ class PartnershipType extends AbstractType
                 'label' => 'Partner',
                 'placeholder' => 'Select a partner...',
                 'attr' => [
-                    'class' => 'form-select',
-                    'data-error-required' => 'Please select a partner'
+                    'class' => 'form-select'
                 ],
                 'required' => true,
                 'constraints' => [
@@ -49,8 +48,7 @@ class PartnershipType extends AbstractType
                         ->orderBy('e.nom', 'ASC');
                 },
                 'attr' => [
-                    'class' => 'form-select',
-                    'data-error-required' => 'Please select an event'
+                    'class' => 'form-select'
                 ],
                 'required' => true,
                 'constraints' => [
@@ -61,10 +59,7 @@ class PartnershipType extends AbstractType
                 'widget' => 'single_text',
                 'label' => 'Start Date',
                 'attr' => [
-                    'class' => 'form-control',
-                    'data-error-required' => 'Start date is required',
-                    'data-error-format' => 'Please enter a valid date',
-                    'data-error-future' => 'Start date must be today or in the future'
+                    'class' => 'form-control'
                 ],
                 'required' => true,
                 'constraints' => [
@@ -83,9 +78,7 @@ class PartnershipType extends AbstractType
                 'widget' => 'single_text',
                 'label' => 'End Date (Optional)',
                 'attr' => [
-                    'class' => 'form-control',
-                    'data-error-format' => 'Please enter a valid date',
-                    'data-error-after' => 'End date must be after start date'
+                    'class' => 'form-control'
                 ],
                 'required' => false,
                 'help' => 'Leave empty for indefinite partnerships',
@@ -105,8 +98,7 @@ class PartnershipType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'rows' => 5,
-                    'placeholder' => 'Enter partnership terms and conditions...',
-                    'data-error-required' => 'Terms and conditions are required'
+                    'placeholder' => 'Enter partnership terms and conditions...'
                 ],
                 'required' => true,
                 'constraints' => [

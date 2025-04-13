@@ -1,6 +1,70 @@
 {% extends 'User/base_dashboard.html.twig' %}
 
-{% block title %}Edit Contract - EvoPlan{% endblock %}
+{% block title %}Edit Contract{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Hide server-side error messages on field change */
+        .form-group.field-changed .invalid-feedback {
+            display: none !important;
+        }
+        
+        /* Apply special styling to error messages */
+        .invalid-feedback {
+            color: #dc3545;
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+    </style>
+{% endblock %}
+
+{% block form_errors %}
+    {# Show errors regardless of method to ensure validation errors display #}
+    {% if errors|length > 0 %}
+        {% for error in errors %}
+            <div class="invalid-feedback d-block mb-2">
+                {{ error.message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock form_errors %}
+
+{# Override form_row to include the error display #}
+{% block form_row %}
+    {% set widget_attr = {} %}
+    {% if help is defined %}
+        {% set widget_attr = {attr: {'aria-describedby': id ~ "_help"}} %}
+    {% endif %}
+    
+    {% set row_class = row_attr.class|default('') %}
+    <div class="form-group {{ row_class }}">
+        {{ form_label(form) }}
+        
+        {# Add is-invalid class when there are errors #}
+        {% if not form.vars.valid %}
+            {% set attr = attr|merge({class: (attr.class|default('') ~ ' is-invalid')|trim}) %}
+        {% endif %}
+        
+        {# Merge placeholder if it exists in attr #}
+        {% if attr.placeholder is defined %}
+            {% set attr = widget_attr.attr|default({})|merge({'placeholder': attr.placeholder}) %}
+            {% set widget_attr = widget_attr|merge({'attr': attr}) %}
+        {% endif %}
+        
+        {{ form_widget(form, widget_attr) }}
+        
+        {# Show errors #}
+        {{ form_errors(form) }}
+        
+        {# Show help text for non-empty help only #}
+        {% if help is defined and help is not empty %}
+            <div id="{{ id }}_help" class="form-text text-muted">
+                {{ help }}
+            </div>
+        {% endif %}
+    </div>
+{% endblock form_row %}
 
 {% block content %}
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
@@ -9,13 +73,20 @@
                 <div class="row align-items-center justify-content-between">
                     <div class="col-auto mt-4">
                         <h1 class="page-header-title">Edit Contract</h1>
-                        <div class="page-header-subtitle">Update contract information</div>
+                        <div class="page-header-subtitle">Update contract details</div>
                     </div>
                     <div class="col-12 col-xl-auto mt-4">
-                        <a href="{{ path('app_contract_index') }}" class="btn btn-white lift">
-                            <i class="fas fa-arrow-left me-1"></i>
-                            Back to List
-                        </a>
+                        <div class="btn-group">
+                            <a href="{{ path('app_contract_index') }}" class="btn btn-white lift">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Back to list
+                            </a>
+                            <a href="{{ path('app_contract_show', {'id_contract': contract.getId()}) }}" 
+                               class="btn btn-primary lift">
+                                <i class="fas fa-eye me-1"></i>
+                                View Details
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -24,22 +95,20 @@
     <!-- Main page content-->
     <div class="container-xl px-4 mt-n10">
         <div class="row">
-            <div class="col-xl-8">
+            <div class="col">
                 <div class="card mb-4">
-                    <div class="card-header">Edit Contract</div>
+                    <div class="card-header">Contract Information</div>
                     <div class="card-body">
-                        {{ include('contract/_form.html.twig', {'button_label': 'Update', 'button_class': 'btn-primary'}) }}
+                        {# Set this to avoid duplicate error messages #}
+                        {% form_theme form _self %}
+                        {{ include('contract/_form.html.twig', {'button_label': 'Update'}) }}
                     </div>
-                </div>
-            </div>
-            <div class="col-xl-4">
-                <div class="card mb-4">
-                    <div class="card-header">Actions</div>
-                    <div class="card-body">
-                        <a href="{{ path('app_contract_show', {'id_contract': contract.id_contract}) }}" class="btn btn-info w-100 mb-2 lift">
-                            <i class="fas fa-eye me-1"></i> View Details
+                    <div class="card-footer d-flex justify-content-between">
+                        <a href="{{ path('app_contract_index') }}" class="btn btn-light">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to list
                         </a>
-                        {{ include('contract/_delete_form.html.twig', {'button_class': 'btn-danger w-100 lift'}) }}
+                        {{ include('contract/_delete_form.html.twig', {'contract': contract}) }}
                     </div>
                 </div>
             </div>
@@ -51,101 +120,163 @@
     {{ parent() }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize feather icons
             feather.replace();
-
-            // Initialize form validation for date fields
+            
+            // Get form elements
+            const contractForm = document.querySelector('form[name="contract"]');
+            const partnerField = document.querySelector('[name$="[id_partner]"]');
+            const partnershipField = document.querySelector('[name$="[id_partnership]"]');
             const startDateField = document.querySelector('[name$="[date_debut]"]');
             const endDateField = document.querySelector('[name$="[date_fin]"]');
-
-            if (startDateField) {
-                startDateField.addEventListener('change', function() {
-                    validateDate(this);
-                    // When start date changes, revalidate end date
-                    if (endDateField && endDateField.value) {
-                        validateDate(endDateField);
-                    }
-                });
-            }
-
-            if (endDateField) {
-                endDateField.addEventListener('change', function() {
-                    validateDate(this);
-                });
-            }
-
-            // Add validation for status field
             const statusField = document.querySelector('[name$="[status]"]');
-            if (statusField) {
-                // Listen for changes on the status field
-                statusField.addEventListener('change', function() {
-                    // If the user tries to select "expired"
-                    if (this.value === 'expired') {
-                        // Show a warning
-                        let warningMessage = document.querySelector('#status-warning');
-                        if (!warningMessage) {
-                            warningMessage = document.createElement('div');
-                            warningMessage.id = 'status-warning';
-                            warningMessage.className = 'alert alert-warning mt-2';
-                            warningMessage.textContent = 'Note: Status can only be set to Expired if the partnership has ended.';
-                            this.parentNode.appendChild(warningMessage);
-                        }
-                    } else {
-                        // Remove the warning if status is not expired
-                        const warningMessage = document.querySelector('#status-warning');
-                        if (warningMessage) {
-                            warningMessage.remove();
-                        }
-                    }
-                });
-
-                // Show warning if status is already expired
-                if (statusField.value === 'expired') {
-                    let warningMessage = document.querySelector('#status-warning');
-                    if (!warningMessage) {
-                        warningMessage = document.createElement('div');
-                        warningMessage.id = 'status-warning';
-                        warningMessage.className = 'alert alert-warning mt-2';
-                        warningMessage.textContent = 'Note: Status can only be set to Expired if the partnership has ended.';
-                        statusField.parentNode.appendChild(warningMessage);
-                    }
+            const termsField = document.querySelector('[name$="[terms]"]');
+            
+            // Function to clear error message for a specific field
+            function clearErrorForField(field) {
+                if (!field) return;
+                
+                field.classList.remove('is-invalid');
+                
+                // Find the closest container and add field-changed class
+                const parentContainer = field.closest('.form-group');
+                if (parentContainer) {
+                    parentContainer.classList.add('field-changed');
+                    const errorElements = parentContainer.querySelectorAll('.invalid-feedback');
+                    errorElements.forEach(error => {
+                        error.style.display = 'none';
+                    });
                 }
             }
-
-            // Add validation for terms field
-            const termsField = document.querySelector('[name$="[terms]"]');
-            if (termsField) {
-                termsField.addEventListener('input', function() {
-                    if (!this.value.trim()) {
-                        // Create a more visible error below the field
-                        let errorAlert = document.querySelector('#terms-error');
-                        if (!errorAlert) {
-                            errorAlert = document.createElement('div');
-                            errorAlert.id = 'terms-error';
-                            errorAlert.className = 'alert alert-danger mt-2';
-                            errorAlert.textContent = 'Contract terms cannot be empty.';
-                            this.parentNode.appendChild(errorAlert);
-                        }
-                    } else {
-                        // Remove any existing visible error
-                        const errorAlert = document.querySelector('#terms-error');
-                        if (errorAlert) {
-                            errorAlert.remove();
-                        }
+            
+            // Add event listeners to clear errors on any field interaction
+            const allFields = [partnerField, partnershipField, startDateField, endDateField, statusField, termsField];
+            
+            allFields.forEach(field => {
+                if (!field) return;
+                
+                // Clear errors on input/change for all fields
+                field.addEventListener('input', function() {
+                    clearErrorForField(this);
+                });
+                
+                field.addEventListener('change', function() {
+                    clearErrorForField(this);
+                    
+                    // Special handling for selects
+                    if (this.tagName === 'SELECT' && this.value !== '') {
+                        this.classList.remove('is-invalid');
+                        clearErrorForField(this);
+                    }
+                    
+                    // For date fields, run the date validation
+                    if (this === startDateField || this === endDateField) {
+                        validateDates();
                     }
                 });
-
-                // Check terms value on load
-                if (!termsField.value.trim()) {
-                    let errorAlert = document.querySelector('#terms-error');
-                    if (!errorAlert) {
-                        errorAlert = document.createElement('div');
-                        errorAlert.id = 'terms-error';
-                        errorAlert.className = 'alert alert-warning mt-2';
-                        errorAlert.textContent = 'Contract terms cannot be empty.';
-                        termsField.parentNode.appendChild(errorAlert);
+            });
+            
+            // Client-side date validation
+            function validateDates() {
+                // Validate end date is after start date
+                if (endDateField && endDateField.value && startDateField && startDateField.value) {
+                    const endDate = new Date(endDateField.value);
+                    const startDate = new Date(startDateField.value);
+                    
+                    if (endDate <= startDate) {
+                        endDateField.setCustomValidity('End date must be after start date.');
+                        endDateField.classList.add('is-invalid');
+                        
+                        // Show the error message
+                        const parentContainer = endDateField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed'); // Remove field-changed to show error
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'End date must be after start date.';
+                    } else {
+                        endDateField.setCustomValidity('');
+                        clearErrorForField(endDateField);
                     }
+                } else if (endDateField) {
+                    endDateField.setCustomValidity('');
+                    clearErrorForField(endDateField);
                 }
+            }
+            
+            // Form submission validation
+            if (contractForm) {
+                contractForm.addEventListener('submit', function(e) {
+                    let hasErrors = false;
+                    
+                    // Partner and Partnership fields are read-only in edit mode, no need to validate
+                    
+                    // Validate date fields
+                    if (startDateField && !startDateField.value) {
+                        startDateField.classList.add('is-invalid');
+                        const parentContainer = startDateField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed');
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Start date is required.';
+                        hasErrors = true;
+                    }
+                    
+                    // Validate status field
+                    if (statusField && statusField.value === '') {
+                        statusField.classList.add('is-invalid');
+                        const parentContainer = statusField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed');
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Status is required.';
+                        hasErrors = true;
+                    }
+                    
+                    // Validate terms field
+                    if (termsField && termsField.value.trim() === '') {
+                        termsField.classList.add('is-invalid');
+                        const parentContainer = termsField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed');
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Terms and conditions are required.';
+                        hasErrors = true;
+                    }
+                    
+                    // Validate dates
+                    validateDates();
+                    
+                    // Check for any date validation errors
+                    if (endDateField && endDateField.validity.customError) {
+                        hasErrors = true;
+                        const parentContainer = endDateField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed');
+                    }
+                    
+                    // Prevent form submission if there are any errors
+                    if (hasErrors) {
+                        e.preventDefault();
+                    }
+                });
             }
         });
     </script>

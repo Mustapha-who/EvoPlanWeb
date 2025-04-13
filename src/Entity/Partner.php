@@ -86,7 +86,7 @@ class Partner
         return $this->phone_Number;
     }
 
-    public function setPhoneNumber(string $phone_Number): static
+    public function setPhoneNumber(?string $phone_Number): static
     {
         $this->phone_Number = $phone_Number;
 
