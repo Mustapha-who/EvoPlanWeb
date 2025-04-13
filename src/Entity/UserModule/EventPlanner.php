@@ -42,5 +42,10 @@ class EventPlanner extends User
         return ['ROLE_EVENTPLANNER'];
     }
 
+    public function __toString(): string
+    {
+        return EventPlannerModule::getValues($this->assignedModule);
+    }
+
 
 }
