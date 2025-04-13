@@ -1,89 +1,99 @@
-{% extends 'base.html.twig' %}
+{% extends 'User/base_dashboard.html.twig' %}
 
 {% block title %}Contract Details - EvoPlan{% endblock %}
 
-{% block page_title %}Contract Details{% endblock %}
-
-{% block page_subtitle %}View contract information{% endblock %}
-
-{% block header_actions %}
-    <a href="{{ path('app_contract_edit', {'id_contract': contract.id_contract}) }}" class="btn btn-primary lift">
-        <i class="fas fa-edit me-1"></i>
-        Edit Contract
-    </a>
-{% endblock %}
-
 {% block content %}
-    <div class="row">
-        <div class="col-xl-8">
-            <div class="card mb-4">
-                <div class="card-header">Contract Information</div>
-                <div class="card-body">
-                    <div class="mb-3 row">
-                        <label class="col-md-3 col-form-label fw-bold">Partner:</label>
-                        <div class="col-md-9">
-                            <p class="form-control-plaintext">
-                                {{ contract.idPartner ? contract.idPartner.email : 'N/A' }}
-                            </p>
-                        </div>
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">Contract Details</h1>
+                        <div class="page-header-subtitle">View contract information</div>
                     </div>
-                    <div class="mb-3 row">
-                        <label class="col-md-3 col-form-label fw-bold">Partnership:</label>
-                        <div class="col-md-9">
-                            <p class="form-control-plaintext">
-                                {% if contract.idPartnership and contract.idPartnership.idEvent %}
-                                    {{ contract.idPartnership.idEvent.nom }}
-                                {% else %}
-                                    N/A
-                                {% endif %}
-                            </p>
-                        </div>
-                    </div>
-                    <div class="mb-3 row">
-                        <label class="col-md-3 col-form-label fw-bold">Start Date:</label>
-                        <div class="col-md-9">
-                            <p class="form-control-plaintext">{{ contract.dateDebut ? contract.dateDebut|date('Y-m-d') : 'N/A' }}</p>
-                        </div>
-                    </div>
-                    <div class="mb-3 row">
-                        <label class="col-md-3 col-form-label fw-bold">End Date:</label>
-                        <div class="col-md-9">
-                            <p class="form-control-plaintext">{{ contract.dateFin ? contract.dateFin|date('Y-m-d') : 'N/A' }}</p>
-                        </div>
-                    </div>
-                    <div class="mb-3 row">
-                        <label class="col-md-3 col-form-label fw-bold">Status:</label>
-                        <div class="col-md-9">
-                            <p class="form-control-plaintext">
-                                <div class="badge bg-{{ 
-                                    contract.status == 'active' ? 'success' : 
-                                    (contract.status == 'suspended' ? 'warning' : 'danger')
-                                }}">
-                                    {{ contract.status|capitalize }}
-                                </div>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="mb-0 row">
-                        <label class="col-md-3 col-form-label fw-bold">Terms:</label>
-                        <div class="col-md-9">
-                            <p class="form-control-plaintext">{{ contract.terms|nl2br }}</p>
-                        </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <a href="{{ path('app_contract_edit', {'id_contract': contract.id_contract}) }}" class="btn btn-white lift">
+                            <i class="fas fa-edit me-1"></i>
+                            Edit Contract
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-4">
-            <div class="card mb-4">
-                <div class="card-header">Actions</div>
-                <div class="card-body">
-                    <a href="{{ path('app_contract_index') }}" class="btn btn-primary w-100 mb-2">
-                        <i class="fas fa-arrow-left me-1"></i> Back to List
-                    </a>
-                    <a href="{{ path('app_contract_edit', {'id_contract': contract.id_contract}) }}" class="btn btn-warning w-100 mb-2">
-                        <i class="fas fa-edit me-1"></i> Edit
-                    </a>
-                    {{ include('contract/_delete_form.html.twig', {'button_class': 'btn-danger w-100'}) }}
+    </header>
+    <!-- Main page content-->
+    <div class="container-xl px-4 mt-n10">
+        <div class="row">
+            <div class="col-xl-8">
+                <div class="card mb-4">
+                    <div class="card-header">Contract Information</div>
+                    <div class="card-body">
+                        <div class="mb-3 row">
+                            <label class="col-md-3 col-form-label fw-bold">Partner:</label>
+                            <div class="col-md-9">
+                                <p class="form-control-plaintext">
+                                    {{ contract.idPartner ? contract.idPartner.email : 'N/A' }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-md-3 col-form-label fw-bold">Partnership:</label>
+                            <div class="col-md-9">
+                                <p class="form-control-plaintext">
+                                    {% if contract.idPartnership and contract.idPartnership.idEvent %}
+                                        {{ contract.idPartnership.idEvent.nom }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-md-3 col-form-label fw-bold">Start Date:</label>
+                            <div class="col-md-9">
+                                <p class="form-control-plaintext">{{ contract.dateDebut ? contract.dateDebut|date('Y-m-d') : 'N/A' }}</p>
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-md-3 col-form-label fw-bold">End Date:</label>
+                            <div class="col-md-9">
+                                <p class="form-control-plaintext">{{ contract.dateFin ? contract.dateFin|date('Y-m-d') : 'N/A' }}</p>
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-md-3 col-form-label fw-bold">Status:</label>
+                            <div class="col-md-9">
+                                <p class="form-control-plaintext">
+                                <div class="badge bg-{{
+                                contract.status == 'active' ? 'success' :
+                                (contract.status == 'suspended' ? 'warning' : 'danger')
+                                }}">
+                                    {{ contract.status|capitalize }}
+                                </div>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mb-0 row">
+                            <label class="col-md-3 col-form-label fw-bold">Terms:</label>
+                            <div class="col-md-9">
+                                <p class="form-control-plaintext">{{ contract.terms|nl2br }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="card mb-4">
+                    <div class="card-header">Actions</div>
+                    <div class="card-body">
+                        <a href="{{ path('app_contract_index') }}" class="btn btn-white w-100 mb-2 lift">
+                            <i class="fas fa-arrow-left me-1"></i> Back to List
+                        </a>
+                        <a href="{{ path('app_contract_edit', {'id_contract': contract.id_contract}) }}" class="btn btn-white w-100 mb-2 lift">
+                            <i class="fas fa-edit me-1"></i> Edit
+                        </a>
+                        {{ include('contract/_delete_form.html.twig', {'button_class': 'btn-white w-100 lift'}) }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -94,7 +104,9 @@
     {{ parent() }}
     <script>
         window.addEventListener('DOMContentLoaded', event => {
-            feather.replace();
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
         });
     </script>
 {% endblock %}

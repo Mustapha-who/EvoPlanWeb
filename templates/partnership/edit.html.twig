@@ -1,23 +1,42 @@
-{% extends 'base.html.twig' %}
+{% extends 'User/base_dashboard.html.twig' %}
 
 {% block title %}Edit Partnership - EvoPlan{% endblock %}
 
-{% block page_title %}Edit Partnership{% endblock %}
-
-{% block page_subtitle %}Modify partnership information{% endblock %}
-
 {% block content %}
-    <div class="card">
-        <div class="card-header">Edit Partnership</div>
-        <div class="card-body">
-            {{ include('partnership/_form.html.twig', {'button_label': 'Update'}) }}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">Edit Partnership</h1>
+                        <div class="page-header-subtitle">Modify partnership information</div>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <div class="d-flex">
+                            <a href="{{ path('app_partnership_index') }}" class="btn btn-white lift me-2">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Back to list
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card-footer d-flex justify-content-between">
-            <a href="{{ path('app_partnership_index') }}" class="btn btn-light">
-                <i data-feather="arrow-left" class="me-1"></i>
-                Back to list
-            </a>
-            {{ include('partnership/_delete_form.html.twig', {'id_partnership': partnership.id}) }}
+    </header>
+    <!-- Main page content-->
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">Edit Partnership</div>
+            <div class="card-body">
+                {{ include('partnership/_form.html.twig', {'button_label': 'Update'}) }}
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+                <a href="{{ path('app_partnership_index') }}" class="btn btn-light lift">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    Back to list
+                </a>
+                {{ include('partnership/_delete_form.html.twig', {'id_partnership': partnership.id}) }}
+            </div>
         </div>
     </div>
 {% endblock %}
@@ -26,12 +45,10 @@
     {{ parent() }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            feather.replace();
-            
             // Initialize form validation for date fields
             const startDateField = document.querySelector('[name$="[date_debut]"]');
             const endDateField = document.querySelector('[name$="[date_fin]"]');
-            
+
             if (startDateField) {
                 startDateField.addEventListener('change', function() {
                     validateDate(this);
@@ -41,7 +58,7 @@
                     }
                 });
             }
-            
+
             if (endDateField) {
                 endDateField.addEventListener('change', function() {
                     validateDate(this);

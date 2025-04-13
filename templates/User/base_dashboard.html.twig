@@ -1,7 +1,18 @@
 <!DOCTYPE html>
+{% set account_routes = ['side_user_profile', 'user_profile', 'account_billing', 'account_security', 'account_notifications'] %}
+{% set partner_routes = [
+    'app_partner_index', 'app_partner_new', 'app_partner_show', 'app_partner_edit',
+    'app_partnership_index', 'app_partnership_new', 'app_partnership_show', 'app_partnership_edit',
+    'app_contract_index', 'app_contract_new', 'app_contract_show', 'app_contract_edit'
+] %}
+{% set all_pages_routes = account_routes|merge(partner_routes) %}
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8">{% set partner_routes = [
+        'app_partner_index', 'app_partner_new', 'app_partner_show', 'app_partner_edit',
+        'app_partnership_index', 'app_partnership_new', 'app_partnership_show', 'app_partnership_edit',
+        'app_contract_index', 'app_contract_new', 'app_contract_show', 'app_contract_edit'
+    ] %}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Application{% endblock %}</title>
     {% block stylesheets %}
@@ -49,43 +60,66 @@
                         </div>
                         <!-- Sidenav Heading (App Views)-->
                         <div class="sidenav-menu-heading">App Views</div>
-                        <!-- Sidenav Accordion (Pages)-->
-                        <a class="nav-link {% if app.request.attributes.get('_route') in ['user_profile', 'account_billing', 'account_security', 'account_notifications'] %}active{% endif %}" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
+                        <!-- Sidenav Accordion (Pages) -->
+                        <a class="nav-link {% if app.request.attributes.get('_route') in all_pages_routes %}active{% endif %}"
+                           href="javascript:void(0);"
+                           data-bs-toggle="collapse"
+                           data-bs-target="#collapsePages"
+                           aria-expanded="{% if app.request.attributes.get('_route') in all_pages_routes %}true{% else %}false{% endif %}"
+                           aria-controls="collapsePages">
                             <div class="nav-link-icon"><i data-feather="grid"></i></div>
                             Pages
                             <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                         </a>
-                        <div class="collapse {% if app.request.attributes.get('_route') in ['side_user_profile', 'user_profile','account_billing', 'account_security', 'account_notifications'] %}show{% endif %}" id="collapsePages" data-bs-parent="#accordionSidenav">
+                        <div class="collapse {% if app.request.attributes.get('_route') in all_pages_routes %}show{% endif %}"
+                             id="collapsePages"
+                             data-bs-parent="#accordionSidenav">
                             <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPagesMenu">
-                                <!-- Nested Sidenav Accordion (Pages -> Account)-->
-                                <a class="nav-link {% if app.request.attributes.get('_route') in ['side_user_profile', 'user_profile','account_billing', 'account_security', 'account_notifications'] %}active{% endif %}" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#pagesCollapseAccount" aria-expanded="false" aria-controls="pagesCollapseAccount">
+                                <!-- Account Section -->
+                                <a class="nav-link {% if app.request.attributes.get('_route') in account_routes %}active{% endif %}"
+                                   href="javascript:void(0);"
+                                   data-bs-toggle="collapse"
+                                   data-bs-target="#pagesCollapseAccount"
+                                   aria-expanded="{% if app.request.attributes.get('_route') in account_routes %}true{% else %}false{% endif %}"
+                                   aria-controls="pagesCollapseAccount">
                                     Account
                                     <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                                 </a>
-                                <div class="collapse {% if app.request.attributes.get('_route') in ['side_user_profile','user_profile', 'account_billing', 'account_security', 'account_notifications'] %}show{% endif %}" id="pagesCollapseAccount" data-bs-parent="#accordionSidenavPagesMenu">
+                                <div class="collapse {% if app.request.attributes.get('_route') in account_routes %}show{% endif %}"
+                                     id="pagesCollapseAccount"
+                                     data-bs-parent="#accordionSidenavPagesMenu">
                                     <nav class="sidenav-menu-nested nav">
-                                        <a class="nav-link {% if app.request.attributes.get('_route') in ['side_user_profile', 'user_profile'] %}active{% endif %}" href="{{ path('user_profile') }}">Profile</a>
-                                        <a class="nav-link {% if app.request.attributes.get('_route') == 'account_billing' %}active{% endif %}" href="">Billing</a>
-                                        <a class="nav-link {% if app.request.attributes.get('_route') == 'account_security' %}active{% endif %}" href="{{ path('account_security') }}">Security</a>
-                                        <a class="nav-link {% if app.request.attributes.get('_route') == 'account_notifications' %}active{% endif %}" href="">Notifications</a>
+                                        <a class="nav-link {% if app.request.attributes.get('_route') in ['side_user_profile', 'user_profile'] %}active{% endif %}"
+                                           href="{{ path('user_profile') }}">Profile</a>
+                                        <a class="nav-link {% if app.request.attributes.get('_route') == 'account_billing' %}active{% endif %}"
+                                           href="">Billing</a>
+                                        <a class="nav-link {% if app.request.attributes.get('_route') == 'account_security' %}active{% endif %}"
+                                           href="{{ path('account_security') }}">Security</a>
+                                        <a class="nav-link {% if app.request.attributes.get('_route') == 'account_notifications' %}active{% endif %}"
+                                           href="">Notifications</a>
                                     </nav>
                                 </div>
 
-                                <!-- Nested Sidenav Accordion (Pages -> Error)-->
-                                <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#pagesCollapseError" aria-expanded="false" aria-controls="pagesCollapseError">
+                                <!-- Partners Section (now properly nested) -->
+                                <a class="nav-link {% if app.request.attributes.get('_route') in partner_routes %}active{% endif %}"
+                                   href="javascript:void(0);"
+                                   data-bs-toggle="collapse"
+                                   data-bs-target="#pagesCollapsePartners"
+                                   aria-expanded="{% if app.request.attributes.get('_route') in partner_routes %}true{% else %}false{% endif %}"
+                                   aria-controls="pagesCollapsePartners">
                                     Partners
                                     <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                                 </a>
-                                <div class="collapse" id="pagesCollapseError" data-bs-parent="#accordionSidenavPagesMenu">
+                                <div class="collapse {% if app.request.attributes.get('_route') in partner_routes %}show{% endif %}"
+                                     id="pagesCollapsePartners"
+                                     data-bs-parent="#accordionSidenavPagesMenu">
                                     <nav class="sidenav-menu-nested nav">
-                                        <a class="nav-link" href="{{ path('app_partner_index') }}">Partner</a>
-                                        <a class="nav-link" href="error-401.html">401 Error</a>
-                                        <a class="nav-link" href="error-403.html">403 Error</a>
-                                        <a class="nav-link" href="error-404-1.html">404 Error 1</a>
-                                        <a class="nav-link" href="error-404-2.html">404 Error 2</a>
-                                        <a class="nav-link" href="error-500.html">500 Error</a>
-                                        <a class="nav-link" href="error-503.html">503 Error</a>
-                                        <a class="nav-link" href="error-504.html">504 Error</a>
+                                        <a class="nav-link {% if app.request.attributes.get('_route') in ['app_partner_index', 'app_partner_new', 'app_partner_show', 'app_partner_edit'] %}active{% endif %}"
+                                           href="{{ path('app_partner_index') }}">Partners</a>
+                                        <a class="nav-link {% if app.request.attributes.get('_route') in ['app_partnership_index', 'app_partnership_new', 'app_partnership_show', 'app_partnership_edit'] %}active{% endif %}"
+                                           href="{{ path('app_partnership_index') }}">Partnerships</a>
+                                        <a class="nav-link {% if app.request.attributes.get('_route') in ['app_contract_index', 'app_contract_new', 'app_contract_show', 'app_contract_edit'] %}active{% endif %}"
+                                           href="{{ path('app_contract_index') }}">Contracts</a>
                                     </nav>
                                 </div>
                                 <!--Side navbar workshop-->
@@ -100,17 +134,12 @@
                                     <nav class="sidenav-menu-nested nav">
                                         <a class="nav-link" href="knowledge-base-home-1.html">Home 1</a>
                                         <a class="nav-link" href="knowledge-base-home-2.html">Home 2</a>
-                                        <a class="nav-link" href="knowledge-base-category.html">Category</a>
-                                        <a class="nav-link" href="knowledge-base-article.html">Article</a>
                                     </nav>
                                 </div>
                                 <a class="nav-link" href="pricing.html">Pricing</a>
                                 <a class="nav-link" href="{{path('logout')}}">Logout</a>
                             </nav>
                         </div>
-                        <!-- Add the rest of the sidemenu items here -->
-                    </div>
-                </div>
                 <div class="sidenav-footer">
                     <div class="sidenav-footer-content">
                         <div class="sidenav-footer-subtitle">Logged in as:</div>

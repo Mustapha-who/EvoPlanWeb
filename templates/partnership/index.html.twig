@@ -1,29 +1,33 @@
-{% extends 'base.html.twig' %}
+{% extends 'User/base_dashboard.html.twig' %}
 
 {% block title %}Partnerships - EvoPlan{% endblock %}
 
-{% block page_title %}Partnerships{% endblock %}
-
-{% block page_subtitle %}Manage your partnerships{% endblock %}
-
-{% block stylesheets %}
-    {{ parent() }}
-    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
-{% endblock %}
-
-{% block header_actions %}
-    <a href="{{ path('app_partnership_new') }}" class="btn btn-primary lift">
-        <i class="fas fa-plus me-1"></i>
-        Add New Partnership
-    </a>
-{% endblock %}
-
 {% block content %}
-    <div class="card mb-4">
-        <div class="card-header">Partnerships List</div>
-        <div class="card-body">
-            <table id="datatablesSimple" class="table table-striped">
-                <thead>
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">Partnerships</h1>
+                        <div class="page-header-subtitle">Manage your partnerships</div>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <a href="{{ path('app_partnership_new') }}" class="btn btn-white lift">
+                            <i class="fas fa-plus me-1"></i>
+                            Add New Partnership
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Main page content-->
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">Partnerships List</div>
+            <div class="card-body">
+                <table id="datatablesSimple" >
+                    <thead>
                     <tr>
                         <th>Partner</th>
                         <th>Partner Logo</th>
@@ -32,87 +36,62 @@
                         <th>End Date</th>
                         <th>Actions</th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     {% for partnership in partnerships %}
-                    <tr>
-                        <td>{{ partnership.idPartner ? partnership.idPartner.email : '' }}</td>
-                        <td>
-                            {% if partnership.idPartner and partnership.idPartner.logo %}
-                                <img src="{{ asset(partnership.idPartner.logo) }}" alt="Partner logo" style="height: 50px; width: auto;">
-                            {% else %}
-                                No logo
-                            {% endif %}
-                        </td>
-                        <td>{{ partnership.idEvent ? partnership.idEvent.nom : '' }}</td>
-                        <td>{{ partnership.dateDebut ? partnership.dateDebut|date('Y-m-d') : '' }}</td>
-                        <td>{{ partnership.dateFin ? partnership.dateFin|date('Y-m-d') : '' }}</td>
-                        <td>
-                            <div class="d-flex">
-                                <a href="{{ path('app_partnership_show', {'id_partnership': partnership.getId()}) }}" 
-                                   class="btn btn-primary me-1">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{{ path('app_partnership_edit', {'id_partnership': partnership.getId()}) }}"
-                                   class="btn btn-warning me-1">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="#" 
-                                   class="btn btn-danger"
-                                   onclick="if(confirm('Are you sure you want to delete this partnership?')) document.getElementById('delete-form-{{ partnership.getId() }}').submit();">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                                <form id="delete-form-{{ partnership.getId() }}" method="post" action="{{ path('app_partnership_delete', {'id_partnership': partnership.getId()}) }}" style="display: none;">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ partnership.getId()) }}">
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="7" class="text-center">No partnerships found</td>
-                    </tr>
+                        <tr>
+                            <td>{{ partnership.idPartner ? partnership.idPartner.email : '' }}</td>
+                            <td>
+                                {% if partnership.idPartner and partnership.idPartner.logo %}
+                                    <img src="{{ asset(partnership.idPartner.logo) }}" alt="Partner logo" style="height: 50px; width: auto;">
+                                {% else %}
+                                    No logo
+                                {% endif %}
+                            </td>
+                            <td>{{ partnership.idEvent ? partnership.idEvent.nom : '' }}</td>
+                            <td>{{ partnership.dateDebut ? partnership.dateDebut|date('Y-m-d') : '' }}</td>
+                            <td>{{ partnership.dateFin ? partnership.dateFin|date('Y-m-d') : '' }}</td>
+                            <td>
+                                <div class="d-flex">
+                                    <a href="{{ path('app_partnership_show', {'id_partnership': partnership.getId()}) }}"
+                                       class="btn btn-primary btn-sm me-1">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_partnership_edit', {'id_partnership': partnership.getId()}) }}"
+                                       class="btn btn-warning btn-sm me-1">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="#"
+                                       class="btn btn-danger btn-sm"
+                                       onclick="if(confirm('Are you sure you want to delete this partnership?')) document.getElementById('delete-form-{{ partnership.getId() }}').submit();">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    <form id="delete-form-{{ partnership.getId() }}" method="post" action="{{ path('app_partnership_delete', {'id_partnership': partnership.getId()}) }}" style="display: none;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ partnership.getId()) }}">
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+
                     {% endfor %}
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="{{ asset('js/scripts.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+    <script src="{{ asset('js/datatables/datatables-simple-demo.js') }}"></script>
 {% endblock %}
+
+
 
 {% block javascripts %}
     {{ parent() }}
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
     <script>
         window.addEventListener('DOMContentLoaded', event => {
-            // Initialize DataTables
-            const datatablesSimple = document.getElementById('datatablesSimple');
-            if (datatablesSimple) {
-                const dataTable = new simpleDatatables.DataTable(datatablesSimple);
-                
-                // Re-initialize icons after DataTables updates
-                dataTable.on('datatable.init', function() {
-                    if (typeof feather !== 'undefined') {
-                        feather.replace();
-                    }
-                });
-                
-                dataTable.on('datatable.update', function() {
-                    if (typeof feather !== 'undefined') {
-                        feather.replace();
-                    }
-                });
-                
-                dataTable.on('datatable.page', function() {
-                    if (typeof feather !== 'undefined') {
-                        feather.replace();
-                    }
-                });
-            }
-            
-            // Initialize Feather Icons
-            if (typeof feather !== 'undefined') {
-                feather.replace();
-            }
+            feather.replace();
         });
     </script>
 {% endblock %}
