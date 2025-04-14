@@ -42,7 +42,9 @@ class WorkshopType extends AbstractType
                 ->add('instructor', EntityType::class, [
                     'class' => Instructor::class,
                     'choices' => $this->getInstructors(),
-                    'choice_label' => fn(Instructor $i) => (string)$i->getId(),
+                    'choice_label' => function(Instructor $instructor) {
+                        return $instructor->getName(); // Display instructor name
+                    },
                     'placeholder' => 'Select an instructor',
                     'required' => true
                 ])
