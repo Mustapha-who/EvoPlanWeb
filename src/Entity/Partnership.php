@@ -42,9 +42,10 @@ class Partnership
     private ?\DateTimeInterface $date_debut = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Assert\NotNull(message: 'End date is required.')]
     #[Assert\Type("\DateTimeInterface", message: 'Please enter a valid date.')]
     #[Assert\Expression(
-        "this.getDateFin() === null or this.getDateFin() > this.getDateDebut()",
+        "this.getDateFin() > this.getDateDebut()",
         message: "End date must be after start date."
     )]
     private ?\DateTimeInterface $date_fin = null;

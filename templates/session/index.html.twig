@@ -95,7 +95,6 @@
                 <table id="datatablesSimple" class="table table-bordered table-striped table-hover">
                     <thead class="bg-light">
                         <tr>
-                            <th class="text-center">ID Session</th>
                             <th class="text-center">Date</th>
                             <th class="text-center">Start Time</th>
                             <th class="text-center">End Time</th>
@@ -107,7 +106,6 @@
                     <tbody>
                     {% for session in sessions %}
                         <tr>
-                            <td class="text-center">{{ session.id_session }}</td>
                             <td class="text-center">{{ session.date ? session.date|date('m-d-Y') : '' }}</td>
                             <td class="text-center">{{ session.dateheuredeb ? session.dateheuredeb|date('H:i:s') : '' }}</td>
                             <td class="text-center">{{ session.dateheurefin ? session.dateheurefin|date('H:i:s') : '' }}</td>
@@ -156,7 +154,6 @@
                             <table class="modalDatatable table table-bordered table-striped table-hover">
                                 <thead class="bg-light">
                                     <tr>
-                                        <th class="text-center">ID</th>
                                         <th>Name</th>
                                         <th>Email</th>
                                         <th>Phone</th>
@@ -166,7 +163,6 @@
                                 <tbody>
                                 {% for reservation in session.reservationSessions %}
                                     <tr>
-                                        <td class="text-center">{{ reservation.participant.id }}</td>
                                         <td>{{ reservation.participant.name }}</td>
                                         <td>{{ reservation.participant.email }}</td>
                                         <td>{{ reservation.participant.phoneNumber }}</td>

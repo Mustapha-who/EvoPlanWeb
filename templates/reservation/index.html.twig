@@ -3,6 +3,7 @@
 {% block title %}Reservation Management - EvoPlan{% endblock %}
 
 {% block content %}
+    <!-- Header -->
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
         <div class="container-xl px-4">
             <div class="page-header-content pt-4">
@@ -14,8 +15,10 @@
                         </h1>
                         <div class="page-header-subtitle">Manage event reservations</div>
                     </div>
-                    <div class="col-12 col-xl-auto mt-4">
-                        {# Optional: Add action button here if needed #}
+                    <div class="col-12 col-md-auto mt-4">
+                        <a href="{{ path('app_event_index') }}" class="btn btn-light">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Events
+                        </a>
                     </div>
                 </div>
             </div>
@@ -24,47 +27,89 @@
 
     <!-- Main Content -->
     <div class="container-xl px-4 mt-n10">
+        <!-- Capacity Progress Bar Card -->
+        <div class="card mb-4">
+            <div class="card-header">Event Capacity</div>
+            <div class="card-body">
+                {% if reservations|length > 0 %}
+                    {% set event = reservations[0].event %}
+                    {% set reservationCount = reservations|length %}
+                    {% set capacityPercentage = (reservationCount / event.capacite) * 100 %}
+                    <p class="card-text">
+                        {{ reservationCount }} reservations out of {{ event.capacite }} ({{ capacityPercentage|round }}% capacity)
+                    </p>
+
+                    <div class="progress">
+                        <div class="progress-bar
+                            {% if capacityPercentage >= 90 %}bg-danger
+                            {% elseif capacityPercentage >= 75 %}bg-warning
+                            {% else %}bg-success{% endif %}"
+                            role="progressbar"
+                            style="width: {{ capacityPercentage }}%"
+                            aria-valuenow="{{ capacityPercentage }}"
+                            aria-valuemin="0"
+                            aria-valuemax="100">
+                            {{ capacityPercentage|round }}%
+                        </div>
+                    </div>
+
+                    {% if capacityPercentage >= 100 %}
+                        <div class="alert alert-danger mt-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>This event is fully booked!
+                        </div>
+                    {% elseif capacityPercentage >= 90 %}
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-exclamation-circle me-2"></i>This event is almost fully booked!
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <p class="card-text">No reservations found for this event.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Reservation List -->
         <div class="card mb-4">
             <div class="card-header">Reservation List</div>
             <div class="card-body">
                 <table id="datatablesSimple" class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Client Phone</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for reservation in reservations %}
-                        <tr>
-                            <td>{{ reservation.idReservation }}</td>
-                            <td>{{ reservation.client ? reservation.client.phoneNumber : 'N/A' }}</td>
+                   <thead>
+                       <tr>
+                           <th>ID</th>
+                           <th>Client</th>
+                           <th>Email</th>
+                           <th>Téléphone</th>
+                           <th>Événement</th>
+                           <th>Status</th>
+                           <th>Actions</th>
+                       </tr>
+                   </thead>
+                   <tbody>
+                   {% for reservation in reservations %}
+                       <tr>
+                           <td>{{ reservation.idReservation }}</td>
+                           <td>{{ reservation.client ? reservation.client.name : 'N/A' }}</td>
+                           <td>{{ reservation.client ? reservation.client.email : 'N/A' }}</td>
+                           <td>{{ reservation.client ? reservation.client.phoneNumber : 'N/A' }}</td>
+                           <td>{{ reservation.event.nom }}</td>
+                           <td>
+                               {% if reservation.statut.value == 'CONFIRMÉE' %}
+                                   <span class="badge bg-success">{{ reservation.statut.value }}</span>
+                               {% elseif reservation.statut.value == 'ANNULÉE' %}
+                                   <span class="badge bg-danger">{{ reservation.statut.value }}</span>
+                               {% else %}
+                                   <span class="badge bg-warning text-dark">{{ reservation.statut.value }}</span>
+                               {% endif %}
+                           </td>
                             <td>
-                                {% if reservation.statut.value == 'CONFIRMÉE' %}
-                                    <span class="badge bg-success">{{ reservation.statut.value }}</span>
-                                {% elseif reservation.statut.value == 'ANNULÉE' %}
-                                    <span class="badge bg-danger">{{ reservation.statut.value }}</span>
-                                {% else %}
-                                    <span class="badge bg-warning text-dark">{{ reservation.statut.value }}</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div class="d-flex">
-                                    <a href="{{ path('app_reservation_edit', {'id_reservation': reservation.idReservation}) }}"
-                                       class="btn btn-primary btn-sm me-1">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form method="post" class="delete-form"
-                                          action="{{ path('app_reservation_delete', {'id_reservation': reservation.idReservation}) }}"
-                                          style="display: inline-block;">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation.idReservation) }}">
-                                        <button type="submit" class="btn btn-danger btn-sm">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                <form method="post" class="delete-form"
+                                      action="{{ path('app_reservation_delete', {'id_reservation': reservation.idReservation}) }}"
+                                      style="display: inline-block;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation.idReservation) }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     {% else %}

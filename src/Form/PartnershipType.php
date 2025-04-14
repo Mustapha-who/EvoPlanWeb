@@ -76,19 +76,20 @@ class PartnershipType extends AbstractType
             ])
             ->add('date_fin', DateType::class, [
                 'widget' => 'single_text',
-                'label' => 'End Date (Optional)',
+                'label' => 'End Date',
                 'attr' => [
-                    'class' => 'form-control'
+                    'class' => 'form-control',
+                    'data-error-required' => 'End date is required'
                 ],
-                'required' => false,
-                'help' => 'Leave empty for indefinite partnerships',
+                'required' => true,
                 'constraints' => [
+                    new NotBlank(['message' => 'End date is required.']),
                     new Type([
                         'type' => '\DateTimeInterface',
                         'message' => 'Please enter a valid date.'
                     ]),
                     new Expression([
-                        'expression' => 'value === null or (value > this.getParent().get("date_debut").getData())',
+                        'expression' => 'value > this.getParent().get("date_debut").getData()',
                         'message' => 'End date must be after start date.'
                     ])
                 ]
