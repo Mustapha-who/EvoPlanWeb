@@ -38,7 +38,7 @@ class PartnershipController extends AbstractController
                 'id_partner' => $partnership->getIdPartner(),
                 'id_event' => $partnership->getIdEvent()
             ]);
-            
+
             if ($existingPartnership) {
                 // Add error to the form
                 $form->get('id_partner')->addError(new FormError('This partner is already associated with this event.'));
@@ -47,7 +47,7 @@ class PartnershipController extends AbstractController
                     'form' => $form,
                 ]);
             }
-            
+
             // Custom date validation
             if ($partnership->getDateFin() !== null && $partnership->getDateFin() <= $partnership->getDateDebut()) {
                 $form->get('date_fin')->addError(new FormError('End date must be after start date.'));
@@ -56,26 +56,36 @@ class PartnershipController extends AbstractController
                     'form' => $form,
                 ]);
             }
-            
+
             try {
                 $entityManager->persist($partnership);
-                
+
                 // Create a contract automatically
                 $contract = new Contract();
                 $contract->setIdPartnership($partnership);
                 $contract->setIdPartner($partnership->getIdPartner());
                 $contract->setDateDebut($partnership->getDateDebut());
+                
+                // Check if date_fin is null (shouldn't happen with form validation, but as a safeguard)
+                if ($partnership->getDateFin() === null) {
+                    $form->get('date_fin')->addError(new FormError('End date is required.'));
+                    return $this->render('partnership/new.html.twig', [
+                        'partnership' => $partnership,
+                        'form' => $form,
+                    ]);
+                }
+                
                 $contract->setDateFin($partnership->getDateFin());
                 $contract->setTerms($partnership->getTerms());
                 $contract->setStatus('active');
-                
+
                 $entityManager->persist($contract);
                 $entityManager->flush();
 
                 return $this->redirectToRoute('app_partnership_index', [], Response::HTTP_SEE_OTHER);
             } catch (\Exception $e) {
                 // Add a generic error to the form
-                $form->addError(new FormError('An error occurred while creating the partnership.'));
+                $form->addError(new FormError('An error occurred while creating the partnership: ' . $e->getMessage()));
             }
         }
 
@@ -89,7 +99,7 @@ class PartnershipController extends AbstractController
     public function show(int $id_partnership, PartnershipRepository $partnershipRepository): Response
     {
         $partnership = $partnershipRepository->find($id_partnership);
-        
+
         if (!$partnership) {
             throw $this->createNotFoundException('Partnership not found');
         }
@@ -103,14 +113,14 @@ class PartnershipController extends AbstractController
     public function edit(int $id_partnership, Request $request, PartnershipRepository $partnershipRepository, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         $partnership = $partnershipRepository->find($id_partnership);
-        
+
         if (!$partnership) {
             throw $this->createNotFoundException('Partnership not found');
         }
 
         $originalPartner = $partnership->getIdPartner();
         $originalEvent = $partnership->getIdEvent();
-        
+
         $form = $this->createForm(PartnershipType::class, $partnership);
         $form->handleRequest($request);
 
@@ -121,7 +131,7 @@ class PartnershipController extends AbstractController
                     'id_partner' => $partnership->getIdPartner(),
                     'id_event' => $partnership->getIdEvent()
                 ]);
-                
+
                 if ($existingPartnership && $existingPartnership->getIdPartnership() !== $partnership->getIdPartnership()) {
                     $form->get('id_partner')->addError(new FormError('This partner is already associated with this event.'));
                     return $this->render('partnership/edit.html.twig', [
@@ -130,7 +140,7 @@ class PartnershipController extends AbstractController
                     ]);
                 }
             }
-            
+
             // Custom date validation
             if ($partnership->getDateFin() !== null && $partnership->getDateFin() <= $partnership->getDateDebut()) {
                 $form->get('date_fin')->addError(new FormError('End date must be after start date.'));
@@ -139,25 +149,35 @@ class PartnershipController extends AbstractController
                     'form' => $form,
                 ]);
             }
-            
+
             try {
                 // Update the associated contract(s)
                 foreach ($partnership->getContracts() as $contract) {
                     $contract->setIdPartner($partnership->getIdPartner());
                     $contract->setDateDebut($partnership->getDateDebut());
+                    
+                    // Check if date_fin is null (shouldn't happen with form validation, but as a safeguard)
+                    if ($partnership->getDateFin() === null) {
+                        $form->get('date_fin')->addError(new FormError('End date is required.'));
+                        return $this->render('partnership/edit.html.twig', [
+                            'partnership' => $partnership,
+                            'form' => $form,
+                        ]);
+                    }
+                    
                     $contract->setDateFin($partnership->getDateFin());
                     $contract->setTerms($partnership->getTerms());
-                    
+
                     // Explicitly persist each contract
                     $entityManager->persist($contract);
                 }
-                
+
                 $entityManager->flush();
                 $this->addFlash('success', 'Partnership and associated contract(s) updated.');
-                
+
                 return $this->redirectToRoute('app_partnership_index', [], Response::HTTP_SEE_OTHER);
             } catch (\Exception $e) {
-                $form->addError(new FormError('An error occurred while updating the partnership.'));
+                $form->addError(new FormError('An error occurred while updating the partnership: ' . $e->getMessage()));
             }
         }
 
@@ -171,7 +191,7 @@ class PartnershipController extends AbstractController
     public function delete(int $id_partnership, Request $request, PartnershipRepository $partnershipRepository, EntityManagerInterface $entityManager): Response
     {
         $partnership = $partnershipRepository->find($id_partnership);
-        
+
         if (!$partnership) {
             throw $this->createNotFoundException('Partnership not found');
         }
@@ -181,7 +201,7 @@ class PartnershipController extends AbstractController
             // because of cascade = {"remove"} in OneToMany relationship
             $entityManager->remove($partnership);
             $entityManager->flush();
-            
+
             $this->addFlash('success', 'Partnership and associated contract(s) deleted.');
         }
 

@@ -19,13 +19,13 @@
     <div class="row">
         <div class="col-md-6 mb-3">
             {{ form_row(form.date_debut, {
-                'attr': {'placeholder': 'Start date must be today or in the future'},
+                'attr': {'placeholder': 'Start date must be today or in the future', 'required': 'required'},
                 'row_attr': {'class': 'form-field-container'}
             }) }}
         </div>
         <div class="col-md-6 mb-3">
             {{ form_row(form.date_fin, {
-                'attr': {'placeholder': 'Leave empty for indefinite partnerships'},
+                'attr': {'placeholder': 'End date must be after start date', 'required': 'required'},
                 'row_attr': {'class': 'form-field-container'}
             }) }}
         </div>
