@@ -75,11 +75,14 @@ final class SessionController extends AbstractController
     public function edit(Request $request, Session $session, EntityManagerInterface $entityManager): Response
     {
         $workshop_id = $session->getIdWorkshop()?->getid_workshop();
+        $currentParticipantCount = $session->getParticipantCount(); // Store current count
+        
         $form = $this->createForm(SessionType::class, $session);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
+                $session->setParticipantCount($currentParticipantCount); // Preserve the count
                 $entityManager->flush();
                 $this->addFlash('success', 'Session has been updated successfully!');
             } catch (\Exception $e) {
