@@ -284,7 +284,7 @@
                         <form action="{{ path('app_event_home') }}" method="get">
                             <div class="row g-3 align-items-center">
                                 <!-- Filtre par lieu -->
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label class="form-label fw-semibold">Lieu</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
@@ -301,7 +301,7 @@
                                 </div>
 
                                 <!-- Filtre par date -->
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label class="form-label fw-semibold">Date</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
@@ -317,17 +317,18 @@
                                 </div>
 
                                 <!-- Boutons -->
-                                <div class="col-12 mt-3">
-                                    <button type="submit" class="btn btn-primary px-4">
-                                        <i class="fas fa-search me-2"></i>Rechercher
-                                    </button>
-                                    {% if app.request.query.get('lieu') or app.request.query.get('date') %}
-                                        <a href="{{ path('app_event_home') }}" class="btn btn-outline-secondary ms-2">
-                                            Réinitialiser
-                                        </a>
-                                    {% endif %}
+                                <div class="col-md-4 pt-4">  <!-- Ajout de pt-3 pour pousser vers le bas -->
+                                    <div class="d-flex align-items-start">  <!-- Conteneur flex pour les boutons -->
+                                        <button type="submit" class="btn btn-primary px-4">
+                                            <i class="fas fa-search me-2"></i>Rechercher
+                                        </button>
+                                        {% if app.request.query.get('lieu') or app.request.query.get('date') %}
+                                            <a href="{{ path('app_event_home') }}" class="btn btn-outline-secondary ms-2">
+                                                Réinitialiser
+                                            </a>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            </div>
                         </form>
                     </div>
                 </div>
