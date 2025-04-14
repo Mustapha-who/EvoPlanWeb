@@ -75,7 +75,6 @@
                 <table id="datatablesSimple" class="table table-striped">
                    <thead>
                        <tr>
-                           <th>ID</th>
                            <th>Client</th>
                            <th>Email</th>
                            <th>Téléphone</th>
@@ -87,7 +86,6 @@
                    <tbody>
                    {% for reservation in reservations %}
                        <tr>
-                           <td>{{ reservation.idReservation }}</td>
                            <td>{{ reservation.client ? reservation.client.name : 'N/A' }}</td>
                            <td>{{ reservation.client ? reservation.client.email : 'N/A' }}</td>
                            <td>{{ reservation.client ? reservation.client.phoneNumber : 'N/A' }}</td>
