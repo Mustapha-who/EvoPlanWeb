@@ -1,0 +1,162 @@
+{% extends 'User/base_dashboard.html.twig' %}
+
+{% block title %}Add Users{% endblock %}
+
+{% block content %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">New Partner</h1>
+                        <div class="page-header-subtitle">Create a new partner</div>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <a href="{{ path('user_dashboard') }}" class="btn btn-white lift">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to DashBoard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main page content-->
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="userTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{ accountType == 'client' ? 'active' }}" id="client-tab" data-bs-toggle="tab" data-bs-target="#client" type="button" role="tab" aria-controls="client" aria-selected="true">Client</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{ accountType == 'instructor' ? 'active' }}" id="instructor-tab" data-bs-toggle="tab" data-bs-target="#instructor" type="button" role="tab" aria-controls="instructor" aria-selected="false">Instructor</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{ accountType == 'eventplanner' ? 'active' }}" id="eventplanner-tab" data-bs-toggle="tab" data-bs-target="#eventplanner" type="button" role="tab" aria-controls="eventplanner" aria-selected="false">Event Planner</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content mt-4" id="userTabsContent">
+                    <!-- Client Form -->
+                    <div class="tab-pane fade {{ accountType == 'client' ? 'show active' }}" id="client" role="tabpanel" aria-labelledby="client-tab">
+                        <div class="card mb-4">
+                            <div class="card-header">Client Details</div>
+                            <div class="card-body">
+                                {{ form_start(addClientForm, {'action': path('admin_add_user')}) }}
+                                <div class="row gx-3 mb-3">
+                                    <div class="col-md-6">
+                                        {{ form_row(addClientForm.firstName, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form_row(addClientForm.lastName, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                </div>
+                                <div class="row gx-3 mb-3">
+                                    <div class="col-md-6">
+                                        {{ form_row(addClientForm.email, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form_row(addClientForm.phoneNumber, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                </div>
+                                <div class="row gx-3 mb-3">
+                                    <div class="col-md-6">
+                                        {{ form_row(addClientForm.password, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form_row(addClientForm.confirmPassword, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Add Client</button>
+                                {{ form_end(addClientForm) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instructor Form -->
+                    <div class="tab-pane fade {{ accountType == 'instructor' ? 'show active' }}" id="instructor" role="tabpanel" aria-labelledby="instructor-tab">
+                        <div class="card mb-4">
+                            <div class="card-header">Instructor Details</div>
+                            <div class="card-body">
+                                {{ form_start(addInstructorForm) }}
+                                <div class="row gx-3 mb-3">
+                                    <div class="col-md-6">
+                                        {{ form_row(addInstructorForm.firstName, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form_row(addInstructorForm.lastName, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                </div>
+                                <div class="row gx-3 mb-3">
+                                    <div class="col-md-6">
+                                        {{ form_row(addInstructorForm.email, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form_row(addInstructorForm.certificate, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                </div>
+                                <div class="row gx-3 mb-3">
+                                    <div class="col-md-6">
+                                        {{ form_row(addInstructorForm.password, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form_row(addInstructorForm.confirmPassword, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Add Instructor</button>
+                                {{ form_end(addInstructorForm) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Event Planner Form -->
+                    <div class="tab-pane fade {{ accountType == 'eventplanner' ? 'show active' }}" id="eventplanner" role="tabpanel" aria-labelledby="eventplanner-tab">
+                        <div class="card mb-4">
+                            <div class="card-header">Event Planner Details</div>
+                            <div class="card-body">
+                                {{ form_start(addEventPlannerForm) }}
+                                <div class="row gx-3 mb-3">
+                                    <div class="col-md-6">
+                                        {{ form_row(addEventPlannerForm.firstName, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form_row(addEventPlannerForm.lastName, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                </div>
+                                <div class="row gx-3 mb-3">
+                                    <div class="col-md-6">
+                                        {{ form_row(addEventPlannerForm.email, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form_row(addEventPlannerForm.specialization, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                </div>
+                                <div class="row gx-3 mb-3">
+                                    <div class="col-md-12">
+                                        <label class="mb-3">Assigned Module</label>
+                                        <div class="d-flex flex-row gap-3">
+                                            {{ form_widget(addEventPlannerForm.assignedModule) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row gx-3 mb-3">
+                                    <div class="col-md-6">
+                                        {{ form_row(addEventPlannerForm.password, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form_row(addEventPlannerForm.confirmPassword, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Add Event Planner</button>
+                                {{ form_end(addEventPlannerForm) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

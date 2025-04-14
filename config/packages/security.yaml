@@ -18,6 +18,7 @@ security:
             security: false
 
         main:
+            access_denied_handler: App\Controller\UserModule\AccessDeniedController
             lazy: true
             provider: app_user_provider
             form_login:
@@ -32,29 +33,33 @@ security:
             remember_me:
                 secret: '%kernel.secret%'
                 lifetime: 604800 # 1 week in seconds
-                path: /
+                path: user_dashboard
                 always_remember_me: true
             logout:
                 path: logout
                 target: login
                 invalidate_session: true
 
+
     access_control:
+        - { path: ^/signup, roles: PUBLIC_ACCESS }
+        - { path: ^/tosignup, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/login_check, roles: PUBLIC_ACCESS }
         - { path: ^/logout, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admindashboard, roles: ROLE_ADMIN }
         - { path: ^/eventplanner, roles: ROLE_EVENTPLANNER }
         - { path: ^/instructor, roles: ROLE_INSTRUCTOR }
-        - { path: ^/sidenav/userdash, roles: [ROLE_ADMIN,ROLE_EVENTPLANNER,ROLE_CLIENT,ROLE_INSTRUCTOR]}
-        - { path: ^/user/profile, roles: [ROLE_ADMIN,ROLE_EVENTPLANNER,ROLE_CLIENT,ROLE_INSTRUCTOR] }
-        - { path: ^/sidenav/profile, roles: [ROLE_ADMIN,ROLE_EVENTPLANNER,ROLE_CLIENT,ROLE_INSTRUCTOR] }
-        - { path: ^/user/account_security, roles: [ROLE_ADMIN,ROLE_EVENTPLANNER,ROLE_CLIENT,ROLE_INSTRUCTOR]}
-        - { path: ^/, roles: [ROLE_ADMIN,ROLE_EVENTPLANNER,ROLE_CLIENT,ROLE_INSTRUCTOR] }
-        - { path: ^/register, roles: PUBLIC_ACCESS }
-        - { path: ^/toregister, roles: PUBLIC_ACCESS }
-        - { path: ^/app_home, roles: [ROLE_ADMIN,ROLE_EVENTPLANNER,ROLE_CLIENT,ROLE_INSTRUCTOR] }
-
+        - { path: ^/event/home, roles: ROLE_CLIENT }
+        - { path: ^/partner, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER ] }
+        - { path: ^/workshop, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_INSTRUCTOR ] }
+        - { path: ^/session, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_INSTRUCTOR ] }
+        - { path: ^/sidenav/userdash, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
+        - { path: ^/user/profile, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
+        - { path: ^/sidenav/profile, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
+        - { path: ^/user/account_security, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
+        - { path: ^/app_home, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
+        - { path: ^/, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
 when@test:
     security:
         password_hashers:
