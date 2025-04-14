@@ -39,7 +39,6 @@
                 <table id="datatablesSimple" class="table table-striped">
                     <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Image</th>
                         <th>Name</th>
                         <th>Start Date</th>
@@ -52,7 +51,6 @@
                     <tbody>
                     {% for event in events %}
                         <tr>
-                            <td>{{ event.id_event }}</td>
                             <td>
                                 {% if event.imageEvent %}
                                     <img src="{{ asset('uploads/' ~ event.imageEvent) }}" alt="Event Image" width="60" height="60" class="rounded">

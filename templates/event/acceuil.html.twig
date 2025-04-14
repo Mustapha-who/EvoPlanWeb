@@ -1,139 +1,360 @@
-{% extends 'User/base_dashboard.html.twig' %}
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="Evoplan - Plateforme d'organisation d'événements dans le domaine de la santé" />
+        <meta name="author" content="" />
+        <title>Evoplan - Événements de santé</title>
+        <link href="{{ asset('css/styles.css') }}" rel="stylesheet" />
+        <link rel="icon" type="image/x-icon" href="assets/img/favicon.png" />
+        <script data-search-pseudo-elements defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/feather.min.js" crossorigin="anonymous"></script>
+        <style>
+            /* Styles existants conservés */
+            .navbar-brand img {
+                height: 60px;
+                width: auto;
+                margin-right: 15px;
+            }
 
-{% block title %}
-    Accueil - Dashboard
-{% endblock %}
+            /* Nouveaux styles pour la section événements */
+            #upcoming-events {
+                scroll-margin-top: 100px;
+                background: linear-gradient(to bottom, #f8f9fc 0%, #ffffff 100%);
+                padding: 4rem 0;
+                position: relative;
+            }
 
-{% block content %}
-    <section class="hero-section py-10 py-lg-5" style="background: linear-gradient(135deg, #f8f9fc 0%, #e9f0ff 100%);">
-        <div class="container px-4">
-            <div class="hero-card bg-white p-4 p-md-5 rounded-4 shadow-lg overflow-hidden position-relative">
-                <!-- Élément décoratif -->
-                <div class="position-absolute top-0 end-0 w-100 h-100 bg-primary-soft opacity-10 rounded-4"
-                     style="clip-path: polygon(100% 0, 100% 100%, 30% 100%); z-index: 0;"></div>
+            #upcoming-events::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 10px;
+                background: linear-gradient(90deg, #007bff, #00b4ff);
+            }
 
-                <div class="row align-items-center g-4 g-lg-5 position-relative" style="z-index: 1;">
-                    <!-- Texte à gauche -->
-                    <div class="col-lg-6 pe-lg-5">
-                        <h2 class="text-gradient-primary fw-bold mb-3" style="font-size: 1.75rem;">
-                            Pour ceux qui <span class="text-primary">aiment</span>
-                        </h2>
-                        <h1 class="display-4 fw-bold text-dark mb-4" style="line-height: 1.2;">
-                            Prendre soin de leur <span class="text-primary">santé</span>
-                        </h1>
-                        <p class="lead text-muted mb-4 mb-lg-5" style="font-size: 1.25rem;">
-                            Découvrez des événements bien-être, santé, nutrition, fitness et plus près de chez vous.
-                        </p>
+            .events-header {
+                text-align: center;
+                margin-bottom: 3rem;
+            }
 
-                        <div class="d-flex flex-wrap gap-3">
-                            <a href="#upcoming-events" class="btn btn-primary btn-lg px-4 px-lg-5 py-3 rounded-pill fw-bold" id="explore-events-btn">
-                                <i class="fas fa-calendar-alt me-2"></i>Explorer les événements
-                            </a>
+            .events-header h2 {
+                font-size: 2.5rem;
+                font-weight: 700;
+                color: #2c3e50;
+                position: relative;
+                display: inline-block;
+                margin-bottom: 1rem;
+            }
+
+            .events-header h2::after {
+                content: '';
+                position: absolute;
+                bottom: -10px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 80px;
+                height: 4px;
+                background: #007bff;
+                border-radius: 2px;
+            }
+
+            .events-header p {
+                color: #6c757d;
+                font-size: 1.1rem;
+                max-width: 700px;
+                margin: 0 auto;
+            }
+
+            .event-card-enhanced {
+                border: none;
+                border-radius: 12px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+                height: 100%;
+                position: relative;
+                background: white;
+            }
+
+            .event-card-enhanced:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 30px rgba(0, 86, 179, 0.15);
+            }
+
+            .event-card-enhanced .card-img-top {
+                height: 200px;
+                object-fit: cover;
+                transition: transform 0.5s ease;
+            }
+
+            .event-card-enhanced:hover .card-img-top {
+                transform: scale(1.05);
+            }
+
+            .event-card-enhanced .card-body {
+                padding: 1.5rem;
+            }
+
+            .event-card-enhanced .event-badge {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                padding: 0.35rem 0.75rem;
+                border-radius: 50px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            .event-card-enhanced .card-title {
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin-bottom: 0.75rem;
+                color: #2c3e50;
+            }
+
+            .event-card-enhanced .event-meta {
+                display: flex;
+                align-items: center;
+                margin-bottom: 0.5rem;
+                color: #6c757d;
+                font-size: 0.9rem;
+            }
+
+            .event-card-enhanced .event-meta i {
+                margin-right: 0.5rem;
+                width: 20px;
+                text-align: center;
+                color: #007bff;
+            }
+
+            .event-card-enhanced .card-text {
+                color: #6c757d;
+                margin-bottom: 1.5rem;
+                font-size: 0.95rem;
+            }
+
+            .event-card-enhanced .event-footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding-top: 1rem;
+                border-top: 1px solid #eee;
+            }
+
+            .event-card-enhanced .event-participants {
+                background: #f8f9fa;
+                padding: 0.25rem 0.75rem;
+                border-radius: 50px;
+                font-size: 0.8rem;
+                font-weight: 500;
+                color: #495057;
+            }
+
+            .view-all-btn {
+                display: block;
+                text-align: center;
+                margin-top: 3rem;
+            }
+
+            .view-all-btn .btn {
+                padding: 0.75rem 2rem;
+                font-weight: 600;
+                border-radius: 50px;
+                box-shadow: 0 5px 15px rgba(0, 123, 255, 0.2);
+            }
+        </style>
+    </head>
+    <body class="nav-fixed">
+       <nav class="topnav navbar navbar-expand-lg navbar-light bg-white shadow">
+            <div class="container-fluid justify-content-between">
+                <!-- Logo -->
+                <a class="navbar-brand d-flex align-items-center pe-3 ps-3" href="index.html">
+                    <img src={{ asset('assets/img/hexatech.png') }} alt="Evoplan Logo" class="me-2" style="height: 60px;" />
+                    <span class="h3 mb-0 text-primary">Evoplan</span>
+                </a>
+
+                <!-- Liens principaux centrés -->
+                <div class="mx-auto">
+                    <ul class="navbar-nav flex-row gap-4">
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold fs-5 text-dark" href="{{ path('app_event_home') }}">Accueil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold fs-5 text-dark" href="feedback.html">Feedback</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold fs-5 text-dark" href="report.html">Report</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Menu utilisateur -->
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link text-secondary" href="#!">Help Center</a>
+                    </li>
+                    <li class="nav-item dropdown no-caret dropdown-user me-3 me-lg-4">
+                        <a class="btn btn-icon btn-transparent-dark dropdown-toggle" id="navbarDropdownUserImage" href="javascript:void(0);" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <img class="img-fluid rounded-circle" src={{ asset('assets/img/illustrations/profiles/profile-1.png')}} />
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end border-0 shadow animated--fade-in-up" aria-labelledby="navbarDropdownUserImage">
+                            <h6 class="dropdown-header d-flex align-items-center">
+                                <img class="dropdown-user-img" src={{ asset('assets/img/illustrations/profiles/profile-1.png')}} />
+                                <div class="dropdown-user-details">
+                                    <div class="dropdown-user-details-name">Utilisateur</div>
+                                    <div class="dropdown-user-details-email">user@example.com</div>
+                                </div>
+                            </h6>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{path ('user_profile')}}"><i data-feather="user"></i> Mon profil</a>
+                            <a class="dropdown-item" href="#!"><i data-feather="calendar"></i> Mes événements</a>
+                            <a class="dropdown-item" href="#!"><i data-feather="settings"></i> Paramètres</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{path('logout')}}"><i data-feather="log-out"></i> Déconnexion</a>
                         </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main>
+            <!-- Hero Section améliorée -->
+            <section class="hero-section py-10 py-lg-5" style="background: linear-gradient(135deg, #f8f9fc 0%, #e9f0ff 100%);">
+                <div class="container px-4">
+                    <div class="hero-card bg-white p-4 p-md-5 rounded-4 shadow-lg overflow-hidden position-relative">
+            <!-- Élément décoratif -->
+            <div class="position-absolute top-0 end-0 w-100 h-100 bg-primary-soft opacity-10 rounded-4"
+                 style="clip-path: polygon(100% 0, 100% 100%, 30% 100%); z-index: 0;"></div>
+
+            <div class="row align-items-center g-4 g-lg-5 position-relative" style="z-index: 1;">
+                <!-- Texte à gauche -->
+                <div class="col-lg-6 pe-lg-5">
+                    <h2 class="text-gradient-primary fw-bold mb-3" style="font-size: 1.75rem;">
+                        Pour ceux qui <span class="text-primary">aiment</span>
+                    </h2>
+                    <h1 class="display-4 fw-bold text-dark mb-4" style="line-height: 1.2;">
+                        Prendre soin de leur <span class="text-primary">santé</span>
+                    </h1>
+                    <p class="lead text-muted mb-4 mb-lg-5" style="font-size: 1.25rem;">
+                        Découvrez des événements bien-être, santé, nutrition, fitness et plus près de chez vous.
+                    </p>
+
+                   <div class="d-flex flex-wrap gap-3">
+                            <a href="#upcoming-events" class="btn btn-primary btn-lg px-4 px-lg-5 py-3 rounded-pill fw-bold" id="explore-events-btn">
+                            <i class="fas fa-calendar-alt me-2"></i>Explorer les événements
+                        </a>
 
                     </div>
 
-                    <!-- Image à droite -->
-                    <div class="col-lg-6 text-center">
-                        <div class="position-relative">
-                            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-                                 alt="Événement santé"
-                                 class="img-fluid rounded-4 shadow-lg"
-                                 style="max-height: 500px; object-fit: cover; border: 8px solid white;" />
-                            <div class="position-absolute bottom-0 start-0 bg-white p-3 rounded-3 shadow-sm ms-4 mb-4">
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-primary-soft p-2 rounded-3 me-3">
-                                        <i class="fas fa-calendar-check text-primary fs-4"></i>
+               </div>
+
+                <!-- Image à droite -->
+                <div class="col-lg-6 text-center">
+                    <div class="position-relative">
+                        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+                             alt="Événement santé"
+                             class="img-fluid rounded-4 shadow-lg"
+                             style="max-height: 500px; object-fit: cover; border: 8px solid white;" />
+                        <div class="position-absolute bottom-0 start-0 bg-white p-3 rounded-3 shadow-sm ms-4 mb-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary-soft p-2 rounded-3 me-3">
+                                    <i class="fas fa-calendar-check text-primary fs-4"></i>
+                                </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+            <!-- Contenu principal -->
+            <div class="container-xl px-4 mt-5">
+                <!-- Filtres améliorés -->
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-body py-4">
+                        <h5 class="card-title text-dark mb-4">Trouver l'événement parfait</h5>
+                        <form action="{{ path('app_event_home') }}" method="get">
+                            <div class="row g-3 align-items-center">
+                                <!-- Filtre par lieu -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Lieu</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                        <select name="lieu" class="form-select">
+                                            <option value="">Tous les lieux</option>
+                                            {% for lieu in lieux %}
+                                                <option value="{{ lieu.value }}"
+                                                    {% if app.request.query.get('lieu') == lieu.value %}selected{% endif %}>
+                                                    {{ lieu.value }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+
+                                <!-- Filtre par date -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Date</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                        <select name="date" class="form-select">
+                                            <option value="">Toutes les dates</option>
+                                            <option value="today" {% if app.request.query.get('date') == 'today' %}selected{% endif %}>Aujourd'hui</option>
+                                            <option value="tomorrow" {% if app.request.query.get('date') == 'tomorrow' %}selected{% endif %}>Demain</option>
+                                            <option value="week" {% if app.request.query.get('date') == 'week' %}selected{% endif %}>Cette semaine</option>
+                                            <option value="weekend" {% if app.request.query.get('date') == 'weekend' %}selected{% endif %}>Ce week-end</option>
+                                            <option value="month" {% if app.request.query.get('date') == 'month' %}selected{% endif %}>Ce mois-ci</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Boutons -->
+                                <div class="col-md-4 pt-4">  <!-- Ajout de pt-3 pour pousser vers le bas -->
+                                    <div class="d-flex align-items-start">  <!-- Conteneur flex pour les boutons -->
+                                        <button type="submit" class="btn btn-primary px-4">
+                                            <i class="fas fa-search me-2"></i>Rechercher
+                                        </button>
+                                        {% if app.request.query.get('lieu') or app.request.query.get('date') %}
+                                            <a href="{{ path('app_event_home') }}" class="btn btn-outline-secondary ms-2">
+                                                Réinitialiser
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                        </form>
                     </div>
                 </div>
-            </div>
-        </div>
 
-    </section>
-    <!-- Contenu principal -->
-    <div class="container-xl px-4 mt-5">
-        <!-- Filtres améliorés -->
-        <div class="card mb-4 border-0 shadow-sm">
-            <div class="card-body py-4">
-                <h5 class="card-title text-dark mb-4">Trouver l'événement parfait</h5>
-                <form action="{{ path('app_event_home') }}" method="get">
-                    <div class="row g-3 align-items-center">
-                        <!-- Filtre par lieu -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Lieu</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                <select name="lieu" class="form-select">
-                                    <option value="">Tous les lieux</option>
-                                    {% for lieu in lieux %}
-                                        <option value="{{ lieu.value }}"
-                                                {% if app.request.query.get('lieu') == lieu.value %}selected{% endif %}>
-                                            {{ lieu.value }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Filtre par date -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Date</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                                <select name="date" class="form-select">
-                                    <option value="">Toutes les dates</option>
-                                    <option value="today" {% if app.request.query.get('date') == 'today' %}selected{% endif %}>Aujourd'hui</option>
-                                    <option value="tomorrow" {% if app.request.query.get('date') == 'tomorrow' %}selected{% endif %}>Demain</option>
-                                    <option value="week" {% if app.request.query.get('date') == 'week' %}selected{% endif %}>Cette semaine</option>
-                                    <option value="weekend" {% if app.request.query.get('date') == 'weekend' %}selected{% endif %}>Ce week-end</option>
-                                    <option value="month" {% if app.request.query.get('date') == 'month' %}selected{% endif %}>Ce mois-ci</option>
-                                </select>
-                            </div>
-                        </div>
-
-
-                        <!-- Boutons -->
-                        <div class="col-12 mt-3">
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="fas fa-search me-2"></i>Rechercher
-                            </button>
-                            {% if app.request.query.get('lieu') or app.request.query.get('date') %}
-                                <a href="{{ path('app_event_home') }}" class="btn btn-outline-secondary ms-2">
-                                    Réinitialiser
-                                </a>
-                            {% endif %}
-                        </div>
+               <!-- Section Événements à venir améliorée -->
+            <section id="upcoming-events">
+                <div class="container-xl px-4">
+                    <div class="events-header">
+                        <p>Découvrez nos prochains événements dans le domaine de la santé et du bien-être</p>
                     </div>
-                </form>
-            </div>
-        </div>
 
-        <!-- Section Événements à venir améliorée -->
-        <section id="upcoming-events">
-            <div class="container-xl px-4">
-                <div class="events-header">
-                    <p>Découvrez nos prochains événements dans le domaine de la santé et du bien-être</p>
-                </div>
-
-                <div class="row g-4">
-                    {% for event in events %}
+                    <div class="row g-4">
+                        {% for event in events %}
                         <div class="col-lg-4 col-md-6">
                             <div class="event-card-enhanced">
                                 <div class="position-relative overflow-hidden">
                                     {% if event.imageEvent %}
-                                        <img src="{{ asset('uploads/' ~ event.imageEvent) }}" class="card-img-top" alt="{{ event.nom }}">
+                                         <img src="{{ asset('uploads/' ~ event.imageEvent) }}" class="card-img-top" alt="{{ event.nom }}">
                                     {% else %}
-                                        <span class="text-muted">No Image</span>
-                                    {% endif %}
+                                         <span class="text-muted">No Image</span>
+                                   {% endif %}
                                     <span class="event-badge
-                                    {% if event.statut.value == 'DISPONIBLE' %}bg-success-soft text-success
-                                    {% else %}bg-danger-soft text-danger{% endif %}">
-                                    {{ event.statut.value }}
-                                </span>
+                                        {% if event.statut.value == 'DISPONIBLE' %}bg-success-soft text-success
+                                        {% else %}bg-danger-soft text-danger{% endif %}">
+                                        {{ event.statut.value }}
+                                    </span>
                                 </div>
                                 <div class="card-body">
                                     <h3 class="card-title">{{ event.nom }}</h3>
@@ -146,23 +367,383 @@
                                         <span class="fs-6">{{ event.lieu.value }}</span>
                                     </div>
                                     <div class="event-footer">
-                                    <span class="event-participants">
-                                        <i class="fas fa-euro-sign me-1"></i>
-                                        {{ event.prix }}
-                                    </span>
+                                        <span class="event-participants">
+                                            <i class="fas fa-euro-sign me-1"></i>  <!-- Changé l'icône pour € au lieu de users -->
+                                            {{ event.prix }}  <!-- Supposant que la propriété est "prix" -->
+                                        </span>
                                         <a href="{{ path('app_event_show', {'id_event': event.id_Event}) }}" class="btn btn-sm btn-primary rounded-pill px-3">S'inscrire</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    {% else %}
+                        {% else %}
                         <div class="col-12">
                             <div class="alert alert-info text-center">Aucun événement disponible pour le moment.</div>
                         </div>
-                    {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+            <div class="my-10"></div>
+            </div>
+        </main>
+
+        <!-- Footer stylé avec cadre -->
+<footer class="footer-styled">
+    <div class="footer-container">
+        <div class="footer-content">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <div class="brand-logo">
+                        <img src="assets/img/hexatech.png" alt="Evoplan Logo">
+                        <span>Evoplan</span>
+                    </div>
+                    <p class="footer-description">
+                        Plateforme premium d'organisation d'événements dans le domaine de la santé.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-links">
+                    <div class="links-column">
+                        <h5 class="links-title">Navigation</h5>
+                        <ul>
+                            <li><a href="#">Accueil</a></li>
+                            <li><a href="#">Événements</a></li>
+                            <li><a href="#">Catégories</a></li>
+                            <li><a href="#">Organisateurs</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="links-column">
+                        <h5 class="links-title">Entreprise</h5>
+                        <ul>
+                            <li><a href="#">À propos</a></li>
+                            <li><a href="#">Carrières</a></li>
+                            <li><a href="#">Presse</a></li>
+                            <li><a href="#">Blog</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="links-column">
+                        <h5 class="links-title">Support</h5>
+                        <ul>
+                            <li><a href="#">Centre d'aide</a></li>
+                            <li><a href="#">Sécurité</a></li>
+                            <li><a href="#">Confidentialité</a></li>
+                            <li><a href="#">Contact</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="newsletter-column">
+                        <h5 class="links-title">Newsletter</h5>
+                        <p>Recevez les derniers événements directement dans votre boîte mail.</p>
+                        <form class="newsletter-form">
+                            <div class="input-group">
+                                <input type="email" placeholder="Votre email">
+                                <button type="submit">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                        <div class="contact-info">
+                            <i class="fas fa-phone-alt"></i>
+                            <span>+33 1 23 45 67 89</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </section>
-        <div class="my-10"></div>
+
+            <div class="footer-bottom">
+                <div class="copyright">
+                    &copy; 2023 Evoplan. Tous droits réservés.
+                </div>
+                <div class="legal-links">
+                    <a href="#">Politique de confidentialité</a>
+                    <span>•</span>
+                    <a href="#">Conditions d'utilisation</a>
+                    <span>•</span>
+                    <a href="#">Mentions légales</a>
+                </div>
+            </div>
+        </div>
     </div>
-{% endblock %}
+</footer>
+
+<style>
+.footer-styled {
+    background: linear-gradient(135deg, #2c3e50 0%, #1a2530 100%);
+    color: #fff;
+    padding: 60px 0 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.footer-styled::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4e54c8, #8f94fb);
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.footer-content {
+    position: relative;
+    z-index: 1;
+}
+
+.footer-top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    margin-bottom: 50px;
+}
+
+.footer-brand {
+    flex: 1;
+    min-width: 250px;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.brand-logo img {
+    height: 40px;
+    margin-right: 15px;
+}
+
+.brand-logo span {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.footer-description {
+    color: #b3b3b3;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.social-links {
+    display: flex;
+    gap: 15px;
+}
+
+.social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+    background: #4e54c8;
+    transform: translateY(-3px);
+}
+
+.footer-links {
+    flex: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+.links-column {
+    min-width: 150px;
+}
+
+.links-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #fff;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.links-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: #4e54c8;
+}
+
+.links-column ul {
+    list-style: none;
+    padding: 0;
+}
+
+.links-column li {
+    margin-bottom: 12px;
+}
+
+.links-column a {
+    color: #b3b3b3;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-size: 15px;
+}
+
+.links-column a:hover {
+    color: #fff;
+}
+
+.newsletter-column {
+    min-width: 250px;
+}
+
+.newsletter-column p {
+    color: #b3b3b3;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.newsletter-form .input-group {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.newsletter-form input {
+    flex: 1;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 4px 0 0 4px;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+}
+
+.newsletter-form input::placeholder {
+    color: #b3b3b3;
+}
+
+.newsletter-form button {
+    padding: 0 20px;
+    background: #4e54c8;
+    color: #fff;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.newsletter-form button:hover {
+    background: #3a41c0;
+}
+
+.contact-info {
+    display: flex;
+    align-items: center;
+    color: #b3b3b3;
+    gap: 10px;
+}
+
+.footer-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.copyright {
+    color: #b3b3b3;
+    font-size: 14px;
+}
+
+.legal-links {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.legal-links a {
+    color: #b3b3b3;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.legal-links a:hover {
+    color: #fff;
+}
+
+.legal-links span {
+    color: #b3b3b3;
+}
+
+@media (max-width: 768px) {
+    .footer-top {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .footer-links {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+}
+</style>
+ <script>
+            // Animation de scroll fluide
+            document.getElementById('explore-events-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                const eventsSection = document.getElementById('upcoming-events');
+                window.scrollTo({
+                    top: eventsSection.offsetTop - 90, // Ajustez selon la hauteur de votre navbar
+                    behavior: 'smooth'
+                });
+            });
+        </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+        <script src="js/scripts.js"></script>
+        <script>
+            // Active les tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
+            // Active les popovers
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl)
+            });
+
+            // Active les feather icons
+            feather.replace();
+        </script>
+      </body>
+</html>
