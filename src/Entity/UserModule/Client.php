@@ -22,5 +22,9 @@ class Client extends User
 
         return $this;
     }
+    public function getRoles(): array
+    {
+        return ['ROLE_CLIENT'];
+    }
 
 }

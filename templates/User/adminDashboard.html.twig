@@ -124,8 +124,18 @@
         </div>
         <!-- Example DataTable for Dashboard Demo-->
         <div class="card mb-4">
-            <div class="card-header">Extended DataTables</div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>User Management</span>
+                <button class="btn btn-primary mb-3" id="addUserButton" onclick="window.location.href='{{ path('admin_add_user') }}'">
+                    Add User
+                </button>
+            </div>
+
+
             <div class="card-body">
+
+
+
                 <table id="datatablesSimple">
                     <thead>
                     <tr>
@@ -150,8 +160,9 @@
                             <td>{{ user.name }}</td>
                             <td>{{ user.role|join(', ') }}</td>
                             <td>
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUserModal" data-url="{{ path('admin_edit_user', {id: user.id}) }}">
-                                    Edit
+                                <button type="button" class="btn btn-datatable btn-icon btn-transparent-dark" data-bs-toggle="modal" onclick="window.location.href='{{ path('admin_edit_user', {id: user.id}) }}'">
+
+                                    <i data-feather="edit"></i>
                                 </button>
                                 <button class="btn btn-datatable btn-icon btn-transparent-dark">
                                     <i data-feather="trash-2"></i>
@@ -160,20 +171,6 @@
                         </tr>
 
 
-
-                        <div class="modal fade" id="editUserModal" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Edit User</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p>Loading...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     {% endfor %}
                     </tbody>
 
@@ -181,48 +178,13 @@
             </div>
         </div>
 
-        <!-- Modal -->
+
 
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="{{ asset('js/scripts.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
     <script src="{{ asset('js/datatables/datatables-simple-demo.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const modal = document.getElementById('editUserModal');
 
-            modal.addEventListener('show.bs.modal', function (event) {
-                // Get the button that triggered the modal
-                const button = event.relatedTarget;
-
-                // Get the URL from the button's data-url attribute
-                const url = button.getAttribute('data-url');
-
-                // Get the modal body element
-                const modalBody = modal.querySelector('.modal-body');
-
-                if (url && modalBody) {
-                    // Show a loading message
-                    modalBody.innerHTML = '<p>Loading...</p>';
-
-                    // Fetch the form content via AJAX
-                    fetch(url)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.text();
-                        })
-                        .then(html => {
-                            modalBody.innerHTML = html;
-                        })
-                        .catch(error => {
-                            modalBody.innerHTML = `<p class="text-danger">Error loading content: ${error.message}</p>`;
-                        });
-                }
-            });
-        });
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 {% endblock %}
