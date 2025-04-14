@@ -92,12 +92,11 @@
                 <table id="datatablesSimple" class="table table-bordered table-striped table-hover">
                     <thead class="bg-light">
                         <tr>
-                            <th class="text-center">ID Workshop</th>
                             <th>Title</th>
                             <th>Date</th>
                             <th>End Date</th>
                             <th>Instructor</th>
-                            <th>ID_Event</th>
+                            <th>Event</th>
                             <th class="text-center">Capacity</th>
                             <th>Location</th>
                             <th>Description</th>
@@ -108,12 +107,11 @@
                     <tbody>
                     {% for workshop in workshops %}
                         <tr>
-                            <td class="text-center" style="width: 5px;">{{ workshop.id_workshop }}</td>
                             <td>{{ workshop.title }}</td>
                             <td>{{ workshop.date ? workshop.date|date('m-d-Y') : '' }}</td>
                             <td>{{ workshop.enddate ? workshop.enddate|date('m-d-Y') : '' }}</td>
-                            <td>{{ workshop.instructor ? workshop.instructor.id ~ ' - ' ~ workshop.instructor.name }}</td>
-                            <td>{{ workshop.Idevent ? workshop.Idevent.id_event ~ ' - ' ~ workshop.Idevent.nom : '' }}</td>
+                            <td>{{ workshop.instructor ? workshop.instructor.name }}</td>
+                            <td>{{ workshop.Idevent ? workshop.Idevent.nom : '' }}</td>
                             <td class="text-center">{{ workshop.capacity }}</td>
                             <td>{{ workshop.location }}</td>
                             <td style="max-width: 300px; white-space: normal; word-wrap: break-word;">

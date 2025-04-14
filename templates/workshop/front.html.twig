@@ -192,11 +192,13 @@
         <div class="container px-5">
             <div class="row gx-5 align-items-center">
                 <div class="col-lg-7">
+                    <!-- Back Button-->
+                    <a href="{{ path('app_event_show', {'id_event': event_id}) }}" 
+                       class="btn btn-light mb-4 d-inline-flex align-items-center">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Event
+                    </a>
                     <h1 class="hero-title">Discover Our Expert-Led Workshops</h1>
                     <p class="hero-subtitle">Join our interactive sessions designed to enhance your skills and knowledge in healthcare. Learn from industry experts and connect with peers.</p>
-                    <a href="#workshops" class="btn btn-light btn-lg px-5 py-3 rounded-pill">
-                        <i class="fas fa-search me-2"></i>Browse Workshops
-                    </a>
                 </div>
             </div>
         </div>
