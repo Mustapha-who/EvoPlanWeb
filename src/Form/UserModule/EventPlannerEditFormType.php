@@ -45,6 +45,7 @@ class EventPlannerEditFormType extends AbstractType
                 'expanded' => true, // Renders as radio buttons
                 'multiple' => false, // Ensures single selection
                 'label' => 'Assigned Module',
+                'attr' => ['class' => 'd-flex flex-row gap-3'],
             ])
             ->add('originalEmail', HiddenType::class, [
                 'mapped' => false,

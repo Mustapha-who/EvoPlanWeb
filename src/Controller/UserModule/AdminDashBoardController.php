@@ -7,9 +7,14 @@ use App\Entity\UserModule\Client;
 use App\Entity\UserModule\EventPlanner;
 use App\Entity\UserModule\Instructor;
 use App\Entity\UserModule\UserDTO;
+use App\Form\UserModule\adminAddClientFormType;
+use App\Form\UserModule\adminAddEventPlannerFormType;
+use App\Form\UserModule\adminAddInstructorFormType;
+use App\Form\UserModule\ClientRegistrationFormType;
 use App\Form\UserModule\ClientUpdateFormType;
 use App\Form\UserModule\EventPlannerEditFormType;
 use App\Form\UserModule\InstructorEditFormType;
+use App\Form\UserModule\InstructorRegistrationFormType;
 use App\Service\UserModule\UserService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -40,8 +45,15 @@ class AdminDashBoardController extends AbstractController
     public function index(): Response
     {
         $users = $this->userService->getAllUsers();
+
+        // Filter out users with 'ROLE_ADMIN'
+        $filteredUsers = array_filter($users, function ($user) {
+            // Assuming the user is an array and contains a 'roles' key
+            return !in_array('ROLE_ADMIN', $user['role']);
+        });
+
         return $this->render('User/adminDashboard.html.twig', [
-            'users' => $users,
+            'users' => $filteredUsers,
         ]);
     }
 
@@ -160,6 +172,75 @@ class AdminDashBoardController extends AbstractController
         return $this->render('User/_user_edit_form.html.twig', [
             'form' => $form->createView(),
             'userId' => $user->getId(),
+        ]);
+    }
+
+    #[Route('/admin/add-user', name: 'admin_add_user')]
+    public function addUser(Request $request): Response
+    {
+        $this->logger->info('Accessed addUser route.');
+
+        $addClientForm = $this->createForm(adminAddClientFormType::class);
+        $addInstructorForm = $this->createForm(adminAddInstructorFormType::class);
+        $addEventPlannerForm = $this->createForm(adminAddEventPlannerFormType::class);
+        $accountType = $request->query->get('type', 'client');
+
+        $this->logger->debug('Forms initialized.', ['accountType' => $accountType]);
+
+        $addClientForm->handleRequest($request);
+        $addInstructorForm->handleRequest($request);
+        $addEventPlannerForm->handleRequest($request);
+
+        if ($addClientForm->isSubmitted() && $addClientForm->isValid()) {
+            $this->logger->info('Client form submitted and is valid.');
+            $data = $addClientForm->getData();
+            $this->logger->debug('Client form data.', $data);
+            $client = new Client();
+            $client->setName($data['firstName'] . ' ' . $data['lastName']);
+            $client->setEmail($data['email']);
+            $client->setPhoneNumber($data['phoneNumber']);
+            $client->setPassword($data['password']);
+            $this->userService->createClient($client);
+            $this->logger->info('Client created successfully.');
+             return $this->redirectToRoute('admin_dashboard');
+        }
+
+        if ($addInstructorForm->isSubmitted() && $addInstructorForm->isValid()) {
+            $this->logger->info('Instructor form submitted and is valid.');
+            $data = $addInstructorForm->getData();
+            $this->logger->debug('Instructor form data.', $data);
+            $instructor = new Instructor();
+            $instructor->setName($data['firstName'] . ' ' . $data['lastName']);
+            $instructor->setEmail($data['email']);
+            $instructor->setCertification($data['certificate']);
+            $instructor->setPassword($data['password']);
+            $this->userService->createInstructor($instructor);
+            $this->logger->info('Instructor created successfully.');
+            return $this->redirectToRoute('admin_dashboard');
+        }
+
+        if ($addEventPlannerForm->isSubmitted() && $addEventPlannerForm->isValid()) {
+            $this->logger->info('Event Planner form submitted and is valid.');
+            $data = $addEventPlannerForm->getData();
+            $this->logger->debug('Event Planner form data.', $data);
+            $eventPlanner = new EventPlanner();
+            $eventPlanner->setName($data['firstName'] . ' ' . $data['lastName']);
+            $eventPlanner->setEmail($data['email']);
+            $eventPlanner->setSpecialization($data['specialization']);
+            $eventPlanner->setAssignedModule($data['assignedModule']);
+            $eventPlanner->setPassword($data['password']);
+            $this->userService->createEventPlanner($eventPlanner);
+            $this->logger->info('Event Planner created successfully.');
+             return $this->redirectToRoute('admin_dashboard');
+        }
+
+
+        $this->logger->info('Rendering add user form.');
+        return $this->render('user/add_user.html.twig', [
+            'addClientForm' => $addClientForm->createView(),
+            'addInstructorForm' => $addInstructorForm->createView(),
+            'addEventPlannerForm' => $addEventPlannerForm->createView(),
+            'accountType' => $accountType,
         ]);
     }
 }
