@@ -164,14 +164,10 @@
             
             // Client-side date validation
             function validateDates() {
-                // Validate start date is today or in the future
-                if (startDateField && startDateField.value) {
-                    const startDate = new Date(startDateField.value);
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    
-                    if (startDate < today) {
-                        startDateField.setCustomValidity('Start date must be today or in the future.');
+                // Validate start date is provided and valid
+                if (startDateField) {
+                    if (!startDateField.value || startDateField.value.trim() === '') {
+                        startDateField.setCustomValidity('Start date is required.');
                         startDateField.classList.add('is-invalid');
                         
                         // Show the error message
@@ -184,20 +180,42 @@
                             parentContainer.appendChild(errorDisplay);
                         }
                         errorDisplay.style.display = 'block';
-                        errorDisplay.textContent = 'Start date must be today or in the future.';
-                    } else {
-                        startDateField.setCustomValidity('');
-                        clearErrorForField(startDateField);
+                        errorDisplay.textContent = 'Start date is required.';
+                        return; // Exit validation since start date is required
+                    }
+                    
+                    // Validate start date is today or in the future
+                    if (startDateField.value) {
+                        const startDate = new Date(startDateField.value);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        
+                        if (startDate < today) {
+                            startDateField.setCustomValidity('Start date must be today or in the future.');
+                            startDateField.classList.add('is-invalid');
+                            
+                            // Show the error message
+                            const parentContainer = startDateField.closest('.form-group');
+                            parentContainer.classList.remove('field-changed'); // Remove field-changed to show error
+                            let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                            if (!errorDisplay) {
+                                errorDisplay = document.createElement('div');
+                                errorDisplay.className = 'invalid-feedback d-block mb-2';
+                                parentContainer.appendChild(errorDisplay);
+                            }
+                            errorDisplay.style.display = 'block';
+                            errorDisplay.textContent = 'Start date must be today or in the future.';
+                        } else {
+                            startDateField.setCustomValidity('');
+                            clearErrorForField(startDateField);
+                        }
                     }
                 }
                 
-                // Validate end date is after start date
-                if (endDateField && endDateField.value && startDateField && startDateField.value) {
-                    const endDate = new Date(endDateField.value);
-                    const startDate = new Date(startDateField.value);
-                    
-                    if (endDate <= startDate) {
-                        endDateField.setCustomValidity('End date must be after start date.');
+                // Validate end date is provided and valid
+                if (endDateField) {
+                    if (!endDateField.value || endDateField.value.trim() === '') {
+                        endDateField.setCustomValidity('End date is required.');
                         endDateField.classList.add('is-invalid');
                         
                         // Show the error message
@@ -210,14 +228,38 @@
                             parentContainer.appendChild(errorDisplay);
                         }
                         errorDisplay.style.display = 'block';
-                        errorDisplay.textContent = 'End date must be after start date.';
-                    } else {
+                        errorDisplay.textContent = 'End date is required.';
+                        return; // Exit validation since start date is required
+                    }
+                    
+                    // Validate end date is after start date
+                    if (endDateField.value && startDateField && startDateField.value) {
+                        const endDate = new Date(endDateField.value);
+                        const startDate = new Date(startDateField.value);
+                        
+                        if (endDate <= startDate) {
+                            endDateField.setCustomValidity('End date must be after start date.');
+                            endDateField.classList.add('is-invalid');
+                            
+                            // Show the error message
+                            const parentContainer = endDateField.closest('.form-group');
+                            parentContainer.classList.remove('field-changed'); // Remove field-changed to show error
+                            let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                            if (!errorDisplay) {
+                                errorDisplay = document.createElement('div');
+                                errorDisplay.className = 'invalid-feedback d-block mb-2';
+                                parentContainer.appendChild(errorDisplay);
+                            }
+                            errorDisplay.style.display = 'block';
+                            errorDisplay.textContent = 'End date must be after start date.';
+                        } else {
+                            endDateField.setCustomValidity('');
+                            clearErrorForField(endDateField);
+                        }
+                    } else if (endDateField) {
                         endDateField.setCustomValidity('');
                         clearErrorForField(endDateField);
                     }
-                } else if (endDateField) {
-                    endDateField.setCustomValidity('');
-                    clearErrorForField(endDateField);
                 }
             }
             
@@ -238,7 +280,7 @@
                             parentContainer.appendChild(errorDisplay);
                         }
                         errorDisplay.style.display = 'block';
-                        errorDisplay.textContent = 'Sélectionnez un élément dans la liste.';
+                        errorDisplay.textContent = 'Please select a partner.';
                         hasErrors = true;
                     }
                     
@@ -254,7 +296,39 @@
                             parentContainer.appendChild(errorDisplay);
                         }
                         errorDisplay.style.display = 'block';
-                        errorDisplay.textContent = 'Sélectionnez un élément dans la liste.';
+                        errorDisplay.textContent = 'Please select an event.';
+                        hasErrors = true;
+                    }
+                    
+                    // Validate start date field
+                    if (startDateField && (startDateField.value === '' || startDateField.value === null)) {
+                        startDateField.classList.add('is-invalid');
+                        const parentContainer = startDateField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed'); // Remove field-changed to allow error display
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Start date is required.';
+                        hasErrors = true;
+                    }
+                    
+                    // Validate end date field
+                    if (endDateField && (endDateField.value === '' || endDateField.value === null)) {
+                        endDateField.classList.add('is-invalid');
+                        const parentContainer = endDateField.closest('.form-group');
+                        parentContainer.classList.remove('field-changed'); // Remove field-changed to allow error display
+                        let errorDisplay = parentContainer.querySelector('.invalid-feedback');
+                        if (!errorDisplay) {
+                            errorDisplay = document.createElement('div');
+                            errorDisplay.className = 'invalid-feedback d-block mb-2';
+                            parentContainer.appendChild(errorDisplay);
+                        }
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'End date is required.';
                         hasErrors = true;
                     }
                     
