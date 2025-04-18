@@ -1,0 +1,132 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Réclamations{% endblock %}
+
+{% block body %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="alert-circle"></i></div>
+                            Liste des Réclamations
+                        </h1>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <a href="{{ path('app_claim_new') }}" class="btn btn-primary">
+                            <i data-feather="plus"></i>
+                            Nouvelle Réclamation
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Gestion des Réclamations</span>
+                <div class="small text-muted">{{ claims|length }} réclamation(s) au total</div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="datatablesSimple">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Client</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for claim in claims %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ claim.description|slice(0, 50) }}{% if claim.description|length > 50 %}...{% endif %}</div>
+                                    </td>
+                                    <td>{{ claim.claimType }}</td>
+                                    <td>{{ claim.creationDate|date('d/m/Y') }}</td>
+                                    <td>
+                                        <span class="badge rounded-pill 
+                                            {% if claim.claimStatus == 'new' %}bg-danger text-white
+                                            {% elseif claim.claimStatus == 'in_progress' %}bg-warning text-dark
+                                            {% elseif claim.claimStatus == 'resolved' %}bg-success text-white
+                                            {% else %}bg-secondary text-white
+                                            {% endif %}">
+                                            {% if claim.claimStatus == 'new' %}Nouveau
+                                            {% elseif claim.claimStatus == 'in_progress' %}En cours
+                                            {% elseif claim.claimStatus == 'resolved' %}Résolu
+                                            {% else %}{{ claim.claimStatus }}
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if claim.client %}
+                                            <span class="d-flex align-items-center">
+                                                <i class="me-2" data-feather="user"></i>
+                                                {{ claim.client.name }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('app_claim_show', {'id': claim.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir détails">
+                                                <i data-feather="eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_claim_edit', {'id': claim.id}) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
+                                                <i data-feather="edit"></i>
+                                            </a>
+                                            <form method="post" action="{{ path('app_claim_delete', {'id': claim.id}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ claim.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                    <i data-feather="trash-2"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">Aucune réclamation trouvée</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const datatablesSimple = document.getElementById('datatablesSimple');
+            if (datatablesSimple) {
+                new simpleDatatables.DataTable(datatablesSimple, {
+                    labels: {
+                        placeholder: "Rechercher...",
+                        perPage: "{select} éléments par page",
+                        noRows: "Aucun résultat trouvé",
+                        info: "Affichage de {start} à {end} sur {rows} éléments"
+                    }
+                });
+            }
+            
+            // Initialisation des tooltips Bootstrap
+            [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                .forEach(function (tooltipTriggerEl) {
+                    new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+        });
+    </script>
+{% endblock %}
