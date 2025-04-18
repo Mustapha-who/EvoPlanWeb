@@ -1,0 +1,115 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Feedback #{{ feedback.id }}{% endblock %}
+
+{% block body %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="edit"></i></div>
+                            Modifier Feedback #{{ feedback.id }}
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="card-title mb-0 text-primary">Formulaire de modification</h2>
+                    <i data-feather="edit-3" class="text-muted"></i>
+                </div>
+            </div>
+            <div class="card-body">
+                {% for message in app.flashes('error') %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                {% endfor %}
+
+                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                {{ form_widget(form._token) }} {# Important pour le CSRF #}
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            {{ form_label(form.comments) }}
+                            {{ form_widget(form.comments, {
+                                'attr': {
+                                    'class': 'form-control' ~ (form.comments.vars.errors|length ? ' is-invalid' : ''),
+                                    'rows': 8
+                                }
+                            }) }}
+                            {{ form_errors(form.comments) }}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            {{ form_label(form.rating) }}
+                            {{ form_widget(form.rating, {
+                                'attr': {
+                                    'class': 'form-select' ~ (form.rating.vars.errors|length ? ' is-invalid' : '')
+                                }
+                            }) }}
+                            {{ form_errors(form.rating) }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form_label(form.client) }}
+                            {{ form_widget(form.client, {
+                                'attr': {
+                                    'class': 'form-select' ~ (form.client.vars.errors|length ? ' is-invalid' : '')
+                                }
+                            }) }}
+                            {{ form_errors(form.client) }}
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{{ path('app_feedback_index') }}" class="btn btn-outline-secondary">
+                        <i data-feather="arrow-left"></i> Retour
+                    </a>
+                    <div>
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i data-feather="save"></i> Enregistrer
+                        </button>
+                        <form method="post" action="{{ path('app_feedback_delete', {'id': feedback.id}) }}" class="d-inline" onsubmit="return confirm('Êtes-vous sûr ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ feedback.id) }}">
+                            
+                        </form>
+                    </div>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Validation Bootstrap
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+
+            feather.replace();
+        });
+    </script>
+{% endblock %}
