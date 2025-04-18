@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Réclamation #{{ claim.id }}{% endblock %}
+
+{% block body %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="file-text"></i></div>
+                            Détails Réclamation #{{ claim.id }}
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">Informations détaillées</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h5 class="fw-bold">Description</h5>
+                            <p>{{ claim.description }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <h5 class="fw-bold">Type</h5>
+                            <p>{{ claim.claimType }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h5 class="fw-bold">Statut</h5>
+                            <span class="badge 
+                                {% if claim.claimStatus == 'Ouvert' %}bg-success
+                                {% elseif claim.claimStatus == 'En cours' %}bg-warning
+                                {% elseif claim.claimStatus == 'Résolu' %}bg-primary
+                                {% else %}bg-secondary
+                                {% endif %} rounded-pill">
+                                {{ claim.claimStatus }}
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <h5 class="fw-bold">Date de création</h5>
+                            <p>{{ claim.creationDate|date('d/m/Y H:i') }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <h5 class="fw-bold">Client</h5>
+                            <p>{{ claim.client ? claim.client.name : 'N/A' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ path('app_claim_index') }}" class="btn btn-secondary">
+                        <i data-feather="arrow-left"></i> Retour à la liste
+                    </a>
+                    <a href="{{ path('app_claim_edit', {'id': claim.id}) }}" class="btn btn-primary ms-2">
+                        <i data-feather="edit"></i> Modifier
+                    </a>
+                    <a href="{{ path('app_claim_export_pdf', {'id': claim.id}) }}" class="btn btn-danger ms-2" target="_blank">
+                        <i data-feather="download"></i> Exporter en PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
