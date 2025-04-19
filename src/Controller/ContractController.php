@@ -41,16 +41,16 @@ final class ContractController extends AbstractController{
             if ($contract->getStatus() === 'expired') {
                 // Get the associated partnership
                 $partnership = $contract->getIdPartnership();
-                
+
                 if ($partnership) {
                     $today = new \DateTime();
                     $partnershipEndDate = $partnership->getDateFin();
-                    
+
                     // Check if partnership end date is in the future or doesn't exist
                     if ($partnershipEndDate === null || $partnershipEndDate > $today) {
                         $errorMessage = 'Status cannot be set to Expired while the partnership is still active. ';
                         $errorMessage .= $partnershipEndDate ? 'Partnership ends on ' . $partnershipEndDate->format('Y-m-d') : 'Partnership has no end date set.';
-                        
+
                         $form->get('status')->addError(new FormError($errorMessage));
                         return $this->render('contract/edit.html.twig', [
                             'contract' => $contract,
@@ -59,9 +59,9 @@ final class ContractController extends AbstractController{
                     }
                 }
             }
-            
+
             // Validate the relationship between dates
-            if ($contract->getDateFin() <= $contract->getDateDebut()) {
+            if ($contract->getDateFin() !== null && $contract->getDateFin() <= $contract->getDateDebut()) {
                 $startDate = $contract->getDateDebut()->format('Y-m-d');
                 $endDate = $contract->getDateFin()->format('Y-m-d');
                 $errorMessage = "End date ($endDate) must be after start date ($startDate).";
@@ -71,7 +71,7 @@ final class ContractController extends AbstractController{
                     'form' => $form,
                 ]);
             }
-            
+
             // Validate start date is today or in the future
             $today = new \DateTime();
             $today->setTime(0, 0, 0);
@@ -85,7 +85,7 @@ final class ContractController extends AbstractController{
                     'form' => $form,
                 ]);
             }
-            
+
             // Check if terms is empty
             if (empty(trim($contract->getTerms()))) {
                 $form->get('terms')->addError(new FormError('Contract terms cannot be empty.'));
@@ -94,7 +94,7 @@ final class ContractController extends AbstractController{
                     'form' => $form,
                 ]);
             }
-            
+
             try {
                 // Sync changes with the associated partnership
                 $partnership = $contract->getIdPartnership();
@@ -103,13 +103,12 @@ final class ContractController extends AbstractController{
                     $partnership->setDateDebut($contract->getDateDebut());
                     $partnership->setDateFin($contract->getDateFin());
                     $partnership->setTerms($contract->getTerms());
-                    
+
                     // If we're updating multiple entities, make sure to persist them
                     $entityManager->persist($partnership);
                 }
-                
+
                 $entityManager->flush();
-                $this->addFlash('success', 'Contract updated successfully! Associated partnership was also updated.');
                 return $this->redirectToRoute('app_contract_index', [], Response::HTTP_SEE_OTHER);
             } catch (\Exception $e) {
                 $form->addError(new FormError('An error occurred while updating the contract: ' . $e->getMessage()));
@@ -128,8 +127,6 @@ final class ContractController extends AbstractController{
         if ($this->isCsrfTokenValid('delete'.$contract->getId_contract(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($contract);
             $entityManager->flush();
-            
-            $this->addFlash('success', 'Contract deleted successfully!');
         }
 
         return $this->redirectToRoute('app_contract_index', [], Response::HTTP_SEE_OTHER);

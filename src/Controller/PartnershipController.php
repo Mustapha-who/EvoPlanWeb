@@ -6,6 +6,7 @@ use App\Entity\Partnership;
 use App\Entity\Contract;
 use App\Form\PartnershipType;
 use App\Repository\PartnershipRepository;
+use App\Service\EmailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,6 +18,13 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/partnership')]
 class PartnershipController extends AbstractController
 {
+    private EmailService $emailService;
+    
+    public function __construct(EmailService $emailService)
+    {
+        $this->emailService = $emailService;
+    }
+    
     #[Route('/', name: 'app_partnership_index', methods: ['GET'])]
     public function index(PartnershipRepository $partnershipRepository): Response
     {
@@ -81,6 +89,33 @@ class PartnershipController extends AbstractController
 
                 $entityManager->persist($contract);
                 $entityManager->flush();
+                
+                // Send contract email to partner
+                $partner = $partnership->getIdPartner();
+                $event = $partnership->getIdEvent();
+                
+                if ($partner && $event) {
+                    try {
+                        $emailSent = $this->emailService->sendContractEmail(
+                            $partner->getEmail(),
+                            $partner->getTypePartner(),
+                            $event->getNom(),
+                            $partnership->getDateDebut(),
+                            $partnership->getDateFin(),
+                            $partnership->getTerms()
+                        );
+                        
+                        if ($emailSent) {
+                            $this->addFlash('success', 'Partnership created and contract PDF emailed to the partner.');
+                        } else {
+                            $this->addFlash('warning', 'Partnership created, but there was an issue sending the contract PDF email.');
+                        }
+                    } catch (\Exception $e) {
+                        $this->addFlash('warning', 'Partnership created, but could not generate or send contract PDF: ' . $e->getMessage());
+                    }
+                } else {
+                    $this->addFlash('success', 'Partnership created successfully.');
+                }
 
                 return $this->redirectToRoute('app_partnership_index', [], Response::HTTP_SEE_OTHER);
             } catch (\Exception $e) {
@@ -185,6 +220,44 @@ class PartnershipController extends AbstractController
             'partnership' => $partnership,
             'form' => $form,
         ]);
+    }
+
+    #[Route('/{id_partnership}/resend-contract', name: 'app_partnership_resend_contract', methods: ['GET'])]
+    public function resendContract(int $id_partnership, PartnershipRepository $partnershipRepository): Response
+    {
+        $partnership = $partnershipRepository->find($id_partnership);
+
+        if (!$partnership) {
+            throw $this->createNotFoundException('Partnership not found');
+        }
+        
+        $partner = $partnership->getIdPartner();
+        $event = $partnership->getIdEvent();
+        
+        if ($partner && $event) {
+            try {
+                $emailSent = $this->emailService->sendContractEmail(
+                    $partner->getEmail(),
+                    $partner->getTypePartner(),
+                    $event->getNom(),
+                    $partnership->getDateDebut(),
+                    $partnership->getDateFin(),
+                    $partnership->getTerms()
+                );
+                
+                if ($emailSent) {
+                    $this->addFlash('success', 'Contract PDF generated and emailed to the partner.');
+                } else {
+                    $this->addFlash('warning', 'There was an issue generating or sending the contract PDF email.');
+                }
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Failed to generate or send contract PDF: ' . $e->getMessage());
+            }
+        } else {
+            $this->addFlash('error', 'Unable to send contract email - missing partner or event information.');
+        }
+        
+        return $this->redirectToRoute('app_partnership_show', ['id_partnership' => $id_partnership], Response::HTTP_SEE_OTHER);
     }
 
     #[Route('/{id_partnership}', name: 'app_partnership_delete', methods: ['POST'])]
