@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="Gestion des ressources" />
+        <meta name="author" content="" />
+        <title>Gestion des Ressources</title>
+        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+        <style>
+            .badge.rounded-pill { padding: 0.35em 0.65em; }
+            .page-header { padding: 1.5rem 0 !important; }
+            .table-responsive { overflow-x: auto; }
+            .action-buttons { white-space: nowrap; }
+            body { background-color: #f8f9fc; }
+            .card { border: none; border-radius: 0.5rem; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); }
+            .page-header-dark { background: linear-gradient(to right, #4e73df, #224abe); color: white; }
+        </style>
+    </head>
+    <body>
+        <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+            <div class="container-xl px-4">
+                <div class="page-header-content pt-4">
+                    <div class="row align-items-center justify-content-between">
+                        <div class="col-auto mt-4">
+                            <h1 class="page-header-title">
+                                <div class="page-header-icon"><i class="bi bi-collection"></i></div>
+                                Gestion des Ressources
+                            </h1>
+                        </div>
+                        <div class="col-12 col-xl-auto mt-4">
+                            <a href="{{ path('app_ressource_new') }}" class="btn btn-light">
+                                <i class="bi bi-plus-circle me-1"></i>
+                                Nouvelle ressource
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main page content-->
+        <div class="container-xl px-4 mt-n10">
+            <div class="card mb-4">
+                <div class="card-header">Liste des Ressources</div>
+                <div class="card-body">
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success alert-dismissible fade show mb-4">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+
+                    <div class="table-responsive">
+                        <table id="datatablesSimple" class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nom</th>
+                                    <th>Type</th>
+                                    <th>Disponibilité</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ressource in ressources %}
+                                    <tr>
+                                        <td>{{ ressource.id }}</td>
+                                        <td>{{ ressource.name }}</td>
+                                        <td>
+                                            <span class="badge bg-info rounded-pill">
+                                                {{ ressource.type }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {{ ressource.availability ? 'bg-primary' : 'bg-danger' }} rounded-pill">
+                                                {{ ressource.availability ? 'Disponible' : 'Indisponible' }}
+                                            </span>
+                                        </td>
+                                        <td class="action-buttons">
+                                            <a href="{{ path('app_ressource_show', {'id': ressource.id}) }}" 
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="Voir">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_ressource_edit', {'id': ressource.id}) }}" 
+                                               class="btn btn-sm btn-outline-secondary ms-1"
+                                               title="Modifier">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <div class="alert alert-info">
+                                                <i class="bi bi-info-circle me-2"></i>
+                                                Aucune ressource trouvée.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer-admin mt-auto footer-light">
+            <div class="container-xl px-4">
+                <div class="row">
+                    <div class="col-md-6 small">Copyright &copy; Votre Application {{ "now"|date("Y") }}</div>
+                    <div class="col-md-6 text-md-end small">
+                        <a href="#!">Mentions légales</a>
+                        &middot;
+                        <a href="#!">Conditions d'utilisation</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const datatablesSimple = document.getElementById('datatablesSimple');
+                if (datatablesSimple) {
+                    new simpleDatatables.DataTable(datatablesSimple, {
+                        perPage: 10,
+                        labels: {
+                            placeholder: "Rechercher...",
+                            perPage: "{select} éléments par page",
+                            noRows: "Aucune ressource trouvée",
+                            info: "Affichage de {start} à {end} sur {rows} éléments"
+                        }
+                    });
+                }
+                
+                // Activer les tooltips Bootstrap
+                [].slice.call(document.querySelectorAll('[title]')).forEach(el => {
+                    new bootstrap.Tooltip(el);
+                });
+            });
+        </script>
+    </body>
+</html>

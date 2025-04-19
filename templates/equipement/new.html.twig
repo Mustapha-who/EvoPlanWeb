@@ -1,0 +1,18 @@
+{# templates/equipement/new.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel équipement{% endblock %}
+
+{% block body %}
+    <div class="container-xl px-4 mt-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h1 class="card-title">Créer un nouvel équipement</h1>
+            </div>
+            <div class="card-body">
+                {{ include('equipement/_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
