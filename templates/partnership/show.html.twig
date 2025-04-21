@@ -17,6 +17,10 @@
                                 <i class="fas fa-edit me-1"></i>
                                 Edit
                             </a>
+                            <a href="{{ path('app_partnership_resend_contract', {'id_partnership': partnership.getId()}) }}" class="btn btn-primary lift me-2">
+                                <i class="fas fa-envelope me-1"></i>
+                                Resend Contract
+                            </a>
                             <a href="{{ path('app_partnership_index') }}" class="btn btn-white lift">
                                 <i class="fas fa-arrow-left me-1"></i>
                                 Back to list
@@ -29,6 +33,15 @@
     </header>
     <!-- Main page content-->
     <div class="container-xl px-4 mt-n10">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+        
         <div class="card mb-4">
             <div class="card-header">Partnership Information</div>
             <div class="card-body">

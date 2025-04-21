@@ -1,0 +1,176 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Feedbacks{% endblock %}
+
+{% block body %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="message-square"></i></div>
+                            Liste des Feedbacks
+                        </h1>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <a href="{{ path('app_feedback_new') }}" class="btn btn-primary">
+                            <i data-feather="plus"></i>
+                            Nouveau Feedback
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-xl px-4 mt-n10">
+        {# Affichage des messages flash #}
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Gestion des Feedbacks</span>
+                <div class="small text-muted">{{ feedbacks|length }} feedback(s) au total</div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="datatablesSimple">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Commentaire</th>
+                                <th class="text-center">Note</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in feedbacks %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ item.comments|slice(0, 100) }}{% if item.comments|length > 100 %}...{% endif %}</div>
+                                        {% if item.email is defined and item.email is not null %}
+                                            <div class="small text-muted mt-1">
+                                                <i data-feather="mail" class="me-1" style="width: 14px; height: 14px;"></i>
+                                                {{ item.email }}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="star-rating" title="{{ item.rating }}/5">
+                                            {% for i in 1..5 %}
+                                                {% if i <= item.rating %}
+                                                    <i class="fas fa-star text-warning"></i>
+                                                {% else %}
+                                                    <i class="far fa-star text-muted"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <small class="text-muted d-block">({{ item.rating }}/5)</small>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('app_feedback_show', {'id': item.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir détails">
+                                                <i data-feather="eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_feedback_edit', {'id': item.id}) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
+                                                <i data-feather="edit"></i>
+                                            </a>
+                                            <form method="post" action="{{ path('app_feedback_delete', {'id': item.id}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                    <i data-feather="trash-2"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-4">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i data-feather="message-square" class="mb-2" style="width: 48px; height: 48px;"></i>
+                                            Aucun feedback trouvé
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .star-rating {
+            display: inline-block;
+            line-height: 1;
+        }
+        .star-rating i {
+            font-size: 1.2rem;
+            margin: 0 1px;
+        }
+        .table-hover tr:hover {
+            background-color: rgba(0, 119, 190, 0.03);
+        }
+        .alert {
+            margin-bottom: 1.5rem;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialisation du datatable
+            const datatablesSimple = document.getElementById('datatablesSimple');
+            if (datatablesSimple) {
+                new simpleDatatables.DataTable(datatablesSimple, {
+                    labels: {
+                        placeholder: "Rechercher...",
+                        perPage: "{select} éléments par page",
+                        noRows: "Aucun résultat trouvé",
+                        info: "Affichage de {start} à {end} sur {rows} éléments"
+                    },
+                    columns: [
+                        { select: 0, sort: "asc" },
+                        { select: 1, sortable: false }
+                    ]
+                });
+            }
+            
+            // Initialisation des tooltips
+            [].slice.call(document.querySelectorAll('[title]'))
+                .forEach(function (tooltipTriggerEl) {
+                    new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+
+            // Fermeture automatique des alertes après 5 secondes
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
+{% endblock %}

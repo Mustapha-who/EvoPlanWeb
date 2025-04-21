@@ -174,8 +174,8 @@
        <nav class="topnav navbar navbar-expand-lg navbar-light bg-white shadow">
             <div class="container-fluid justify-content-between">
                 <!-- Logo -->
-                <a class="navbar-brand d-flex align-items-center pe-3 ps-3" href="index.html">
-                    <img src={{ asset('assets/img/hexatech.png') }} alt="Evoplan Logo" class="me-2" style="height: 60px;" />
+                <a class="navbar-brand d-flex align-items-center pe-3 ps-3" href={{ path('user_dashboard') }}>
+{#                    <img src={{ asset('assets/img/hexatech.png') }} alt="Evoplan Logo" class="me-2" style="height: 60px;" />#}
                     <span class="h3 mb-0 text-primary">Evoplan</span>
                 </a>
 
@@ -207,8 +207,8 @@
                             <h6 class="dropdown-header d-flex align-items-center">
                                 <img class="dropdown-user-img" src={{ asset('assets/img/illustrations/profiles/profile-1.png')}} />
                                 <div class="dropdown-user-details">
-                                    <div class="dropdown-user-details-name">Utilisateur</div>
-                                    <div class="dropdown-user-details-email">user@example.com</div>
+                                    <div class="dropdown-user-details-name">{{ app.user.name }}</div>
+                                    <div class="dropdown-user-details-email">{{ app.user.email }}</div>
                                 </div>
                             </h6>
                             <div class="dropdown-divider"></div>
@@ -329,7 +329,9 @@
                                         {% endif %}
                                     </div>
                                 </div>
+                            </div>
                         </form>
+
                     </div>
                 </div>
 

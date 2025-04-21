@@ -23,7 +23,7 @@ class DashboardController extends AbstractController
         if ($this->isGranted('ROLE_ADMIN')) {
             return $this->redirectToRoute('admin_dashboard');
         } elseif ($this->isGranted('ROLE_EVENTPLANNER')) {
-            return $this->render('User/eventplannerDashboard.html.twig');
+            return $this->redirectToRoute('app_event_index');
         }elseif ($this->isGranted('ROLE_CLIENT')) {
             return $this->redirectToRoute('app_event_home');
         }

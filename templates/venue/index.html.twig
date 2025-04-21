@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Venues{% endblock %}
+
+{% block body %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i class="bi bi-geo-alt"></i></div>
+                            Gestion des Venues
+                        </h1>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <a href="{{ path('app_venue_new') }}" class="btn btn-light">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            Nouvelle venue
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main page content-->
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">Liste des Venues</div>
+            <div class="card-body">
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success alert-dismissible fade show mb-4">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+
+                <div class="table-responsive">
+                    <table id="datatablesVenues" class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Adresse</th>
+                                <th>Capacité</th>
+                                <th>Ressource associée</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for venue in venues %}
+                                <tr>
+                                    <td>{{ venue.id }}</td>
+                                    <td>{{ venue.address }}</td>
+                                    <td>
+                                        <span class="badge bg-success rounded-pill">
+                                            {{ venue.capacity }} places
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if venue.ressource %}
+                                            <span class="badge bg-info text-dark rounded-pill">
+                                                {{ venue.ressource.name }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary rounded-pill">
+                                                Aucune
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="action-buttons">
+                                        <a href="{{ path('app_venue_show', {'id': venue.id}) }}" 
+                                           class="btn btn-sm btn-outline-primary"
+                                           title="Voir">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{{ path('app_venue_edit', {'id': venue.id}) }}" 
+                                           class="btn btn-sm btn-outline-warning ms-1"
+                                           title="Modifier">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form method="post" action="{{ path('app_venue_delete', {'id': venue.id}) }}" 
+                                              class="d-inline" 
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette venue ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ venue.id) }}">
+                                            <button class="btn btn-sm btn-outline-danger ms-1"
+                                                    title="Supprimer">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle me-2"></i>
+                                            Aucune venue trouvée
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

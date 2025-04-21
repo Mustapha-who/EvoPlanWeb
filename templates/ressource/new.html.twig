@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="Ajout d'une ressource" />
+        <meta name="author" content="" />
+        <title>Ajouter une ressource</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+        <style>
+            .badge.rounded-pill { padding: 0.35em 0.65em; }
+            .page-header { padding: 1.5rem 0 !important; }
+            .table-responsive { overflow-x: auto; }
+            .action-buttons { white-space: nowrap; }
+            body { background-color: #f8f9fc; }
+            .card { border: none; border-radius: 0.5rem; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); }
+            .page-header-dark { background: linear-gradient(to right, #4e73df, #224abe); color: white; }
+            .form-control, .form-select { padding: 0.5rem 0.75rem; }
+            .form-error { color: #dc3545; font-size: 0.875em; }
+        </style>
+    </head>
+    <body>
+        <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+            <div class="container-xl px-4">
+                <div class="page-header-content pt-4">
+                    <div class="row align-items-center justify-content-between">
+                        <div class="col-auto mt-4">
+                            <h1 class="page-header-title">
+                                <div class="page-header-icon"><i class="bi bi-collection"></i></div>
+                                Ajouter une ressource
+                            </h1>
+                        </div>
+                        <div class="col-12 col-xl-auto mt-4">
+                            <a href="{{ path('app_ressource_index') }}" class="btn btn-light">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                Retour
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main page content-->
+        <div class="container-xl px-4 mt-n10">
+            <div class="card mb-4">
+                <div class="card-header">Détails de la ressource</div>
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                        
+                        {% if not form.vars.valid %}
+                            <div class="alert alert-danger alert-dismissible fade show mb-4">
+                                <span>Veuillez corriger les erreurs dans le formulaire.</span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endif %}
+
+                        <!-- Nom de la ressource -->
+                        <div class="mb-4">
+                            {{ form_label(form.name, 'Nom de la ressource', {'label_attr': {'class': 'form-label'}}) }}
+                            <span class="text-danger">*</span>
+                            {{ form_widget(form.name, {'attr': {'class': 'form-control' ~ (form.name.vars.errors|length ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(form.name) }}
+                        </div>
+
+                        <!-- Type de ressource -->
+                        <div class="mb-4">
+                            {{ form_label(form.type, 'Type de ressource', {'label_attr': {'class': 'form-label'}}) }}
+                            <span class="text-danger">*</span>
+                            {{ form_widget(form.type, {'attr': {'class': 'form-select' ~ (form.type.vars.errors|length ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(form.type) }}
+                        </div>
+
+                        <!-- Disponibilité -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                {{ form_widget(form.availability, {'attr': {'class': 'form-check-input'}}) }}
+                                {{ form_label(form.availability, 'Disponible', {'label_attr': {'class': 'form-check-label'}}) }}
+                            </div>
+                            {{ form_errors(form.availability) }}
+                        </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="d-flex justify-content-between mt-5">
+                            <a href="{{ path('app_ressource_index') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i>
+                                Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>
+                                Enregistrer
+                            </button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer-admin mt-auto footer-light">
+            <div class="container-xl px-4">
+                <div class="row">
+                    <div class="col-md-6 small">Copyright &copy; Votre Application {{ "now"|date("Y") }}</div>
+                    <div class="col-md-6 text-md-end small">
+                        <a href="#!">Mentions légales</a>
+                        &middot;
+                        <a href="#!">Conditions d'utilisation</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

@@ -1,0 +1,22 @@
+<form method="post" action="{{ path('app_claim_delete', {'id': claim.id}) }}" onsubmit="return confirm('Are you sure you want to delete this item?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ claim.id) }}">
+    <button class="btn" style="
+    background: linear-gradient(to right, #ff416c, #ff4b2b);
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 30px;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(255, 75, 43, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+">
+    <i class="fas fa-trash-alt"></i>
+    Supprimer
+</button>
+</form>

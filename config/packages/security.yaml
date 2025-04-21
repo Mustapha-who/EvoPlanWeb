@@ -52,7 +52,10 @@ security:
         - { path: ^/instructor, roles: ROLE_INSTRUCTOR }
         - { path: ^/event/home, roles: ROLE_CLIENT }
         - { path: ^/partner, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER ] }
-        - { path: ^/workshop, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_INSTRUCTOR ] }
+        - { path: ^/workshop/new, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_INSTRUCTOR ] }
+        - { path: ^/workshop/front/\d+, roles: ROLE_CLIENT }
+        - { path: ^/workshop/front, roles: ROLE_CLIENT }
+        - { path: ^/workshop, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
         - { path: ^/session, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_INSTRUCTOR ] }
         - { path: ^/sidenav/userdash, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
         - { path: ^/user/profile, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
