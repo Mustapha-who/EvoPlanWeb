@@ -16,6 +16,24 @@ class PartnershipRepository extends ServiceEntityRepository
         parent::__construct($registry, Partnership::class);
     }
 
+    /**
+     * Find partnerships ending between two dates
+     * 
+     * @param \DateTime $startDate
+     * @param \DateTime $endDate
+     * @return Partnership[] Returns partnerships ending in the specified date range
+     */
+    public function findPartnershipsEndingBetween(\DateTime $startDate, \DateTime $endDate): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.date_fin >= :startDate')
+            ->andWhere('p.date_fin <= :endDate')
+            ->setParameter('startDate', $startDate->format('Y-m-d'))
+            ->setParameter('endDate', $endDate->format('Y-m-d'))
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Partnership[] Returns an array of Partnership objects
 //     */
