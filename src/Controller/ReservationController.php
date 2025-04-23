@@ -9,12 +9,17 @@ use App\Entity\Event;
 use App\Form\ReservationType;
 use App\Repository\EventRepository;
 use App\Repository\ReservationRepository;
+use App\Service\EventEmailService;
 use App\Service\FlouciPayment;
+use App\Service\TicketGeneratorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Container\ContainerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -50,7 +55,10 @@ final class ReservationController extends AbstractController
         EventRepository $eventRepository,
         Security $security,
         FlouciPayment $flouciPayment,
-        UrlGeneratorInterface $urlGenerator
+        UrlGeneratorInterface $urlGenerator,
+        EventEmailService $emailService, // ✅ Service d’email
+        TicketGeneratorService $ticketGenerator, // ✅ Service de génération de ticket
+        MailerInterface $mailer // ✅ Mailer Symfony
     ): Response {
         $event = $eventRepository->find($id_event);
         if (!$event) {
@@ -82,20 +90,20 @@ final class ReservationController extends AbstractController
             $eventPrice = (float) $event->getPrix();
 
             if ($eventPrice > 0) {
-                // Paiement requis => Stocker infos en session + rediriger vers Flouci
+                // Événement payant => rediriger vers Flouci
                 $successLink = $urlGenerator->generate('app_reservation_success', [], UrlGeneratorInterface::ABSOLUTE_URL);
                 $failLink = $urlGenerator->generate('app_reservation_fail', [], UrlGeneratorInterface::ABSOLUTE_URL);
                 $trackingId = 'reservation_' . $event->getId_event() . '_' . uniqid();
 
                 try {
                     $payment = $flouciPayment->generatePayment(
-                        $eventPrice * 1000, // en millimes
+                        $eventPrice * 1000,
                         $successLink,
                         $failLink,
                         $trackingId
                     );
 
-                    // Stocker les infos de réservation temporairement
+                    // Stocker les infos pour traitement post-paiement
                     $request->getSession()->set('reservation_data', [
                         'id_event' => $event->getId_event(),
                         'client_id' => $user?->getId(),
@@ -108,11 +116,37 @@ final class ReservationController extends AbstractController
                 }
             }
 
-            // Événement gratuit => réservation directe
+            // Événement gratuit => Réservation directe
             $entityManager->persist($reservation);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Votre réservation a été confirmée avec succès !');
+            // ✅ Génération du ticket
+            if ($user instanceof Client && $user->getEmail()) {
+                $clientInfo = sprintf("Nom: %s\nEmail: %s", $user->getName(), $user->getEmail());
+
+                $ticketPath = $ticketGenerator->generateTicket(
+                    $event->getNom(),
+                    $event->getDateDebut()->format('Y-m-d'),
+                    $event->getPrix() . ' TND',
+                    $event->getLieu()->value,
+                    $event->getImageEvent(), // ❗Assurez-vous que cette méthode existe dans Event
+                    $clientInfo
+                );
+
+                // ✅ Envoi de l'e-mail avec le ticket en pièce jointe
+                $email = (new Email())
+                    ->from('yacineamrouche2512@gmail.com')
+                    ->to($user->getEmail())
+                    ->subject('Confirmation de votre réservation')
+                    ->text('Merci pour votre réservation. Veuillez trouver votre ticket en pièce jointe.')
+                    ->attachFromPath($ticketPath, 'ticket.png', 'image/png');
+
+                $mailer->send($email);
+            }
+
+            // ✅ Message de succès
+            $this->addFlash('success', 'Votre réservation a été confirmée avec succès ! Un ticket vous a été envoyé par email.');
+
             return $this->redirectToRoute('app_event_show', [
                 'id_event' => $event->getId_event()
             ]);
@@ -126,62 +160,66 @@ final class ReservationController extends AbstractController
             'is_paid' => $event->getPrix() > 0
         ]);
     }
-
-
-    #[Route('/{id_reservation}', name: 'app_reservation_delete', methods: ['POST'])]
-    public function delete(Request $request, Reservation $reservation, EntityManagerInterface $entityManager): Response
-    {
-        $eventId = $reservation->getEvent()->getId_event();
-
-        if ($this->isCsrfTokenValid('delete' . $reservation->getIdReservation(), $request->request->get('_token'))) {
-            $entityManager->remove($reservation);
-            $entityManager->flush();
-        }
-
-        return $this->redirectToRoute('app_reservations_event', [
-            'id_event' => $eventId,
-        ]);
-    }
     #[Route('/reservation/success', name: 'app_reservation_success')]
-    public function paymentSuccess(
-        Request $request,
-        EntityManagerInterface $entityManager,
-        EventRepository $eventRepository,
-        Security $security
-    ): Response {
+    public function success(Request $request, EntityManagerInterface $em, EventRepository $eventRepo, Security $security, EventEmailService $emailService,MailerInterface $mailer,TicketGeneratorService $ticketGenerator): Response
+    {
         $session = $request->getSession();
-        $reservationData = $session->get('reservation_data');
+        $data = $session->get('reservation_data');
 
-        if (!$reservationData) {
-            $this->addFlash('danger', 'Aucune donnée de réservation trouvée.');
-            return $this->redirectToRoute('app_event_index');
+        if (!$data) {
+            $this->addFlash('danger', 'Aucune réservation en cours.');
+            return $this->redirectToRoute('app_event_list');
         }
 
-        $event = $eventRepository->find($reservationData['id_event']);
+        $event = $eventRepo->find($data['id_event']);
         $client = $security->getUser();
 
-        if (!$event || !$client instanceof Client) {
-            $this->addFlash('danger', 'Informations invalides pour finaliser la réservation.');
-            return $this->redirectToRoute('app_event_show', ['id_event' => $reservationData['id_event']]);
+        if (!$event || !$client) {
+            $this->addFlash('danger', 'Erreur lors de la récupération de la réservation.');
+            return $this->redirectToRoute('app_event_list');
         }
 
         $reservation = new Reservation();
         $reservation->setEvent($event);
         $reservation->setClient($client);
         $reservation->setStatut(StatutReservation::CONFIRMEE);
+        $user = $security->getUser();
 
-        $entityManager->persist($reservation);
-        $entityManager->flush();
+        $em->persist($reservation);
+        $em->flush();
 
-        // Nettoyer la session
+        // ✅ Envoi de l'email
+        if ($user instanceof Client && $user->getEmail()) {
+            $clientInfo = sprintf("Nom: %s\nEmail: %s", $user->getName(), $user->getEmail());
+
+            $ticketPath = $ticketGenerator->generateTicket(
+                $event->getNom(),
+                $event->getDateDebut()->format('Y-m-d'),
+                $event->getPrix() . ' TND',
+                $event->getLieu()->value,
+                $event->getImageEvent(), // ❗Assurez-vous que cette méthode existe dans Event
+                $clientInfo
+            );
+
+            // ✅ Envoi de l'e-mail avec le ticket en pièce jointe
+            $email = (new Email())
+                ->from('yacineamrouche2512@gmail.com')
+                ->to($user->getEmail())
+                ->subject('Confirmation de votre réservation')
+                ->text('Merci pour votre réservation. Veuillez trouver votre ticket en pièce jointe.')
+                ->attachFromPath($ticketPath, 'ticket.png', 'image/png');
+
+            $mailer->send($email);
+        }
+
+        $this->addFlash('success', 'Réservation confirmée après paiement. Un email vous a été envoyé.');
         $session->remove('reservation_data');
 
-        // ✅ Redirection vers la page de l'événement avec un message de succès
-        $this->addFlash('success', 'Votre paiement a été validé et votre réservation est confirmée !');
         return $this->redirectToRoute('app_event_show', [
-            'id_event' => $event->getId_event()
+            'id_event' => $event->getId_event(),
         ]);
     }
+
 
 
     #[Route('/reservation/fail', name: 'app_reservation_fail')]
