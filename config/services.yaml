@@ -7,6 +7,7 @@ parameters:
     event_images_directory: '%kernel.project_dir%/public/uploads'
     flouci_app_token: '%env(FLOUCI_APP_TOKEN)%'
     flouci_app_secret: '%env(FLOUCI_APP_SECRET)%'
+    tickets_directory: '%kernel.project_dir%/public/uploads/tickets'
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -15,6 +16,8 @@ services:
         bind:
             string $appToken: '%env(FLOUCI_APP_TOKEN)%'
             string $appSecret: '%env(FLOUCI_APP_SECRET)%'
+            string $ticketsDirectory: '%tickets_directory%'
+            string $eventImagesDirectory: '%event_images_directory%'
     App\Service\UserModule\UserService:
         arguments:
             $administratorRepository: '@App\Repository\UserModule\AdministratorRepository'
@@ -24,6 +27,9 @@ services:
     App\Service\FlouciPayment:
         arguments:
             $client: '@http_client'
+    App\Service\TicketGeneratorService:
+        arguments:
+
     App\Form\WorkshopType:
         arguments: ['@doctrine.orm.entity_manager']
         tags: [form.type]

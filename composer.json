@@ -12,6 +12,8 @@
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^3.3",
         "dompdf/dompdf": "^3.1",
+        "endroid/qr-code": "4.0",
+        "imagine/imagine": "^1.5",
         "myclabs/php-enum": "^1.8",
         "phpdocumentor/reflection-docblock": "^5.6",
         "phpoffice/phpspreadsheet": "^4.1",
