@@ -15,10 +15,43 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Service\WorkshopAnalyticsService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Service\OpenRouterApiService;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Route('/workshop')]
 final class WorkshopController extends AbstractController
 {
+    #[Route('/generate', name: 'app_workshop_generate', methods: ['POST'])]
+    public function generateWorkshop(Request $request, OpenRouterApiService $apiService): JsonResponse
+    {
+        try {
+            $content = $request->getContent();
+            $data = json_decode($content, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \InvalidArgumentException('Invalid JSON payload');
+            }
+
+            $prompt = $data['prompt'] ?? '';
+            if (empty($prompt)) {
+                throw new \InvalidArgumentException('Prompt cannot be empty');
+            }
+
+            $workshopData = $apiService->generateWorkshopData($prompt);
+
+            return new JsonResponse([
+                'success' => true,
+                'title' => $workshopData['title'],
+                'description' => $workshopData['description']
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
     #[Route(name: 'app_workshop_index', methods: ['GET'])]
     public function index(WorkshopRepository $workshopRepository): Response
     {
