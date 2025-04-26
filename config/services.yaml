@@ -41,6 +41,7 @@ services:
     App\Service\GoogleCalendarService:
         arguments:
             $credentialsPath: '%google_api_credentials%'
+            $projectDir: '%kernel.project_dir%'
         public: true
     App\Service\PartnershipReminderService:
         arguments:

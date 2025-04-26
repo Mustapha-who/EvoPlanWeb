@@ -32,6 +32,9 @@ class PartnershipController extends AbstractController
         $partnerships = $partnershipRepository->findAll();
         $remindersCreated = 0;
         
+        // Log start of partnership check process
+        error_log("[DEBUG] Starting partnership reminder check in index page");
+        
         // AUTOMATIC CHECK: Check each partnership for pending reminders
         foreach ($partnerships as $partnership) {
             $endDate = $partnership->getDateFin();
@@ -42,14 +45,20 @@ class PartnershipController extends AbstractController
                 
                 // If partnership ends within the next 7 days, check for reminders
                 if ($daysDiff <= 7) {
+                    error_log("[DEBUG] Found partnership #" . $partnership->getIdPartnership() . " ending in $daysDiff days");
+                    
                     // This will automatically create reminders if needed
                     $created = $reminderService->checkSinglePartnership($partnership);
+                    error_log("[DEBUG] Reminder created: " . ($created ? "YES" : "NO"));
+                    
                     if ($created) {
                         $remindersCreated++;
                     }
                 }
             }
         }
+        
+        error_log("[DEBUG] Reminders created: $remindersCreated");
         
         // Show message if reminders were created
         if ($remindersCreated > 0) {

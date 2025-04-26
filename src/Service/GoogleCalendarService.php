@@ -9,17 +9,20 @@ use Google_Service_Calendar_Event;
 use Google_Service_Calendar_EventDateTime;
 use Google_Service_Calendar_EventReminders;
 use Google_Service_Calendar_EventReminder;
+use Google_Service_Calendar_EventAttendee;
 
 class GoogleCalendarService
 {
-    private Google_Service_Calendar $calendarService;
-    private Google_Client $client;
+    private $calendarService;
+    private $client;
+    private $projectDir;
 
-    public function __construct(string $credentialsPath)
+    public function __construct(string $credentialsPath, string $projectDir = null)
     {
         $this->client = new Google_Client();
         $this->client->setApplicationName('EvoPlanWeb Partnership Reminder');
         $this->client->setScopes([Google_Service_Calendar::CALENDAR]);
+        $this->projectDir = $projectDir;
         
         // Load client credentials from the JSON file
         $clientCredentials = json_decode(file_get_contents($credentialsPath), true);
@@ -36,35 +39,40 @@ class GoogleCalendarService
     }
 
     /**
-     * Set access token obtained from OAuth callback
-     * 
-     * @throws \Exception If the token is invalid or expired and cannot be refreshed
+     * Set the access token for API requests
+     *
+     * @param array $accessToken The access token
+     * @return void
      */
     public function setAccessToken(array $accessToken): void
     {
-        $this->client->setAccessToken($accessToken);
+        error_log("[DEBUG] GoogleCalendarService::setAccessToken called with: " . json_encode($accessToken, JSON_PRETTY_PRINT));
         
-        // Refresh the token if needed
-        if ($this->client->isAccessTokenExpired()) {
-            // Check if we have a refresh token
-            $refreshToken = $this->client->getRefreshToken();
-            if (!$refreshToken) {
-                throw new \Exception('Access token has expired and no refresh token is available. Please re-authenticate.');
-            }
+        // Validate access token format
+        if (!isset($accessToken['access_token'])) {
+            error_log("[ERROR] Invalid token format in GoogleCalendarService::setAccessToken - missing 'access_token'");
+            throw new \InvalidArgumentException("Invalid access token format");
+        }
+        
+        // Load client if not already loaded
+        if (!$this->client) {
+            error_log("[DEBUG] Initializing Google client in setAccessToken");
+            $this->client = $this->getClient();
+        }
+        
+        try {
+            // Set the access token
+            $this->client->setAccessToken($accessToken);
+            error_log("[DEBUG] Access token set successfully in Google client");
             
-            try {
-                $newAccessToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
-                
-                // Check for errors
-                if (isset($newAccessToken['error'])) {
-                    throw new \Exception('Error refreshing access token: ' . 
-                        $newAccessToken['error'] . ' - ' . 
-                        ($newAccessToken['error_description'] ?? 'No description'));
-                }
-            } catch (\Exception $e) {
-                throw new \Exception('Failed to refresh access token: ' . $e->getMessage() . 
-                    ' Please re-authenticate at /admin/google/auth');
+            // Check if token needs refresh
+            if ($this->client->isAccessTokenExpired()) {
+                error_log("[DEBUG] Access token is expired, attempting to refresh");
+                $this->refreshToken();
             }
+        } catch (\Exception $e) {
+            error_log("[ERROR] Exception in GoogleCalendarService::setAccessToken: " . $e->getMessage());
+            throw $e;
         }
     }
     
@@ -108,130 +116,313 @@ class GoogleCalendarService
     }
 
     /**
-     * Check if a partnership end reminder exists in Google Calendar
-     * 
-     * @param Partnership $partnership
-     * @param string $calendarId The calendar ID to check (default: primary)
-     * @return bool True if reminder exists, false otherwise
+     * Check if a partnership end reminder already exists in Google Calendar
+     *
+     * @param Partnership $partnership The partnership to check
+     * @param string $calendarId The calendar ID (default: primary)
+     * @return bool True if a reminder exists, false otherwise
      */
     public function partnershipEndReminderExists(Partnership $partnership, string $calendarId = 'primary'): bool
     {
+        if (!$partnership->getIdPartner() || !$partnership->getIdEvent()) {
+            error_log("[WARN] Cannot check if reminder exists: partnership #" . $partnership->getIdPartnership() . " is missing partner or event");
+            return false;
+        }
+        
+        error_log("[DEBUG] Checking if reminder exists for partnership #" . $partnership->getIdPartnership());
+        
+        // Ensure we have a valid token
+        if (!$this->ensureValidToken()) {
+            error_log("[ERROR] No valid token available for checking reminders");
+            return false;
+        }
+        
         try {
-            // Check token status first
-            if (!$this->hasValidToken()) {
-                return false;
+            // Get end date
+            $endDate = $partnership->getDateFin()->format('Y-m-d');
+            $partnerEmail = $partnership->getIdPartner()->getEmail();
+            $eventName = $partnership->getIdEvent()->getNom();
+            
+            // Make sure we have calendarService ready
+            if (!$this->calendarService) {
+                error_log("[DEBUG] Creating Google Calendar service in partnershipEndReminderExists");
+                $this->calendarService = new Google_Service_Calendar($this->client);
             }
             
-            $partner = $partnership->getIdPartner();
-            $event = $partnership->getIdEvent();
-            
-            if (!$partner || !$event || !$partnership->getDateFin()) {
-                return false;
-            }
-            
-            $endDate = $partnership->getDateFin();
-            
-            // Calculate time range to search events
-            $startDate = (clone $endDate)->modify('-7 days');
-            $endDateSearch = (clone $endDate)->modify('+1 day');
-            
-            // Create a search query for events
-            $optParams = [
-                'timeMin' => $startDate->format('c'),
-                'timeMax' => $endDateSearch->format('c'),
-                'q' => 'Partnership End Reminder: ' . $event->getNom(),
+            // Query parameters to look for matching events
+            $params = [
+                'q' => 'Partnership End: ' . $eventName,
+                'timeMin' => date('c', strtotime('-7 days')), // Include recent events
+                'timeMax' => date('c', strtotime('+30 days')), // Include upcoming events
+                'showDeleted' => false,
                 'singleEvents' => true,
+                'maxResults' => 10,
+                'orderBy' => 'startTime'
             ];
             
-            // Search for events
-            $events = $this->calendarService->events->listEvents($calendarId, $optParams);
+            error_log("[DEBUG] Searching calendar with query: " . json_encode($params));
             
-            // Check if any events match the partnership
-            foreach ($events->getItems() as $event) {
-                // If we find a matching event, the reminder already exists
-                if (strpos($event->getSummary(), 'Partnership End Reminder:') !== false) {
+            $events = $this->calendarService->events->listEvents($calendarId, $params);
+            $items = $events->getItems();
+            
+            error_log("[DEBUG] Found " . count($items) . " candidate events");
+            
+            foreach ($items as $event) {
+                // Check if this event is for our partnership
+                $description = $event->getDescription() ?? '';
+                
+                if (strpos($description, 'Partnership with ' . $partnerEmail) !== false &&
+                    strpos($description, 'Event: ' . $eventName) !== false) {
+                    
+                    error_log("[DEBUG] Found matching event: " . $event->getSummary() . " (ID: " . $event->getId() . ")");
                     return true;
                 }
             }
             
+            error_log("[DEBUG] No matching reminder found");
             return false;
+            
         } catch (\Exception $e) {
-            // Log error but treat as not existing
-            error_log('Error checking for partnership reminder: ' . $e->getMessage());
+            error_log("[ERROR] Exception in partnershipEndReminderExists: " . $e->getMessage());
+            // Return false but don't throw - we want to create a new reminder on error
             return false;
         }
     }
 
     /**
-     * Create a calendar event for partnership ending reminder
-     * 
-     * @param Partnership $partnership
-     * @param string $calendarId The calendar ID to create the event in (default: primary)
-     * @return string|null Event ID if created successfully, null otherwise
+     * Create a calendar event reminder for a partnership ending soon
+     *
+     * @param Partnership $partnership The partnership to create a reminder for
+     * @param string $calendarId The calendar ID (default: primary)
+     * @return string|null The ID of the created event, or null on failure
      */
     public function createPartnershipEndReminder(Partnership $partnership, string $calendarId = 'primary'): ?string
     {
+        error_log("[DEBUG] Creating partnership end reminder for partnership #" . $partnership->getIdPartnership());
+        
+        $partner = $partnership->getIdPartner();
+        $event = $partnership->getIdEvent();
+        $endDate = $partnership->getDateFin();
+        
+        if (!$partner || !$event || !$endDate) {
+            error_log("[ERROR] Cannot create reminder: missing partner, event, or end date");
+            return null;
+        }
+        
+        // Ensure we have a valid token
+        if (!$this->ensureValidToken()) {
+            error_log("[ERROR] No valid token available for creating reminders");
+            return null;
+        }
+        
         try {
-            // Check token status first
-            if (!$this->hasValidToken()) {
-                throw new \Exception('Invalid or expired authentication token. Please re-authenticate.');
+            // Make sure we have calendarService ready
+            if (!$this->calendarService) {
+                error_log("[DEBUG] Creating Google Calendar service in createPartnershipEndReminder");
+                $this->calendarService = new Google_Service_Calendar($this->client);
             }
             
-            $partner = $partnership->getIdPartner();
-            $event = $partnership->getIdEvent();
+            // Create a calendar event
+            $calEvent = new Google_Service_Calendar_Event();
             
-            if (!$partner || !$event || !$partnership->getDateFin()) {
+            // Set title
+            $title = 'Partnership End: ' . $event->getNom();
+            $calEvent->setSummary($title);
+            
+            // Set description
+            $description = "Partnership with " . $partner->getEmail() . " for event \"" . $event->getNom() . "\" is ending.\n\n";
+            $description .= "Event: " . $event->getNom() . "\n";
+            $description .= "Partner: " . $partner->getEmail() . " (" . $partner->getEmail() . ")\n";
+            $description .= "Partnership Type: " . $partner->getTypePartner() . "\n";
+            $description .= "Start Date: " . $partnership->getDateDebut()->format('Y-m-d') . "\n";
+            $description .= "End Date: " . $endDate->format('Y-m-d') . "\n";
+            
+            if ($partnership->getTerms()) {
+                $description .= "\nTerms: " . $partnership->getTerms() . "\n";
+            }
+            
+            $calEvent->setDescription($description);
+            
+            // Set event date (all-day event on the end date)
+            $eventDate = new Google_Service_Calendar_EventDateTime();
+            $eventDate->setDate($endDate->format('Y-m-d'));
+            $calEvent->setStart($eventDate);
+            
+            // End date is same as start for all-day events
+            $endEventDate = new Google_Service_Calendar_EventDateTime();
+            $endEventDate->setDate($endDate->format('Y-m-d'));
+            $calEvent->setEnd($endEventDate);
+            
+            // Add reminders
+            $reminder = new Google_Service_Calendar_EventReminders();
+            $reminder->setUseDefault(false);
+            
+            $overrides = [
+                new Google_Service_Calendar_EventReminder([
+                    'method' => 'email',
+                    'minutes' => 24 * 60 // 1 day before
+                ]),
+                new Google_Service_Calendar_EventReminder([
+                    'method' => 'popup',
+                    'minutes' => 24 * 60 // 1 day before
+                ])
+            ];
+            
+            $reminder->setOverrides($overrides);
+            $calEvent->setReminders($reminder);
+            
+            // IMPORTANT: Add the partner as an attendee to share the calendar event with them
+            $attendee = new Google_Service_Calendar_EventAttendee();
+            $attendee->setEmail($partner->getEmail());
+            $attendee->setResponseStatus('needsAction');
+            $calEvent->setAttendees([$attendee]);
+            
+            // Set event color (red)
+            $calEvent->setColorId('11');
+            
+            // Set event visibility to public
+            $calEvent->setVisibility('public');
+            
+            // Create the event
+            error_log("[DEBUG] Creating Google Calendar event with title: " . $title);
+            
+            // Using optParams to set sendUpdates to 'all' to notify attendees
+            $optParams = ['sendUpdates' => 'all'];
+            $createdEvent = $this->calendarService->events->insert($calendarId, $calEvent, $optParams);
+            
+            if ($createdEvent && $createdEvent->getId()) {
+                error_log("[SUCCESS] Created calendar event with ID: " . $createdEvent->getId() . " and sent invitation to partner");
+                return $createdEvent->getId();
+            } else {
+                error_log("[ERROR] Failed to create event - no ID returned");
                 return null;
             }
             
-            $endDate = $partnership->getDateFin();
-            $partnerEmail = $partner->getEmail();
-            
-            // Create event
-            $calendarEvent = new Google_Service_Calendar_Event();
-            $calendarEvent->setSummary('Partnership End Reminder: ' . $event->getNom());
-            $calendarEvent->setDescription(
-                'Your partnership for event "' . $event->getNom() . '" is ending on ' . 
-                $endDate->format('Y-m-d') . ". Please contact the organizers if you wish to extend the partnership."
-            );
-            
-            // Set event date to the partnership end date
-            $eventDateTime = new Google_Service_Calendar_EventDateTime();
-            // Create a timed event rather than an all-day event
-            $startDate = clone $endDate;
-            $startDate->setTime(9, 0); // 9:00 AM
-            $endDate->setTime(10, 0);  // 10:00 AM
-            $eventDateTime->setDateTime($startDate->format('c')); // ISO 8601 format
-            $calendarEvent->setStart($eventDateTime);
-            
-            $endDateTime = new Google_Service_Calendar_EventDateTime();
-            $endDateTime->setDateTime($endDate->format('c'));
-            $calendarEvent->setEnd($endDateTime);
-            
-            // Add attendee (partner)
-            $calendarEvent->setAttendees([
-                ['email' => $partnerEmail]
-            ]);
-            
-            // Set reminders properly
-            $reminder = new Google_Service_Calendar_EventReminder();
-            $reminder->setMethod('email');
-            $reminder->setMinutes(1440); // 24 hours before
-            
-            $reminders = new Google_Service_Calendar_EventReminders();
-            $reminders->setUseDefault(false);
-            $reminders->setOverrides([$reminder]);
-            
-            $calendarEvent->setReminders($reminders);
-            
-            // Insert event to calendar
-            $createdEvent = $this->calendarService->events->insert($calendarId, $calendarEvent);
-            
-            return $createdEvent->getId();
         } catch (\Exception $e) {
-            // Log the error
-            error_log('Failed to create calendar event: ' . $e->getMessage());
-            throw $e;
+            error_log("[ERROR] Exception creating calendar event: " . $e->getMessage());
+            error_log("[ERROR] Exception trace: " . $e->getTraceAsString());
+            return null;
         }
+    }
+
+    /**
+     * Refresh the access token using refresh token 
+     *
+     * @return bool True if successfully refreshed
+     * @throws \Exception If token cannot be refreshed
+     */
+    private function refreshToken(): bool
+    {
+        error_log("[DEBUG] Attempting to refresh Google access token");
+        
+        // Check if we have a refresh token
+        $refreshToken = $this->client->getRefreshToken();
+        if (!$refreshToken) {
+            error_log("[ERROR] No refresh token available for refresh");
+            throw new \Exception('Access token has expired and no refresh token is available. Please re-authenticate.');
+        }
+        
+        try {
+            $newAccessToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
+            
+            // Check for errors
+            if (isset($newAccessToken['error'])) {
+                error_log("[ERROR] Error refreshing token: " . $newAccessToken['error']);
+                throw new \Exception('Error refreshing access token: ' . 
+                    $newAccessToken['error'] . ' - ' . 
+                    ($newAccessToken['error_description'] ?? 'No description'));
+            }
+            
+            error_log("[DEBUG] Token refreshed successfully");
+            return true;
+        } catch (\Exception $e) {
+            error_log("[ERROR] Exception while refreshing token: " . $e->getMessage());
+            throw new \Exception('Failed to refresh access token: ' . $e->getMessage() . 
+                ' Please re-authenticate at /admin/google/auth');
+        }
+    }
+
+    /**
+     * Checks if client is initialized with a valid token
+     * and attempts to load one from the token file if needed
+     *
+     * @param bool $tryToLoad Whether to try to load the token from file if not set
+     * @return bool True if client has a valid token
+     */
+    public function ensureValidToken(bool $tryToLoad = true): bool
+    {
+        error_log("[DEBUG] Checking if Google client has valid token");
+        
+        // If client is not initialized, initialize it
+        if (!$this->client) {
+            error_log("[DEBUG] Client not initialized, initializing it");
+            $this->client = new Google_Client();
+            $this->client->setApplicationName('EvoPlanWeb Partnership Reminder');
+            $this->client->setScopes([Google_Service_Calendar::CALENDAR]);
+        }
+        
+        // Check if client already has a token
+        if ($this->client->getAccessToken()) {
+            error_log("[DEBUG] Client already has a token set");
+            
+            // Check if token is expired and can be refreshed
+            if ($this->client->isAccessTokenExpired()) {
+                error_log("[DEBUG] Token is expired, attempting to refresh");
+                try {
+                    $this->refreshToken();
+                    return true;
+                } catch (\Exception $e) {
+                    error_log("[ERROR] Failed to refresh token: " . $e->getMessage());
+                    return false;
+                }
+            }
+            
+            // Make sure the calendarService is initialized
+            if (!$this->calendarService) {
+                $this->calendarService = new Google_Service_Calendar($this->client);
+            }
+            
+            return true;
+        }
+        
+        // No token set, try to load from file if requested
+        if ($tryToLoad) {
+            error_log("[DEBUG] No token set, trying to load from file");
+            $tokenPath = $this->projectDir . '/var/google_token.json';
+            
+            if (file_exists($tokenPath)) {
+                try {
+                    error_log("[DEBUG] Found token file, loading it");
+                    $accessToken = json_decode(file_get_contents($tokenPath), true);
+                    $this->client->setAccessToken($accessToken);
+                    
+                    // Check if token is expired and can be refreshed
+                    if ($this->client->isAccessTokenExpired()) {
+                        error_log("[DEBUG] Loaded token is expired, attempting to refresh");
+                        try {
+                            $this->refreshToken();
+                        } catch (\Exception $e) {
+                            error_log("[ERROR] Failed to refresh loaded token: " . $e->getMessage());
+                            return false;
+                        }
+                    }
+                    
+                    // Make sure the calendarService is initialized
+                    if (!$this->calendarService) {
+                        $this->calendarService = new Google_Service_Calendar($this->client);
+                    }
+                    
+                    return true;
+                } catch (\Exception $e) {
+                    error_log("[ERROR] Failed to load token from file: " . $e->getMessage());
+                    return false;
+                }
+            } else {
+                error_log("[WARN] No token file found at " . $tokenPath);
+                return false;
+            }
+        }
+        
+        return false;
     }
 } 

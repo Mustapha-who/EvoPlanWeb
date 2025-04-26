@@ -211,6 +211,14 @@ class PartnershipReminderService
                 try {
                     error_log("[DEBUG] Loading Google access token");
                     $accessToken = json_decode(file_get_contents($tokenPath), true);
+                    
+                    // Check if token is valid
+                    if (!isset($accessToken['access_token'])) {
+                        error_log("[ERROR] Invalid token format - missing access_token");
+                        return false;
+                    }
+                    
+                    error_log("[DEBUG] Token loaded successfully. Setting access token.");
                     $this->googleCalendarService->setAccessToken($accessToken);
                     
                     // Check if calendar reminder already exists
