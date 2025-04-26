@@ -17,6 +17,7 @@ use App\Service\WorkshopAnalyticsService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Service\OpenRouterApiService;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Service\TranslationApiService;
 
 #[Route('/workshop')]
 final class WorkshopController extends AbstractController
@@ -43,6 +44,32 @@ final class WorkshopController extends AbstractController
                 'success' => true,
                 'title' => $workshopData['title'],
                 'description' => $workshopData['description']
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    #[Route('/translate', name: 'app_workshop_translate', methods: ['POST'])]
+    public function translate(Request $request, TranslationApiService $translationService): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+            $text = $data['text'] ?? '';
+            $targetLang = $data['targetLang'] ?? '';
+
+            if (empty($text) || empty($targetLang)) {
+                throw new \InvalidArgumentException('Text and target language are required');
+            }
+
+            $translatedText = $translationService->translate($text, 'en', $targetLang);
+
+            return new JsonResponse([
+                'success' => true,
+                'translation' => $translatedText
             ]);
         } catch (\Exception $e) {
             return new JsonResponse([
