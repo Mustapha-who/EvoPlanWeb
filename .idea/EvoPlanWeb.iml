@@ -160,11 +160,19 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/dasprid/enum" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/endroid/qr-code" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/imagine/imagine" />
+
+      <excludeFolder url="file://$MODULE_DIR$/vendor/facebook/graph-sdk" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/nyholm/psr7" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/openai-php/client" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/php-http/discovery" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/php-http/multipart-stream-builder" />
+
       <excludeFolder url="file://$MODULE_DIR$/vendor/doctrine/data-fixtures" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/doctrine/doctrine-fixtures-bundle" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/knplabs/knp-components" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/knplabs/knp-paginator-bundle" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/twilio/sdk" />
+
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

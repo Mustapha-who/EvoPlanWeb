@@ -8,10 +8,15 @@ parameters:
     flouci_app_token: '%env(FLOUCI_APP_TOKEN)%'
     flouci_app_secret: '%env(FLOUCI_APP_SECRET)%'
     tickets_directory: '%kernel.project_dir%/public/uploads/tickets'
+
+    uploads_directory: '%kernel.project_dir%/public/uploads/publications'
+    openrouter_api_key: '%env(OPENROUTER_API_KEY)%'
+
     google_api_credentials: '%kernel.project_dir%/config/google_credentials.json'
     twilio_account_sid: '%env(TWILIO_ACCOUNT_SID)%'
     twilio_auth_token: '%env(TWILIO_AUTH_TOKEN)%'
     twilio_phone_number: '%env(TWILIO_PHONE_NUMBER)%'
+
 
 services:
     # default configuration for services in *this* file
@@ -23,6 +28,9 @@ services:
             string $appSecret: '%env(FLOUCI_APP_SECRET)%'
             string $ticketsDirectory: '%tickets_directory%'
             string $eventImagesDirectory: '%event_images_directory%'
+
+            string $openRouterToken: '%openrouter_api_key%'
+
             string $credentialsPath: '%google_api_credentials%'
             string $projectDir: '%kernel.project_dir%'
     
@@ -30,6 +38,7 @@ services:
     Symfony\Component\DependencyInjection\ContainerInterface:
         alias: 'service_container'
         public: true
+
 
     App\Service\UserModule\UserService:
         arguments:
@@ -42,6 +51,10 @@ services:
             $client: '@http_client'
     App\Service\TicketGeneratorService:
         arguments:
+
+    App\Service\AIContentGenerator:
+        arguments:
+            $client: '@http_client'
     App\Service\GoogleCalendarService:
         arguments:
             $credentialsPath: '%google_api_credentials%'
@@ -61,6 +74,7 @@ services:
             $googleCalendarService: '@App\Service\GoogleCalendarService'
             $projectDir: '%kernel.project_dir%'
             $filesystem: '@filesystem'
+
 
     App\Form\WorkshopType:
         arguments: ['@doctrine.orm.entity_manager']
