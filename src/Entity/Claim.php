@@ -8,6 +8,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ClaimRepository::class)]
+#[ORM\Table(name: 'claim')]
 class Claim
 {
     #[ORM\Id]
@@ -15,19 +16,20 @@ class Claim
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     private ?string $description = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $claim_type = null;
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $claimType = null;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $claimStatus = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $creation_date = null;
+    private ?\DateTimeInterface $creationDate = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $claim_status = null;
-
-    #[ORM\ManyToOne(inversedBy: 'client')]
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'client_id', referencedColumnName: 'id')]
     private ?Client $client = null;
 
     public function getId(): ?int
@@ -40,42 +42,46 @@ class Claim
         return $this->description;
     }
 
-    public function setDescription(string $description): static
+    public function setDescription(string $description): self
     {
         $this->description = $description;
+
         return $this;
     }
 
     public function getClaimType(): ?string
     {
-        return $this->claim_type;
+        return $this->claimType;
     }
 
-    public function setClaimType(string $claim_type): static
+    public function setClaimType(string $claimType): self
     {
-        $this->claim_type = $claim_type;
+        $this->claimType = $claimType;
+
+        return $this;
+    }
+
+    public function getClaimStatus(): ?string
+    {
+        return $this->claimStatus;
+    }
+
+    public function setClaimStatus(string $claimStatus): self
+    {
+        $this->claimStatus = $claimStatus;
+
         return $this;
     }
 
     public function getCreationDate(): ?\DateTimeInterface
     {
-        return $this->creation_date;
+        return $this->creationDate;
     }
 
-    public function setCreationDate(\DateTimeInterface $creation_date): static
+    public function setCreationDate(\DateTimeInterface $creationDate): self
     {
-        $this->creation_date = $creation_date;
-        return $this;
-    }
+        $this->creationDate = $creationDate;
 
-    public function getClaimStatus(): ?string // Getter original
-    {
-        return $this->claim_status;
-    }
-
-    public function setClaimStatus(string $claim_status): static // Setter original
-    {
-        $this->claim_status = $claim_status;
         return $this;
     }
 
@@ -84,9 +90,10 @@ class Claim
         return $this->client;
     }
 
-    public function setClient(?Client $client): static
+    public function setClient(?Client $client): self
     {
         $this->client = $client;
+
         return $this;
     }
 }

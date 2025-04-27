@@ -9,6 +9,10 @@ parameters:
     flouci_app_secret: '%env(FLOUCI_APP_SECRET)%'
     tickets_directory: '%kernel.project_dir%/public/uploads/tickets'
     google_api_credentials: '%kernel.project_dir%/config/google_credentials.json'
+    twilio_account_sid: '%env(TWILIO_ACCOUNT_SID)%'
+    twilio_auth_token: '%env(TWILIO_AUTH_TOKEN)%'
+    twilio_phone_number: '%env(TWILIO_PHONE_NUMBER)%'
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -61,6 +65,10 @@ services:
     App\Form\WorkshopType:
         arguments: ['@doctrine.orm.entity_manager']
         tags: [form.type]
+
+    App\Service\TwilioService:
+         arguments:
+             $params: '@parameter_bag'
     App\Controller\UserModule\AccessDeniedController: ~
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Export des Feedbacks</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        h1 { color: #333; text-align: center; }
+        .header { margin-bottom: 20px; text-align: center; }
+        .footer { margin-top: 30px; font-size: 10px; text-align: center; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background-color: #f2f2f2; text-align: left; padding: 8px; }
+        td { padding: 8px; border-bottom: 1px solid #ddd; }
+        .stats-container { margin-top: 30px; }
+        .stats-row { display: flex; margin-bottom: 15px; }
+        .stats-box { flex: 1; border: 1px solid #ddd; padding: 10px; margin: 0 5px; text-align: center; }
+        .stats-value { font-size: 24px; font-weight: bold; }
+        .star { color: gold; }
+        .filter-info { background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Rapport des Feedbacks</h1>
+        <p>Généré le {{ date|date('d/m/Y H:i') }}</p>
+    </div>
+
+    {% if filters.rating or filters.keyword %}
+    <div class="filter-info">
+        <h3>Filtres appliqués :</h3>
+        <ul>
+            {% if filters.rating %}
+                <li>Note : {{ filters.rating }} étoile(s)</li>
+            {% endif %}
+            {% if filters.keyword %}
+                <li>Mot-clé : {{ filters.keyword }}</li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <h2>Liste des Feedbacks ({{ feedbacks|length }})</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Commentaire</th>
+                <th>Note</th>
+                <th>Client</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for feedback in feedbacks %}
+            <tr>
+                <td>#{{ feedback.id }}</td>
+                <td>{{ feedback.comments }}</td>
+                <td>
+                    {% for i in 1..5 %}
+                        {% if i <= feedback.rating %}
+                            <span class="star">★</span>
+                        {% else %}
+                            <span>☆</span>
+                        {% endif %}
+                    {% endfor %}
+                    ({{ feedback.rating }}/5)
+                </td>
+                <td>{{ feedback.client ? feedback.client.phoneNumber : 'N/A' }}</td>
+            </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4">Aucun feedback trouvé.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="stats-container">
+        <h2>Statistiques</h2>
+        <div class="stats-row">
+            <div class="stats-box">
+                <div>Note moyenne</div>
+                <div class="stats-value">{{ average_rating|number_format(1) }}/5</div>
+            </div>
+            <div class="stats-box">
+                <div>Total feedbacks</div>
+                <div class="stats-value">{{ feedbacks|length }}</div>
+            </div>
+        </div>
+
+        <h3>Répartition des notes</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Note</th>
+                    <th>Nombre</th>
+                    <th>Pourcentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rating, count in rating_counts %}
+                <tr>
+                    <td>
+                        {% for i in 1..5 %}
+                            {% if i <= rating %}
+                                <span class="star">★</span>
+                            {% else %}
+                                <span>☆</span>
+                            {% endif %}
+                        {% endfor %}
+                        ({{ rating }}/5)
+                    </td>
+                    <td>{{ count }}</td>
+                    <td>{{ (feedbacks|length > 0 ? (count / feedbacks|length * 100) : 0)|number_format(1) }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        Rapport généré automatiquement par le système - © {{ "now"|date("Y") }}
+    </div>
+</body>
+</html>

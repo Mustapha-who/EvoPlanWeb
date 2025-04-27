@@ -11,14 +11,15 @@
         "doctrine/doctrine-bundle": "^2.14",
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^3.3",
-        "gregwar/captcha": "^1.2",
         "dompdf/dompdf": "^3.1",
         "endroid/qr-code": "4.0",
         "google/apiclient": "^2.18",
+        "gregwar/captcha": "^1.2",
         "imagine/imagine": "^1.5",
+        "knplabs/knp-paginator-bundle": "^6.8",
         "myclabs/php-enum": "^1.8",
         "phpdocumentor/reflection-docblock": "^5.6",
-        "phpoffice/phpspreadsheet": "*",
+        "phpoffice/phpspreadsheet": "^4.2",
         "phpstan/phpdoc-parser": "^2.1",
         "symfony/asset": "6.4.*",
         "symfony/asset-mapper": "6.4.*",
@@ -52,7 +53,8 @@
         "symfony/web-link": "6.4.*",
         "symfony/yaml": "6.4.*",
         "twig/extra-bundle": "^2.12|^3.0",
-        "twig/twig": "^2.12|^3.0"
+        "twig/twig": "^2.12|^3.0",
+        "twilio/sdk": "^8.5"
     },
     "config": {
         "allow-plugins": {
@@ -104,6 +106,7 @@
         }
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^4.1",
         "phpunit/phpunit": "^9.5",
         "symfony/browser-kit": "6.4.*",
         "symfony/css-selector": "6.4.*",

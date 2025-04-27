@@ -16,28 +16,33 @@ class ClaimRepository extends ServiceEntityRepository
         parent::__construct($registry, Claim::class);
     }
 
-//    /**
-//     * @return Claim[] Returns an array of Claim objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @param array $filters
+     * @return Claim[]
+     */
+    public function findByFilters(array $filters): array
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->leftJoin('c.client', 'cl')
+            ->addSelect('cl');
 
-//    public function findOneBySomeField($value): ?Claim
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        if (isset($filters['claim_filter']['claimStatus']) && $filters['claim_filter']['claimStatus'] !== null) {
+            $qb->andWhere('c.claimStatus = :status')
+                ->setParameter('status', $filters['claim_filter']['claimStatus']);
+        }
+
+        if (isset($filters['claim_filter']['claimType']) && $filters['claim_filter']['claimType'] !== null) {
+            $qb->andWhere('c.claimType = :type')
+                ->setParameter('type', $filters['claim_filter']['claimType']);
+        }
+
+        if (isset($filters['claim_filter']['keyword']) && !empty($filters['claim_filter']['keyword'])) {
+            $qb->andWhere('c.description LIKE :keyword')
+                ->setParameter('keyword', '%' . $filters['claim_filter']['keyword'] . '%');
+        }
+
+        $qb->orderBy('c.creationDate', 'DESC');
+
+        return $qb->getQuery()->getResult();
+    }
 }

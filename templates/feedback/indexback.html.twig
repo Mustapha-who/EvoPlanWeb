@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des Feedbacks{% endblock %}
+{% block title %}Admin - Liste des Feedbacks{% endblock %}
 
 {% block body %}
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
@@ -10,14 +10,10 @@
                     <div class="col-auto mt-4">
                         <h1 class="page-header-title">
                             <div class="page-header-icon"><i data-feather="message-square"></i></div>
-                            Liste des Feedbacks
+                            Administration - Liste des Feedbacks
                         </h1>
                     </div>
                     <div class="col-12 col-xl-auto mt-4">
-                        <a href="{{ path('app_feedback_new') }}" class="btn btn-primary">
-                            <i data-feather="plus"></i>
-                            Nouveau Feedback
-                        </a>
                         <button type="button" class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#statsModal">
                             <i data-feather="bar-chart-2"></i>
                             Statistiques
@@ -126,7 +122,7 @@
                                     <td>{{ item.client ? item.client.phoneNumber : 'N/A' }}</td>
                                     <td class="text-end">
                                         <div class="btn-group" role="group">
-                                            <a href="{{ path('app_feedback_show', {'id': item.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir détails">
+                                            <a href="{{ path('app_feedback_admin_show', {'id': item.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir détails">
                                                 <i data-feather="eye"></i>
                                             </a>
                                             <a href="{{ path('app_feedback_edit', {'id': item.id}) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
