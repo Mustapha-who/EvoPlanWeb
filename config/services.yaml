@@ -5,18 +5,59 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     event_images_directory: '%kernel.project_dir%/public/uploads'
-
+    flouci_app_token: '%env(FLOUCI_APP_TOKEN)%'
+    flouci_app_secret: '%env(FLOUCI_APP_SECRET)%'
+    tickets_directory: '%kernel.project_dir%/public/uploads/tickets'
+    google_api_credentials: '%kernel.project_dir%/config/google_credentials.json'
 services:
     # default configuration for services in *this* file
     _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        autowire: true
+        autoconfigure: true
+        bind:
+            string $appToken: '%env(FLOUCI_APP_TOKEN)%'
+            string $appSecret: '%env(FLOUCI_APP_SECRET)%'
+            string $ticketsDirectory: '%tickets_directory%'
+            string $eventImagesDirectory: '%event_images_directory%'
+            string $credentialsPath: '%google_api_credentials%'
+            string $projectDir: '%kernel.project_dir%'
+    
+    # Container alias for our subscriber
+    Symfony\Component\DependencyInjection\ContainerInterface:
+        alias: 'service_container'
+        public: true
+
     App\Service\UserModule\UserService:
         arguments:
             $administratorRepository: '@App\Repository\UserModule\AdministratorRepository'
             $eventPlannerRepository: '@App\Repository\UserModule\EventPlannerRepository'
             $clientRepository: '@App\Repository\UserModule\ClientRepository'
             $instructorRepository: '@App\Repository\UserModule\InstructorRepository'
+    App\Service\FlouciPayment:
+        arguments:
+            $client: '@http_client'
+    App\Service\TicketGeneratorService:
+        arguments:
+    App\Service\GoogleCalendarService:
+        arguments:
+            $credentialsPath: '%google_api_credentials%'
+            $projectDir: '%kernel.project_dir%'
+        public: true
+    App\Service\PartnershipReminderService:
+        arguments:
+            $googleCalendarService: '@App\Service\GoogleCalendarService'
+            $partnershipRepository: '@App\Repository\PartnershipRepository'
+            $projectDir: '%kernel.project_dir%'
+            $filesystem: '@filesystem'
+    App\Command\PartnershipEndReminderCommand:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+    App\Controller\GoogleAuthController:
+        arguments:
+            $googleCalendarService: '@App\Service\GoogleCalendarService'
+            $projectDir: '%kernel.project_dir%'
+            $filesystem: '@filesystem'
+
     App\Form\WorkshopType:
         arguments: ['@doctrine.orm.entity_manager']
         tags: [form.type]

@@ -6,6 +6,7 @@ use App\Entity\Partnership;
 use App\Entity\Contract;
 use App\Form\PartnershipType;
 use App\Repository\PartnershipRepository;
+use App\Service\EmailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,15 +14,59 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Service\PartnershipReminderService;
 
 #[Route('/partnership')]
 class PartnershipController extends AbstractController
 {
-    #[Route('/', name: 'app_partnership_index', methods: ['GET'])]
-    public function index(PartnershipRepository $partnershipRepository): Response
+    private EmailService $emailService;
+    
+    public function __construct(EmailService $emailService)
     {
+        $this->emailService = $emailService;
+    }
+    
+    #[Route('/', name: 'app_partnership_index', methods: ['GET'])]
+    public function index(PartnershipRepository $partnershipRepository, PartnershipReminderService $reminderService): Response
+    {
+        $partnerships = $partnershipRepository->findAll();
+        $remindersCreated = 0;
+        
+        // Log start of partnership check process
+        error_log("[DEBUG] Starting partnership reminder check in index page");
+        
+        // AUTOMATIC CHECK: Check each partnership for pending reminders
+        foreach ($partnerships as $partnership) {
+            $endDate = $partnership->getDateFin();
+            $today = new \DateTime();
+            
+            if ($endDate && $today < $endDate) {
+                $daysDiff = $endDate->diff($today)->days;
+                
+                // If partnership ends within the next 7 days, check for reminders
+                if ($daysDiff <= 7) {
+                    error_log("[DEBUG] Found partnership #" . $partnership->getIdPartnership() . " ending in $daysDiff days");
+                    
+                    // This will automatically create reminders if needed
+                    $created = $reminderService->checkSinglePartnership($partnership);
+                    error_log("[DEBUG] Reminder created: " . ($created ? "YES" : "NO"));
+                    
+                    if ($created) {
+                        $remindersCreated++;
+                    }
+                }
+            }
+        }
+        
+        error_log("[DEBUG] Reminders created: $remindersCreated");
+        
+        // Show message if reminders were created
+        if ($remindersCreated > 0) {
+            $this->addFlash('info', $remindersCreated . ' Google Calendar reminder(s) were automatically created for partnerships ending soon.');
+        }
+        
         return $this->render('partnership/index.html.twig', [
-            'partnerships' => $partnershipRepository->findAll(),
+            'partnerships' => $partnerships,
         ]);
     }
 
@@ -81,6 +126,33 @@ class PartnershipController extends AbstractController
 
                 $entityManager->persist($contract);
                 $entityManager->flush();
+                
+                // Send contract email to partner
+                $partner = $partnership->getIdPartner();
+                $event = $partnership->getIdEvent();
+                
+                if ($partner && $event) {
+                    try {
+                        $emailSent = $this->emailService->sendContractEmail(
+                            $partner->getEmail(),
+                            $partner->getTypePartner(),
+                            $event->getNom(),
+                            $partnership->getDateDebut(),
+                            $partnership->getDateFin(),
+                            $partnership->getTerms()
+                        );
+                        
+                        if ($emailSent) {
+                            $this->addFlash('success', 'Partnership created and contract PDF emailed to the partner.');
+                        } else {
+                            $this->addFlash('warning', 'Partnership created, but there was an issue sending the contract PDF email.');
+                        }
+                    } catch (\Exception $e) {
+                        $this->addFlash('warning', 'Partnership created, but could not generate or send contract PDF: ' . $e->getMessage());
+                    }
+                } else {
+                    $this->addFlash('success', 'Partnership created successfully.');
+                }
 
                 return $this->redirectToRoute('app_partnership_index', [], Response::HTTP_SEE_OTHER);
             } catch (\Exception $e) {
@@ -96,12 +168,34 @@ class PartnershipController extends AbstractController
     }
 
     #[Route('/{id_partnership}', name: 'app_partnership_show', methods: ['GET'])]
-    public function show(int $id_partnership, PartnershipRepository $partnershipRepository): Response
+    public function show(
+        int $id_partnership, 
+        PartnershipRepository $partnershipRepository,
+        PartnershipReminderService $reminderService
+    ): Response
     {
         $partnership = $partnershipRepository->find($id_partnership);
 
         if (!$partnership) {
             throw $this->createNotFoundException('Partnership not found');
+        }
+
+        // Check if partnership is ending soon and create a calendar reminder if needed
+        $endDate = $partnership->getDateFin();
+        $today = new \DateTime();
+        
+        if ($endDate && $today < $endDate) {
+            $daysDiff = $endDate->diff($today)->days;
+            
+            // If partnership ends within the next 7 days, try to create a reminder
+            if ($daysDiff <= 7) {
+                $reminderResult = $reminderService->checkAndCreateReminderForPartnership($partnership);
+                
+                // Only show message if a new reminder was created (don't show message if one already exists)
+                if ($reminderResult['success'] && $reminderResult['event_id']) {
+                    $this->addFlash('info', 'A Google Calendar reminder has been created for this partnership ending soon.');
+                }
+            }
         }
 
         return $this->render('partnership/show.html.twig', [
@@ -187,6 +281,44 @@ class PartnershipController extends AbstractController
         ]);
     }
 
+    #[Route('/{id_partnership}/resend-contract', name: 'app_partnership_resend_contract', methods: ['GET'])]
+    public function resendContract(int $id_partnership, PartnershipRepository $partnershipRepository): Response
+    {
+        $partnership = $partnershipRepository->find($id_partnership);
+
+        if (!$partnership) {
+            throw $this->createNotFoundException('Partnership not found');
+        }
+        
+        $partner = $partnership->getIdPartner();
+        $event = $partnership->getIdEvent();
+        
+        if ($partner && $event) {
+            try {
+                $emailSent = $this->emailService->sendContractEmail(
+                    $partner->getEmail(),
+                    $partner->getTypePartner(),
+                    $event->getNom(),
+                    $partnership->getDateDebut(),
+                    $partnership->getDateFin(),
+                    $partnership->getTerms()
+                );
+                
+                if ($emailSent) {
+                    $this->addFlash('success', 'Contract PDF generated and emailed to the partner.');
+                } else {
+                    $this->addFlash('warning', 'There was an issue generating or sending the contract PDF email.');
+                }
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Failed to generate or send contract PDF: ' . $e->getMessage());
+            }
+        } else {
+            $this->addFlash('error', 'Unable to send contract email - missing partner or event information.');
+        }
+        
+        return $this->redirectToRoute('app_partnership_show', ['id_partnership' => $id_partnership], Response::HTTP_SEE_OTHER);
+    }
+
     #[Route('/{id_partnership}', name: 'app_partnership_delete', methods: ['POST'])]
     public function delete(int $id_partnership, Request $request, PartnershipRepository $partnershipRepository, EntityManagerInterface $entityManager): Response
     {
@@ -206,5 +338,96 @@ class PartnershipController extends AbstractController
         }
 
         return $this->redirectToRoute('app_partnership_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/debug-reminders', name: 'app_partnership_debug_reminders')]
+    public function debugReminders(
+        PartnershipRepository $partnershipRepository,
+        PartnershipReminderService $reminderService
+    ): Response
+    {
+        // Only allow in dev environment
+        if ($this->getParameter('kernel.environment') !== 'dev') {
+            throw $this->createAccessDeniedException('Debug endpoint only available in dev environment');
+        }
+        
+        $output = [];
+        $partnerships = $partnershipRepository->findAll();
+        $count = 0;
+        $created = 0;
+        $errors = 0;
+        
+        // Get token path
+        $tokenPath = $this->getParameter('kernel.project_dir') . '/var/google_token.json';
+        $output[] = "Token path: $tokenPath";
+        $output[] = "Token exists: " . (file_exists($tokenPath) ? 'Yes' : 'No');
+        
+        if (file_exists($tokenPath)) {
+            $tokenContent = file_get_contents($tokenPath);
+            $output[] = "Token content length: " . strlen($tokenContent) . " bytes";
+            $tokenData = json_decode($tokenContent, true);
+            $output[] = "Token valid JSON: " . (json_last_error() === JSON_ERROR_NONE ? 'Yes' : 'No - ' . json_last_error_msg());
+            
+            if (isset($tokenData['access_token'])) {
+                $output[] = "Access token present: Yes";
+            } else {
+                $output[] = "Access token present: No";
+            }
+            
+            if (isset($tokenData['refresh_token'])) {
+                $output[] = "Refresh token present: Yes";
+            } else {
+                $output[] = "Refresh token present: No";
+            }
+        }
+        
+        $output[] = "------- Checking Partnerships -------";
+        
+        foreach ($partnerships as $partnership) {
+            $count++;
+            $endDate = $partnership->getDateFin();
+            
+            if (!$endDate) {
+                $output[] = "Partnership #{$partnership->getIdPartnership()}: No end date";
+                continue;
+            }
+            
+            $today = new \DateTime();
+            $diff = $today->diff($endDate);
+            $diffDays = $diff->days;
+            $inFuture = $today < $endDate;
+            
+            $output[] = "Partnership #{$partnership->getIdPartnership()}: " . 
+                "Ends {$endDate->format('Y-m-d')}, " . 
+                "Today: {$today->format('Y-m-d')}, " . 
+                "Days until end: $diffDays, " . 
+                "End in future: " . ($inFuture ? 'Yes' : 'No');
+            
+            if ($inFuture && $diffDays <= 7) {
+                $output[] = "  - Eligible for reminder (ending within 7 days)";
+                
+                try {
+                    $created = $reminderService->checkSinglePartnership($partnership);
+                    if ($created) {
+                        $output[] = "  - CREATED NEW REMINDER";
+                        $created++;
+                    } else {
+                        $output[] = "  - Not created (already exists or error occurred)";
+                    }
+                } catch (\Exception $e) {
+                    $output[] = "  - ERROR: " . $e->getMessage();
+                    $errors++;
+                }
+            } else {
+                $output[] = "  - Not eligible for reminder";
+            }
+        }
+        
+        $output[] = "------- Summary -------";
+        $output[] = "Total partnerships: $count";
+        $output[] = "Reminders created: $created";
+        $output[] = "Errors: $errors";
+        
+        return new Response("<html><body><pre>" . implode("\n", $output) . "</pre></body></html>");
     }
 }

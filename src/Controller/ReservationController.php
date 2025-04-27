@@ -9,12 +9,21 @@ use App\Entity\Event;
 use App\Form\ReservationType;
 use App\Repository\EventRepository;
 use App\Repository\ReservationRepository;
+use App\Service\EventEmailService;
+use App\Service\FlouciPayment;
+use App\Service\TicketGeneratorService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Container\ContainerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[Route('/reservation')]
 final class ReservationController extends AbstractController
@@ -38,23 +47,27 @@ final class ReservationController extends AbstractController
             'reservations' => $reservations,
         ]);
     }
-
     #[Route('/new/event/{id_event}', name: 'app_reservation_new', methods: ['GET', 'POST'])]
     public function new(
         Request $request,
         int $id_event,
         EntityManagerInterface $entityManager,
         EventRepository $eventRepository,
-        Security $security
+        Security $security,
+        FlouciPayment $flouciPayment,
+        UrlGeneratorInterface $urlGenerator,
+        EventEmailService $emailService, // ✅ Service d’email
+        TicketGeneratorService $ticketGenerator, // ✅ Service de génération de ticket
+        MailerInterface $mailer // ✅ Mailer Symfony
     ): Response {
         $event = $eventRepository->find($id_event);
         if (!$event) {
             throw $this->createNotFoundException('Événement non trouvé');
         }
 
-        // Vérification des places disponibles (modifié pour utiliser id_event)
+        // Vérification des places disponibles
         $reservationsCount = $entityManager->getRepository(Reservation::class)
-            ->count(['id_event' => $event]); // Changé 'event' en 'id_event'
+            ->count(['id_event' => $event]);
 
         if ($event->getCapacite() <= $reservationsCount) {
             $this->addFlash('danger', 'Désolé, plus de places disponibles pour cet événement.');
@@ -62,25 +75,78 @@ final class ReservationController extends AbstractController
         }
 
         $reservation = new Reservation();
-        // Modification pour utiliser setId_event() au lieu de setEvent()
-        $reservation->setEvent($event); // Changé setEvent() en setId_event()
+        $reservation->setEvent($event);
         $reservation->setStatut(StatutReservation::CONFIRMEE);
 
-        // Si l'utilisateur est connecté et est un Client
         $user = $security->getUser();
         if ($user instanceof Client) {
-            // Modification pour utiliser setId_client() au lieu de setClient()
-            $reservation->setClient($user); // Changé setClient() en setId_client()
+            $reservation->setClient($user);
         }
 
         $form = $this->createForm(ReservationType::class, $reservation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $eventPrice = (float) $event->getPrix();
+
+            if ($eventPrice > 0) {
+                // Événement payant => rediriger vers Flouci
+                $successLink = $urlGenerator->generate('app_reservation_success', [], UrlGeneratorInterface::ABSOLUTE_URL);
+                $failLink = $urlGenerator->generate('app_reservation_fail', [], UrlGeneratorInterface::ABSOLUTE_URL);
+                $trackingId = 'reservation_' . $event->getId_event() . '_' . uniqid();
+
+                try {
+                    $payment = $flouciPayment->generatePayment(
+                        $eventPrice * 1000,
+                        $successLink,
+                        $failLink,
+                        $trackingId
+                    );
+
+                    // Stocker les infos pour traitement post-paiement
+                    $request->getSession()->set('reservation_data', [
+                        'id_event' => $event->getId_event(),
+                        'client_id' => $user?->getId(),
+                    ]);
+
+                    return $this->redirect($payment['result']['link']);
+                } catch (\Exception $e) {
+                    $this->addFlash('danger', 'Erreur lors de la génération du paiement : ' . $e->getMessage());
+                    return $this->redirectToRoute('app_event_show', ['id_event' => $event->getId_event()]);
+                }
+            }
+
+            // Événement gratuit => Réservation directe
             $entityManager->persist($reservation);
             $entityManager->flush();
 
-            $this->addFlash('reservation_success', 'Votre réservation a été confirmée avec succès!');
+            // ✅ Génération du ticket
+            if ($user instanceof Client && $user->getEmail()) {
+                $clientInfo = sprintf("Nom: %s\nEmail: %s", $user->getName(), $user->getEmail());
+
+                $ticketPath = $ticketGenerator->generateTicket(
+                    $event->getNom(),
+                    $event->getDateDebut()->format('Y-m-d'),
+                    $event->getPrix() . ' TND',
+                    $event->getLieu()->value,
+                    $event->getImageEvent(), // ❗Assurez-vous que cette méthode existe dans Event
+                    $clientInfo
+                );
+
+                // ✅ Envoi de l'e-mail avec le ticket en pièce jointe
+                $email = (new Email())
+                    ->from('yacineamrouche2512@gmail.com')
+                    ->to($user->getEmail())
+                    ->subject('Confirmation de votre réservation')
+                    ->text('Merci pour votre réservation. Veuillez trouver votre ticket en pièce jointe.')
+                    ->attachFromPath($ticketPath, 'ticket.png', 'image/png');
+
+                $mailer->send($email);
+            }
+
+            // ✅ Message de succès
+            $this->addFlash('success', 'Votre réservation a été confirmée avec succès ! Un ticket vous a été envoyé par email.');
+
             return $this->redirectToRoute('app_event_show', [
                 'id_event' => $event->getId_event()
             ]);
@@ -90,39 +156,88 @@ final class ReservationController extends AbstractController
             'event' => $event,
             'form' => $form->createView(),
             'remaining_seats' => $event->getCapacite() - $reservationsCount,
-            'current_user' => $user
+            'current_user' => $user,
+            'is_paid' => $event->getPrix() > 0
         ]);
     }
-    #[Route('/{id_reservation}/edit', name: 'app_reservation_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Reservation $reservation, EntityManagerInterface $entityManager): Response
+    #[Route('/reservation/success', name: 'app_reservation_success')]
+    public function success(Request $request, EntityManagerInterface $em, EventRepository $eventRepo, Security $security, EventEmailService $emailService,MailerInterface $mailer,TicketGeneratorService $ticketGenerator): Response
     {
-        $form = $this->createForm(ReservationType::class, $reservation);
-        $form->handleRequest($request);
+        $session = $request->getSession();
+        $data = $session->get('reservation_data');
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_reservation_index', [], Response::HTTP_SEE_OTHER);
+        if (!$data) {
+            $this->addFlash('danger', 'Aucune réservation en cours.');
+            return $this->redirectToRoute('app_event_list');
         }
 
-        return $this->render('reservation/edit.html.twig', [
-            'reservation' => $reservation,
-            'form' => $form,
-        ]);
-    }
+        $event = $eventRepo->find($data['id_event']);
+        $client = $security->getUser();
 
-    #[Route('/{id_reservation}', name: 'app_reservation_delete', methods: ['POST'])]
-    public function delete(Request $request, Reservation $reservation, EntityManagerInterface $entityManager): Response
-    {
-        $eventId = $reservation->getEvent()->getId_event();
-
-        if ($this->isCsrfTokenValid('delete' . $reservation->getIdReservation(), $request->request->get('_token'))) {
-            $entityManager->remove($reservation);
-            $entityManager->flush();
+        if (!$event || !$client) {
+            $this->addFlash('danger', 'Erreur lors de la récupération de la réservation.');
+            return $this->redirectToRoute('app_event_list');
         }
 
-        return $this->redirectToRoute('app_reservations_event', [
-            'id_event' => $eventId,
+        $reservation = new Reservation();
+        $reservation->setEvent($event);
+        $reservation->setClient($client);
+        $reservation->setStatut(StatutReservation::CONFIRMEE);
+        $user = $security->getUser();
+
+        $em->persist($reservation);
+        $em->flush();
+
+        // ✅ Envoi de l'email
+        if ($user instanceof Client && $user->getEmail()) {
+            $clientInfo = sprintf("Nom: %s\nEmail: %s", $user->getName(), $user->getEmail());
+
+            $ticketPath = $ticketGenerator->generateTicket(
+                $event->getNom(),
+                $event->getDateDebut()->format('Y-m-d'),
+                $event->getPrix() . ' TND',
+                $event->getLieu()->value,
+                $event->getImageEvent(), // ❗Assurez-vous que cette méthode existe dans Event
+                $clientInfo
+            );
+
+            // ✅ Envoi de l'e-mail avec le ticket en pièce jointe
+            $email = (new Email())
+                ->from('yacineamrouche2512@gmail.com')
+                ->to($user->getEmail())
+                ->subject('Confirmation de votre réservation')
+                ->text('Merci pour votre réservation. Veuillez trouver votre ticket en pièce jointe.')
+                ->attachFromPath($ticketPath, 'ticket.png', 'image/png');
+
+            $mailer->send($email);
+        }
+
+        $this->addFlash('success', 'Réservation confirmée après paiement. Un email vous a été envoyé.');
+        $session->remove('reservation_data');
+
+        return $this->redirectToRoute('app_event_show', [
+            'id_event' => $event->getId_event(),
         ]);
     }
+
+
+
+    #[Route('/reservation/fail', name: 'app_reservation_fail')]
+    public function paymentFail(Request $request): Response
+    {
+        $reservationData = $request->getSession()->get('reservation_data');
+        $request->getSession()->remove('reservation_data');
+
+        $eventId = $reservationData['id_event'] ?? null;
+
+        if (!$eventId) {
+            $this->addFlash('danger', 'Échec du paiement. Aucun événement trouvé.');
+            return $this->redirectToRoute('app_event_index');
+        }
+
+        // ❌ Redirection avec message d'échec
+        $this->addFlash('danger', 'Le paiement a échoué. Veuillez réessayer.');
+        return $this->redirectToRoute('app_event_show', ['id_event' => $eventId]);
+    }
+
 }
