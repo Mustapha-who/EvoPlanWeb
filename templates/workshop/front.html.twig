@@ -290,58 +290,115 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <!-- Workshop Details Card -->
-                                    <div class="card mb-4 border-0 bg-light">
-                                        <div class="card-body">
-                                            <div class="row g-4">
-                                                <div class="col-md-6">
-                                                    <div class="d-flex align-items-center mb-3">
-                                                        <div class="feature  me-3">
-                                                            <i class="fas fa-user text-primary"></i>
+                                    <div class="row">
+                                        <!-- Left side - Existing workshop details -->
+                                        <div class="col-md-8">
+                                            <div class="card mb-4 border-0 bg-light">
+                                                <div class="card-body">
+                                                    <div class="row g-4">
+                                                        <div class="col-md-6">
+                                                            <div class="d-flex align-items-center mb-3">
+                                                                <div class="feature  me-3">
+                                                                    <i class="fas fa-user text-primary"></i>
+                                                                </div>
+                                                                <div>
+                                                                    <h6 class="fw-bold mb-0">Instructor</h6>
+                                                                    <small class="text-muted">{{ workshop.instructor ? workshop.instructor.name : 'No instructor assigned' }}</small>
+                                                                </div>
+                                                            </div>
+                                                            <div class="d-flex align-items-center mb-3">
+                                                                <div class="feature  me-3">
+                                                                    <i class="fas fa-calendar text-primary"></i>
+                                                                </div>
+                                                                <div>
+                                                                    <h6 class="fw-bold mb-0">Duration</h6>
+                                                                    <small class="text-muted">{{ workshop.date|date('M d, Y') }} - {{ workshop.enddate|date('M d, Y') }}</small>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <h6 class="fw-bold mb-0">Instructor</h6>
-                                                            <small class="text-muted">{{ workshop.instructor ? workshop.instructor.name : 'No instructor assigned' }}</small>
+                                                        <div class="col-md-6">
+                                                            <div class="d-flex align-items-center mb-3">
+                                                                <div class="feature me-3">
+                                                                    <i class="fas fa-users text-primary"></i>
+                                                                </div>
+                                                                <div>
+                                                                    <h6 class="fw-bold mb-0">Capacity</h6>
+                                                                    <small class="text-muted">{{ workshop.capacity }} participants</small>
+                                                                </div>
+                                                            </div>
+                                                            <div class="d-flex align-items-center mb-3">
+                                                                <div class="feature  me-3">
+                                                                    <i class="fas fa-map-marker-alt text-primary"></i>
+                                                                </div>
+                                                                <div>
+                                                                    <h6 class="fw-bold mb-0">Location</h6>
+                                                                    <small class="text-muted">{{ workshop.location }}</small>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="d-flex align-items-center mb-3">
-                                                        <div class="feature  me-3">
-                                                            <i class="fas fa-calendar text-primary"></i>
-                                                        </div>
-                                                        <div>
-                                                            <h6 class="fw-bold mb-0">Duration</h6>
-                                                            <small class="text-muted">{{ workshop.date|date('M d, Y') }} - {{ workshop.enddate|date('M d, Y') }}</small>
+                                                        <div class="col-12">
+                                                            <div class="d-flex align-items-start">
+                                                                <div class="feature  me-3">
+                                                                    <i class="fas fa-info-circle text-primary"></i>
+                                                                </div>
+                                                                <div>
+                                                                    <h6 class="fw-bold mb-2">Description</h6>
+                                                                    <p class="text-muted mb-0 small">{{ workshop.description }}</p>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <div class="d-flex align-items-center mb-3">
-                                                        <div class="feature me-3">
-                                                            <i class="fas fa-users text-primary"></i>
-                                                        </div>
-                                                        <div>
-                                                            <h6 class="fw-bold mb-0">Capacity</h6>
-                                                            <small class="text-muted">{{ workshop.capacity }} participants</small>
-                                                        </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Right side - Chatbot Feature -->
+                                        <div class="col-md-4 border-start">
+                                            <div class="card border-0 bg-light">
+                                                <div class="card-body">
+                                                    <h5 class="card-title mb-3">
+                                                        <i class="fas fa-robot text-primary me-2"></i>Workshop Assistant
+                                                    </h5>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small text-muted">Ask about this workshop</label>
+                                                        <textarea class="form-control mb-2 chat-input" 
+                                                                  rows="2" 
+                                                                  placeholder="e.g. Can you explain this workshop in simpler terms?"
+                                                                  data-workshop-id="{{ workshop.id_workshop }}"
+                                                                  data-workshop-title="{{ workshop.title }}"
+                                                                  data-workshop-description="{{ workshop.description }}"></textarea>
+                                                        <button class="btn btn-primary btn-sm w-100 generate-explanation">
+                                                            <i class="fas fa-comment-dots me-2"></i>Get Explanation
+                                                        </button>
                                                     </div>
-                                                    <div class="d-flex align-items-center mb-3">
-                                                        <div class="feature  me-3">
-                                                            <i class="fas fa-map-marker-alt text-primary"></i>
+                                                    <div class="chat-response p-3 rounded bg-white shadow-sm d-none">
+                                                        <div class="spinner-border spinner-border-sm text-primary d-none" role="status">
+                                                            <span class="visually-hidden">Loading...</span>
                                                         </div>
-                                                        <div>
-                                                            <h6 class="fw-bold mb-0">Location</h6>
-                                                            <small class="text-muted">{{ workshop.location }}</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-12">
-                                                    <div class="d-flex align-items-start">
-                                                        <div class="feature  me-3">
-                                                            <i class="fas fa-info-circle text-primary"></i>
-                                                        </div>
-                                                        <div>
-                                                            <h6 class="fw-bold mb-2">Description</h6>
-                                                            <p class="text-muted mb-0 small">{{ workshop.description }}</p>
+                                                        <div class="response-text mb-3"></div>
+                                                        
+                                                        <!-- Translation Section -->
+                                                        <div class="translation-section mt-3 pt-3 border-top d-none">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <select class="form-select form-select-sm" id="targetLanguage">
+                                                                    <option value="fr">French</option>
+                                                                    <option value="es">Spanish</option>
+                                                                    <option value="de">German</option>
+                                                                    <option value="it">Italian</option>
+                                                                    <option value="pt">Portuguese</option>
+                                                                    <option value="ru">Russian</option>
+                                                                    <option value="ar">Arabic</option>
+                                                                    <option value="zh">Chinese</option>
+                                                                    <option value="ja">Japanese</option>
+                                                                    <option value="ko">Korean</option>
+                                                                </select>
+                                                                <button class="btn btn-sm btn-outline-primary translate-btn">
+                                                                    <i class="fas fa-language me-1"></i>Translate
+                                                                </button>
+                                                            </div>
+                                                            <div class="translated-text mt-3 d-none">
+                                                                <div class="alert alert-info mb-0"></div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -494,6 +551,116 @@
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
+            // Add chatbot functionality
+            document.querySelectorAll('.generate-explanation').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const container = button.closest('.card-body');
+                    const input = container.querySelector('.chat-input');
+                    const responseDiv = container.querySelector('.chat-response');
+                    const spinner = container.querySelector('.spinner-border');
+                    const responseText = container.querySelector('.response-text');
+
+                    // Get workshop data
+                    const workshopTitle = input.dataset.workshopTitle;
+                    const workshopDescription = input.dataset.workshopDescription;
+                    const userQuestion = input.value.trim();
+
+                    if (!userQuestion) {
+                        input.value = "Can you explain this workshop in simple terms?";
+                        return;
+                    }
+
+                    try {
+                        // Show loading state
+                        responseDiv.classList.remove('d-none');
+                        spinner.classList.remove('d-none');
+                        responseText.innerHTML = '';
+                        button.disabled = true;
+
+                        const response = await fetch('{{ path('app_workshop_generate') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                prompt: `Based on this workshop titled "${workshopTitle}" with description "${workshopDescription}", please ${userQuestion}. Keep the explanation simple and concise.`
+                            })
+                        });
+
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            responseText.innerHTML = `<p class="mb-0">${data.description}</p>`;
+                        } else {
+                            throw new Error(data.message || 'Failed to get explanation');
+                        }
+                    } catch (error) {
+                        responseText.innerHTML = `<p class="text-danger mb-0">Sorry, I couldn't generate an explanation. Please try again.</p>`;
+                    } finally {
+                        spinner.classList.add('d-none');
+                        button.disabled = false;
+                    }
+                });
+            });
+
+            // Add translation functionality
+            document.querySelectorAll('.translate-btn').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const container = button.closest('.translation-section');
+                    const responseText = button.closest('.card-body').querySelector('.response-text').textContent;
+                    const targetLang = container.querySelector('#targetLanguage').value;
+                    const translatedContainer = container.querySelector('.translated-text');
+                    const alertBox = translatedContainer.querySelector('.alert');
+
+                    try {
+                        button.disabled = true;
+                        button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Translating...';
+
+                        const response = await fetch('{{ path('app_workshop_translate') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                text: responseText,
+                                targetLang: targetLang
+                            })
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            translatedContainer.classList.remove('d-none');
+                            alertBox.textContent = data.translation;
+                        } else {
+                            throw new Error(data.message);
+                        }
+                    } catch (error) {
+                        alertBox.classList.remove('alert-info');
+                        alertBox.classList.add('alert-danger');
+                        alertBox.textContent = 'Translation failed: ' + error.message;
+                    } finally {
+                        button.disabled = false;
+                        button.innerHTML = '<i class="fas fa-language me-1"></i>Translate';
+                    }
+                });
+            });
+
+            // Show translation section when chat response is received
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList' && mutation.target.classList.contains('response-text')) {
+                        const translationSection = mutation.target.closest('.chat-response').querySelector('.translation-section');
+                        if (translationSection) {
+                            translationSection.classList.remove('d-none');
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('.response-text').forEach(element => {
+                observer.observe(element, { childList: true });
             });
         });
     </script>

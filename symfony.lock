@@ -26,6 +26,7 @@
             "./migrations/.gitignore"
         ]
     },
+
     "php-http/discovery": {
         "version": "1.20",
         "recipe": {
@@ -37,6 +38,16 @@
         "files": [
             "./config/packages/http_discovery.yaml"
         ]
+
+    "google/apiclient": {
+        "version": "2.18",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "2.10",
+            "ref": "07a97ec434d43b7903c78069a04c92adb6442e52"
+        }
+
     },
     "phpunit/phpunit": {
         "version": "9.6",
@@ -143,6 +154,18 @@
             "version": "1.0",
             "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
         }
+    },
+    "symfony/mercure-bundle": {
+        "version": "0.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "0.3",
+            "ref": "528285147494380298f8f991ee8c47abebaf79db"
+        },
+        "files": [
+            "./config/packages/mercure.yaml"
+        ]
     },
     "symfony/messenger": {
         "version": "6.4",

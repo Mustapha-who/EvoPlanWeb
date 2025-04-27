@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de la Réclamation - Admin{% endblock %}
+
+{% block body %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="alert-circle"></i></div>
+                            Détails de la Réclamation #{{ claim.id }} - Admin
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">Informations</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">ID</dt>
+                    <dd class="col-sm-9">{{ claim.id }}</dd>
+                    <dt class="col-sm-3">Description</dt>
+                    <dd class="col-sm-9">{{ claim.description }}</dd>
+                    <dt class="col-sm-3">Type</dt>
+                    <dd class="col-sm-9">{{ claim.claimType }}</dd>
+                    <dt class="col-sm-3">Statut</dt>
+                    <dd class="col-sm-9">{{ claim.claimStatus }}</dd>
+                    <dt class="col-sm-3">Date de création</dt>
+                    <dd class="col-sm-9">{{ claim.creationDate|date('d/m/Y') }}</dd>
+                    <dt class="col-sm-3">Client</dt>
+                    <dd class="col-sm-9">{{ claim.client ? claim.client.phoneNumber : 'N/A' }}</dd>
+                </dl>
+                <div class="mt-4">
+                    <a href="{{ path('app_claim_admin_edit', {'id': claim.id}) }}" class="btn btn-primary">Modifier le statut</a>
+                    <form method="post" action="{{ path('app_claim_delete', {'id': claim.id}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression ?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ claim.id) }}">
+                        <button type="submit" class="btn btn-danger ms-2">Supprimer</button>
+                    </form>
+                    <a href="{{ path('app_claim_admin_index') }}" class="btn btn-secondary ms-2">Retour</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

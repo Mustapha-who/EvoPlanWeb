@@ -107,7 +107,7 @@
                     <tbody>
                     {% for workshop in workshops %}
                         <tr>
-                            <td>{{ workshop.title }}</td>
+                            <td >{{ workshop.title}}</td>
                             <td>{{ workshop.date ? workshop.date|date('m-d-Y') : '' }}</td>
                             <td>{{ workshop.enddate ? workshop.enddate|date('m-d-Y') : '' }}</td>
                             <td>{{ workshop.instructor ? workshop.instructor.name }}</td>
@@ -117,7 +117,7 @@
                             <td style="max-width: 300px; white-space: normal; word-wrap: break-word;">
                                 {{ workshop.description }}
                             </td>
-                            <td class="text-center">
+                            <td  class="text-center" >
                                 <button class="btn btn-datatable btn-icon btn-transparent-dark me-2" onclick="location.href='{{ path('app_session_index', {'workshop_id': workshop.id_workshop}) }}'">
                                     <i data-feather="file-text"></i>
                                 </button>
