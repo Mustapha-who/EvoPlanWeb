@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails Feedback #{{ feedback.id }}{% endblock %}
+{% block title %}Détails Feedback #{{ feedback.id }} - Admin{% endblock %}
 
 {% block body %}
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
@@ -49,7 +49,7 @@
                 </div>
 
                 <div class="mt-4">
-                    <a href="{{ path('app_feedback_index') }}" class="btn btn-secondary">
+                    <a href="{{ path('app_feedback_admin_index') }}" class="btn btn-secondary">
                         <i data-feather="arrow-left"></i> Retour à la liste
                     </a>
                 </div>

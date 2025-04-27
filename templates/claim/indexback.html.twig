@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des Feedbacks{% endblock %}
+{% block title %}Admin - Liste des Réclamations{% endblock %}
 
 {% block body %}
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
@@ -9,14 +9,14 @@
                 <div class="row align-items-center justify-content-between">
                     <div class="col-auto mt-4">
                         <h1 class="page-header-title">
-                            <div class="page-header-icon"><i data-feather="message-square"></i></div>
-                            Liste des Feedbacks
+                            <div class="page-header-icon"><i data-feather="alert-circle"></i></div>
+                            Administration - Liste des Réclamations
                         </h1>
                     </div>
                     <div class="col-12 col-xl-auto mt-4">
-                        <a href="{{ path('app_feedback_new') }}" class="btn btn-primary">
-                            <i data-feather="plus"></i>
-                            Nouveau Feedback
+                        <a href="{{ path('app_claim_admin_calendar') }}" class="btn btn-info ms-2">
+                            <i data-feather="calendar"></i>
+                            Calendrier
                         </a>
                         <button type="button" class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#statsModal">
                             <i data-feather="bar-chart-2"></i>
@@ -28,9 +28,9 @@
                                 Exporter
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ path('app_feedback_export_excel', {'rating': filters.rating|default(null), 'keyword': filters.keyword|default(null)}) }}">Excel</a></li>
-                                <li><a class="dropdown-item" href="{{ path('app_feedback_export_pdf', {'rating': filters.rating|default(null), 'keyword': filters.keyword|default(null)}) }}">PDF</a></li>
-                                <li><a class="dropdown-item" href="{{ path('app_feedback_export_csv', {'rating': filters.rating|default(null), 'keyword': filters.keyword|default(null)}) }}">CSV</a></li>
+                                <li><a class="dropdown-item" href="{{ path('app_claim_export_excel', filter_form.vars.data|default({})) }}">Excel</a></li>
+                                <li><a class="dropdown-item" href="{{ path('app_claim_export_pdf', filter_form.vars.data|default({})) }}">PDF</a></li>
+                                <li><a class="dropdown-item" href="{{ path('app_claim_export_csv', filter_form.vars.data|default({})) }}">CSV</a></li>
                             </ul>
                         </div>
                     </div>
@@ -60,30 +60,20 @@
                 <span>Filtres de recherche</span>
             </div>
             <div class="card-body">
-                {{ form_start(filter_form) }}
+                {{ form_start(filter_form, {'attr': {'class': 'needs-validation', 'novalidate': ''}}) }}
                 <div class="row g-3">
                     <div class="col-md-4">
-                        {{ form_row(filter_form.rating, {
-                            'attr': {
-                                'class': 'form-select'
-                            }
-                        }) }}
+                        {{ form_row(filter_form.claimStatus, {'attr': {'class': 'form-select'}}) }}
                     </div>
                     <div class="col-md-4">
-                        {{ form_row(filter_form.keyword, {
-                            'attr': {
-                                'class': 'form-control',
-                                'placeholder': 'Rechercher dans les commentaires...'
-                            }
-                        }) }}
+                        {{ form_row(filter_form.claimType, {'attr': {'class': 'form-select'}}) }}
                     </div>
-                    <div class="col-md-4 d-flex align-items-end">
-                        {{ form_row(filter_form.submit, {
-                            'attr': {
-                                'class': 'btn btn-primary w-100'
-                            }
-                        }) }}
+                    <div class="col-md-4">
+                        {{ form_row(filter_form.keyword, {'attr': {'class': 'form-control'}}) }}
                     </div>
+                </div>
+                <div class="mt-3">
+                    {{ form_row(filter_form.submit, {'attr': {'class': 'btn btn-primary'}}) }}
                 </div>
                 {{ form_end(filter_form) }}
             </div>
@@ -91,48 +81,39 @@
 
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Gestion des Feedbacks</span>
-                <div class="small text-muted">{{ feedbacks.getTotalItemCount }} feedback(s) au total</div>
+                <span>Gestion des Réclamations</span>
+                <div class="small text-muted">{{ claims.getTotalItemCount }} réclamation(s) au total</div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-hover" id="datatablesSimple">
                         <thead class="table-light">
                             <tr>
-                                <th>Commentaire</th>
-                                <th class="text-center">Note</th>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th>Statut</th>
+                                <th>Date</th>
                                 <th>Client (Numéro de téléphone)</th>
                                 <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for item in feedbacks %}
+                            {% for item in claims %}
                                 <tr>
-                                    <td>
-                                        <div class="fw-bold">{{ item.comments|slice(0, 100) }}{% if item.comments|length > 100 %}...{% endif %}</div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="star-rating" title="{{ item.rating }}/5">
-                                            {% for i in 1..5 %}
-                                                {% if i <= item.rating %}
-                                                    <i class="fas fa-star text-warning"></i>
-                                                {% else %}
-                                                    <i class="far fa-star text-muted"></i>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </div>
-                                        <small class="text-muted d-block">({{ item.rating }}/5)</small>
-                                    </td>
+                                    <td>{{ item.description|slice(0, 100) }}{% if item.description|length > 100 %}...{% endif %}</td>
+                                    <td>{{ item.claimType }}</td>
+                                    <td>{{ item.claimStatus }}</td>
+                                    <td>{{ item.creationDate|date('d/m/Y') }}</td>
                                     <td>{{ item.client ? item.client.phoneNumber : 'N/A' }}</td>
                                     <td class="text-end">
                                         <div class="btn-group" role="group">
-                                            <a href="{{ path('app_feedback_show', {'id': item.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir détails">
+                                            <a href="{{ path('app_claim_admin_show', {'id': item.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir détails">
                                                 <i data-feather="eye"></i>
                                             </a>
-                                            <a href="{{ path('app_feedback_edit', {'id': item.id}) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
+                                            <a href="{{ path('app_claim_admin_edit', {'id': item.id}) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
                                                 <i data-feather="edit"></i>
                                             </a>
-                                            <form method="post" action="{{ path('app_feedback_delete', {'id': item.id}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression ?');">
+                                            <form method="post" action="{{ path('app_claim_delete', {'id': item.id}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression ?');">
                                                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
                                                     <i data-feather="trash-2"></i>
@@ -143,10 +124,10 @@
                                 </tr>
                             {% else %}
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-4">
+                                    <td colspan="6" class="text-center text-muted py-4">
                                         <div class="d-flex flex-column align-items-center">
-                                            <i data-feather="message-square" class="mb-2" style="width: 48px; height: 48px;"></i>
-                                            Aucun feedback trouvé
+                                            <i data-feather="alert-circle" class="mb-2" style="width: 48px; height: 48px;"></i>
+                                            Aucune réclamation trouvée
                                         </div>
                                     </td>
                                 </tr>
@@ -154,11 +135,10 @@
                         </tbody>
                     </table>
                 </div>
-                {% if feedbacks.getTotalItemCount > feedbacks.getItemNumberPerPage %}
-                    <div class="navigation mt-4">
-                        {{ knp_pagination_render(feedbacks, null, {}, {'align': 'center'}) }}
-                    </div>
-                {% endif %}
+
+                <div class="navigation mt-4">
+                    {{ knp_pagination_render(claims, null, {}, {'align': 'center'}) }}
+                </div>
             </div>
         </div>
     </div>
@@ -169,7 +149,7 @@
                 <div class="modal-header bg-info text-white">
                     <h5 class="modal-title" id="statsModalLabel">
                         <i data-feather="bar-chart-2" class="me-2"></i>
-                        Statistiques des Feedbacks
+                        Statistiques des Réclamations
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -178,10 +158,10 @@
                         <div class="col-md-6">
                             <div class="card mb-4">
                                 <div class="card-header">
-                                    Répartition des notes
+                                    Répartition des statuts
                                 </div>
                                 <div class="card-body">
-                                    <canvas id="ratingChart" height="250"></canvas>
+                                    <canvas id="statusChart" height="250"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -193,12 +173,20 @@
                                 <div class="card-body">
                                     <ul class="list-group list-group-flush">
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Total des feedbacks
-                                            <span class="badge bg-primary rounded-pill">{{ feedbacks.getTotalItemCount }}</span>
+                                            Total des réclamations
+                                            <span class="badge bg-primary rounded-pill">{{ claims.getTotalItemCount }}</span>
                                         </li>
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Note moyenne
-                                            <span class="badge bg-success rounded-pill">{{ average_rating|default(0)|number_format(1) }}/5</span>
+                                            Nouvelles
+                                            <span class="badge bg-warning rounded-pill">{{ status_counts.new }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            En cours
+                                            <span class="badge bg-info rounded-pill">{{ status_counts.in_progress }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Résolues
+                                            <span class="badge bg-success rounded-pill">{{ status_counts.resolved }}</span>
                                         </li>
                                     </ul>
                                 </div>
@@ -220,14 +208,6 @@
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        .star-rating {
-            display: inline-block;
-            line-height: 1;
-        }
-        .star-rating i {
-            font-size: 1.2rem;
-            margin: 0 1px;
-        }
         .table-hover tr:hover {
             background-color: rgba(0, 119, 190, 0.03);
         }
@@ -237,81 +217,30 @@
         .dropdown-menu {
             z-index: 1050;
         }
-        .form-control, .form-select {
-            border-radius: 0.375rem;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        }
-        .form-control:focus, .form-select:focus {
-            border-color: #80bdff;
-            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
-        }
-        .form-label {
-            font-weight: 500;
-            color: #495057;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-            transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #004085;
-        }
-        /* Pagination Styles with Higher Specificity */
         .navigation .pagination {
-            display: flex;
             justify-content: center;
-            margin-top: 2rem;
-            padding: 0;
-            list-style: none;
-            font-family: 'Arial', sans-serif;
+            margin-top: 1.5rem;
         }
-        .navigation .pagination .page-item {
-            margin: 0 5px;
+        .pagination .page-item.active .page-link {
+            background-color: #0077b6;
+            border-color: #0077b6;
+            color: white;
         }
-        .navigation .pagination .page-item .page-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 40px;
-            height: 40px;
-            padding: 0;
-            border-radius: 10px !important;
-            border: 1px solid #e0e6ed !important;
-            background-color: #ffffff !important;
-            color: #007bff !important;
-            font-size: 1rem;
-            font-weight: 600;
-            text-align: center;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        .pagination .page-item .page-link {
+            color: #0077b6;
+            border: 1px solid #dee2e6;
+            margin: 0 0.2rem;
+            border-radius: 0.25rem;
         }
-        .navigation .pagination .page-item .page-link:hover {
-            background-color: #f1f5f9 !important;
-            border-color: #d1d9e6 !important;
-            color: #0056b3 !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #fff;
+            border-color: #dee2e6;
         }
-        .navigation .pagination .page-item.active .page-link {
-            background-color: #007bff !important;
-            border-color: #007bff !important;
-            color: #ffffff !important;
-            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-        }
-        .navigation .pagination .page-item.disabled .page-link {
-            color: #adb5bd !important;
-            background-color: #f8f9fa !important;
-            border-color: #e0e6ed !important;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        .navigation .pagination .page-item:first-child .page-link,
-        .navigation .pagination .page-item:last-child .page-link {
-            font-size: 1.2rem;
-            border-radius: 10px !important;
+        .pagination .page-item:not(.disabled) .page-link:hover {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
         }
     </style>
 {% endblock %}
@@ -328,18 +257,15 @@
                     labels: {
                         placeholder: "Rechercher...",
                         perPage: "{select} éléments par page",
-                        noRows: "Aucun résultat trouvé",
+                        noRows: "Aucune réclamation trouvée",
                         info: "Affichage de {start} à {end} sur {rows} éléments"
                     },
                     columns: [
-                        { select: 0, sort: "asc" },
-                        { select: 1, sortable: false }
-                    ],
-                    perPage: 0,
-                    searchable: false
+                        { select: 0, sort: "asc" }
+                    ]
                 });
             }
-            
+
             [].slice.call(document.querySelectorAll('[title]'))
                 .forEach(function (tooltipTriggerEl) {
                     new bootstrap.Tooltip(tooltipTriggerEl);
@@ -356,25 +282,21 @@
             const statsModal = document.getElementById('statsModal');
             if (statsModal) {
                 statsModal.addEventListener('shown.bs.modal', function() {
-                    const ctx = document.getElementById('ratingChart').getContext('2d');
+                    const ctx = document.getElementById('statusChart').getContext('2d');
                     new Chart(ctx, {
                         type: 'pie',
                         data: {
-                            labels: ['1 étoile', '2 étoiles', '3 étoiles', '4 étoiles', '5 étoiles'],
+                            labels: ['Nouvelles', 'En cours', 'Résolues'],
                             datasets: [{
                                 data: [
-                                    {{ rating_counts[1]|default(0) }},
-                                    {{ rating_counts[2]|default(0) }},
-                                    {{ rating_counts[3]|default(0) }},
-                                    {{ rating_counts[4]|default(0) }},
-                                    {{ rating_counts[5]|default(0) }}
+                                    {{ status_counts.new|default(0) }},
+                                    {{ status_counts.in_progress|default(0) }},
+                                    {{ status_counts.resolved|default(0) }}
                                 ],
                                 backgroundColor: [
-                                    '#dc3545',
-                                    '#fd7e14',
                                     '#ffc107',
-                                    '#20c997',
-                                    '#198754'
+                                    '#17a2b8',
+                                    '#28a745'
                                 ]
                             }]
                         },
