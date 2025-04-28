@@ -18,12 +18,12 @@ class baseDashController extends AbstractController
     #[Route('/sidenav/userdash', name: 'side_user_dashboard')]
     public function index(): Response
     {
-        return $this->render('User/adminDashboard.html.twig');
+        return $this->redirectToRoute('user_dashboard');
     }
-    #[Route('/user/account_security', name: 'account_security')]
+    #[Route('/sidenav/account_security', name: 'side_account_security')]
     public function security(): Response
     {
-        return $this->render('User/account-security.html.twig');
+        return $this->redirectToRoute('account_security');
     }
 
 

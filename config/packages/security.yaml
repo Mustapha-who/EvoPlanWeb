@@ -39,32 +39,53 @@ security:
                 path: logout
                 target: login
                 invalidate_session: true
-
-
+            custom_authenticators:
+                - App\Service\UserModule\GoogleAuthenticator
+                - App\Service\UserModule\RecaptchaAuthenticator
     access_control:
-        - { path: ^/signup, roles: PUBLIC_ACCESS }
-        - { path: ^/tosignup, roles: PUBLIC_ACCESS }
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/logout, roles: PUBLIC_ACCESS }
-        - { path: ^/admin/google/auth, roles: PUBLIC_ACCESS }
-        - { path: ^/calendar-callback, roles: PUBLIC_ACCESS }
-        - { path: ^/admin, roles: ROLE_ADMIN }
-        - { path: ^/admindashboard, roles: ROLE_ADMIN }
-        - { path: ^/eventplanner, roles: ROLE_EVENTPLANNER }
-        - { path: ^/instructor, roles: ROLE_INSTRUCTOR }
-        - { path: ^/event/home, roles: ROLE_CLIENT }
-        - { path: ^/partner, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER ] }
-        - { path: ^/workshop/new, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_INSTRUCTOR ] }
-        - { path: ^/workshop/front/\d+, roles: ROLE_CLIENT }
-        - { path: ^/workshop/front, roles: ROLE_CLIENT }
-        - { path: ^/workshop, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
-        - { path: ^/session, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_INSTRUCTOR ] }
-        - { path: ^/sidenav/userdash, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
-        - { path: ^/user/profile, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
-        - { path: ^/sidenav/profile, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
-        - { path: ^/user/account_security, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
-        - { path: ^/app_home, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
-        - { path: ^/, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
+    - { path: ^/signup, roles: PUBLIC_ACCESS }
+    - { path: ^/tosignup, roles: PUBLIC_ACCESS }
+    - { path: ^/google-signup, roles: PUBLIC_ACCESS }
+    - { path: ^/google/login, roles: PUBLIC_ACCESS }
+    - { path: ^/google/callback, roles: PUBLIC_ACCESS }
+    - { path: ^/login, roles: PUBLIC_ACCESS }
+    - { path: ^/logout, roles: PUBLIC_ACCESS }
+    - { path: ^/forgot-password, roles: PUBLIC_ACCESS }
+    - { path: ^/verify-email, roles: PUBLIC_ACCESS }
+    - { path: ^/admin/google/auth, roles: PUBLIC_ACCESS }
+    - { path: ^/calendar-callback, roles: PUBLIC_ACCESS }
+    - { path: ^/admin, roles: ROLE_ADMIN }
+    - { path: ^/admindashboard, roles: ROLE_ADMIN }
+    - { path: ^/eventplanner, roles: ROLE_EVENTPLANNER }
+    - { path: ^/instructor, roles: ROLE_INSTRUCTOR }
+    - { path: ^/event/home, roles: ROLE_CLIENT }
+    - { path: ^/partner, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER ] }
+    - { path: ^/workshop/new, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_INSTRUCTOR ] }
+    - { path: ^/workshop/front/\d+, roles: ROLE_CLIENT }
+    - { path: ^/workshop/front, roles: ROLE_CLIENT }
+    - { path: ^/claim/admin/claim/calendar, roles: ROLE_ADMIN }
+    - { path: ^/claim/admin/claim, roles: ROLE_ADMIN }
+    - { path: ^/claim/admin/claim, roles: ROLE_ADMIN }
+    - { path: ^/claim/\d+/edit, roles: ROLE_ADMIN }
+    - { path: ^/claim/export/csv, roles: [ ROLE_ADMIN, ROLE_CLIENT ] }
+    - { path: ^/claim/export/excel, roles: [ ROLE_ADMIN, ROLE_CLIENT ] }
+    - { path: ^/claim/export/pdf, roles: [ ROLE_ADMIN, ROLE_CLIENT ] }
+    - { path: ^/claim/new, roles: ROLE_CLIENT }
+    - { path: ^/claim/\d+, roles: ROLE_CLIENT }
+    - { path: ^/claim/, roles: ROLE_CLIENT }
+    - { path: ^/feedback/admin/feedback, roles: ROLE_ADMIN }
+    - { path: ^/feedback/admin/\d+, roles: ROLE_ADMIN }
+    - { path: ^/feedback/\d+/edit, roles: ROLE_ADMIN }
+    - { path: ^/feedback/, roles: ROLE_CLIENT }
+    - { path: ^/workshop, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
+    - { path: ^/session, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_INSTRUCTOR ] }
+    - { path: ^/sidenav/userdash, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
+    - { path: ^/user/profile, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
+    - { path: ^/sidenav/profile, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
+    - { path: ^/user/account_security, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
+    - { path: ^/user/update_password, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
+    - { path: ^/app_home, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
+    - { path: ^/, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
 when@test:
     security:
         password_hashers:

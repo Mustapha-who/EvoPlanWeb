@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Génération IA{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">
+        <i class="fas fa-robot"></i> Génération de contenu par IA
+    </h1>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row">
+                {% for event in events %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ event.nom }}</h5>
+                            <p class="card-text text-muted small">
+                                {{ event.dateDebut|date('d/m/Y') }} - {{ event.lieu.value }}
+                            </p>
+                            <p class="card-text">
+                                {{ event.description|slice(0, 100) }}...
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ path('app_publication_new', {'id_event': event.id_event, 'generate': 'ai'}) }}"
+                               class="btn btn-success btn-sm">
+                               <i class="fas fa-magic"></i> Générer le post
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12">
+                    <div class="alert alert-warning">
+                        Aucun événement disponible. Créez d'abord un événement pour générer du contenu.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

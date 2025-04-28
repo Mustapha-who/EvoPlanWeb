@@ -23,7 +23,6 @@
         <nav class="nav nav-borders">
             <a class="nav-link active ms-0" href={{ path('user_profile') }}>Profile</a>
             <a class="nav-link" href="{{ path('account_security') }}">Security</a>
-            <a class="nav-link" href="account-notifications.html">Notifications</a>
         </nav>
         <hr class="mt-0 mb-4" />
         <div class="row">
@@ -41,6 +40,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="col-xl-8">
                 <!-- Account details card-->
                 <div class="card mb-4">
@@ -54,14 +54,24 @@
                         </div>
                         <div class="mb-3">
                             {{ form_label(form.email, 'Email', {'label_attr': {'class': 'small mb-1'}}) }}
-                            {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Enter your email'}}) }}
-                            {{ form_errors(form.email) }}
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1 me-2">
+                                    {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Enter your email'}}) }}
+                                    {{ form_errors(form.email) }}
+                                </div>
+                                <button type="button" id="verifyEmail" class="btn btn-secondary" disabled>Verify Email</button>
+                            </div>
                         </div>
                         {% if form.phoneNumber is defined %}
                             <div class="mb-3">
                                 {{ form_label(form.phoneNumber, 'Phone Number', {'label_attr': {'class': 'small mb-1'}}) }}
-                                {{ form_widget(form.phoneNumber, {'attr': {'class': 'form-control', 'placeholder': 'Enter your phone number'}}) }}
-                                {{ form_errors(form.phoneNumber) }}
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1 me-2">
+                                        {{ form_widget(form.phoneNumber, {'attr': {'class': 'form-control', 'placeholder': 'Enter your phone number'}}) }}
+                                        {{ form_errors(form.phoneNumber) }}
+                                    </div>
+                                    <button type="button" id="verifyPhone" class="btn btn-secondary" disabled>Verify Phone</button>
+                                </div>
                             </div>
                         {% endif %}
                         {% if form.specialization is defined %}
@@ -85,11 +95,191 @@
                                 {{ form_errors(form.certificate) }}
                             </div>
                         {% endif %}
-                        <button class="btn btn-primary" type="submit">Save changes</button>
+                        <button class="btn btn-primary" id="submitButton" type="submit">Save changes</button>
                         {{ form_end(form) }}
                     </div>
                 </div>
             </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="verificationModal" tabindex="-1" aria-labelledby="verificationModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="verificationModalLabel">Verification Required</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="emailVerification" style="display: none;">
+                                <p>Enter the code sent to your email:</p>
+                                <input type="text" id="emailCode" class="form-control mb-2" placeholder="Email Code" />
+                                <button id="verifyEmailCode" class="btn btn-primary">Verify Email</button>
+                            </div>
+                            <div id="phoneVerification" style="display: none;">
+                                <p>Enter the code sent to your phone:</p>
+                                <input type="text" id="phoneCode" class="form-control mb-2" placeholder="Phone Code" />
+                                <button id="verifyPhoneCode" class="btn btn-primary">Verify Phone</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM fully loaded and parsed.');
+
+            const emailField = document.querySelector('[data-verify-target="email"]');
+            const phoneField = document.querySelector('[data-verify-target="phone"]');
+            const verifyEmailButton = document.getElementById('verifyEmail');
+            const verifyPhoneButton = document.getElementById('verifyPhone');
+            const submitButton = document.getElementById('submitButton');
+            const verificationModal = new bootstrap.Modal(document.getElementById('verificationModal')); // Bootstrap modal instance
+            const emailVerificationSection = document.getElementById('emailVerification');
+            const phoneVerificationSection = document.getElementById('phoneVerification');
+            const emailCodeInput = document.getElementById('emailCode');
+            const phoneCodeInput = document.getElementById('phoneCode');
+            let emailTouched = false;
+            let phoneTouched = false;
+            let emailVerified = false;
+            let phoneVerified = false;
+
+            console.log('Initial states:', { emailTouched, phoneTouched, emailVerified, phoneVerified });
+
+            // Enable submit button by default
+            submitButton.disabled = false;
+
+            // Handle email field changes
+            emailField.addEventListener('input', () => {
+                console.log('Email field changed:', emailField.value);
+                emailTouched = true;
+                emailVerified = false; // Reset verification status
+                verifyEmailButton.disabled = false; // Enable verify button
+                toggleSubmitButton();
+            });
+
+            // Handle phone field changes
+            phoneField.addEventListener('input', () => {
+                console.log('Phone field changed:', phoneField.value);
+                phoneTouched = true;
+                phoneVerified = false; // Reset verification status
+                verifyPhoneButton.disabled = false; // Enable verify button
+                toggleSubmitButton();
+            });
+
+            // Send email verification code
+            verifyEmailButton.addEventListener('click', () => {
+                console.log('Sending email verification code...');
+                fetch('/send-email-verification-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: emailField.value })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Email verification response data:', data);
+                        if (data.success) {
+                            alert('Verification code sent to your email.');
+                            emailVerificationSection.style.display = 'block';
+                            phoneVerificationSection.style.display = 'none';
+                            verificationModal.show(); // Show modal using Bootstrap API
+                        } else {
+                            alert('Failed to send verification code.');
+                        }
+                    })
+                    .catch(error => console.error('Error sending email verification code:', error));
+            });
+
+            // Send phone verification code
+            verifyPhoneButton.addEventListener('click', () => {
+                console.log('Sending phone verification code...');
+                fetch('/send-phone-verification-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phoneField.value })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Phone verification response data:', data);
+                        if (data.success) {
+                            alert('Verification code sent to your phone.');
+                            phoneVerificationSection.style.display = 'block';
+                            emailVerificationSection.style.display = 'none';
+                            verificationModal.show(); // Show modal using Bootstrap API
+                        } else {
+                            alert('Failed to send verification code.');
+                        }
+                    })
+                    .catch(error => console.error('Error sending phone verification code:', error));
+            });
+
+            // Verify email code
+            document.querySelector('#emailVerification button').addEventListener('click', () => {
+                const emailCode = emailCodeInput.value.trim(); // Trim to remove extra spaces
+                console.log('Verifying email code:', emailCode); // Log the code being sent
+
+                fetch('/verify-email-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: emailCode }) // Send the code in JSON format
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Email code verification response data:', data); // Log the response
+                        if (data.success) {
+                            alert('Email verified successfully!');
+                            emailVerified = true;
+                            verifyEmailButton.disabled = true;
+                            verificationModal.hide(); // Hide modal using Bootstrap API
+                            toggleSubmitButton();
+                        } else {
+                            alert('Invalid email verification code.');
+                        }
+                    })
+                    .catch(error => console.error('Error verifying email code:', error));
+            });
+
+            // Verify phone code
+            document.querySelector('#phoneVerification button').addEventListener('click', () => {
+                const phoneCode = phoneCodeInput.value.trim(); // Trim to remove extra spaces
+                console.log('Verifying phone code:', phoneCode); // Log the code being sent
+
+                fetch('/verify-phone-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: phoneCode }) // Send the code in JSON format
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Phone code verification response data:', data); // Log the response
+                        if (data.success) {
+                            alert('Phone verified successfully!');
+                            phoneVerified = true;
+                            verifyPhoneButton.disabled = true;
+                            verificationModal.hide(); // Hide modal using Bootstrap API
+                            toggleSubmitButton();
+                        } else {
+                            alert('Invalid phone verification code.');
+                        }
+                    })
+                    .catch(error => console.error('Error verifying phone code:', error));
+            });
+
+            // Enable/disable submit button based on verification status
+            function toggleSubmitButton() {
+                console.log('Toggling submit button. Current states:', { emailTouched, phoneTouched, emailVerified, phoneVerified });
+                if (
+                    (emailTouched && !emailVerified) ||
+                    (phoneTouched && !phoneVerified)
+                ) {
+                    submitButton.disabled = true;
+                } else {
+                    submitButton.disabled = false;
+                }
+            }
+        });
+    </script>
 {% endblock %}

@@ -1,8 +1,9 @@
-{% extends 'base.html.twig' %}
+{# Extend your User dashboard template #}
+{% extends 'User/base_dashboard.html.twig' %}
 
 {% block title %}Admin - Liste des Réclamations{% endblock %}
 
-{% block body %}
+{% block content %}
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
         <div class="container-xl px-4">
             <div class="page-header-content pt-4">
@@ -89,16 +90,17 @@
                 <div class="table-responsive">
                     <table class="table table-hover" id="datatablesSimple">
                         <thead class="table-light">
-                            <tr>
-                                <th>Description</th>
-                                <th>Type</th>
-                                <th>Statut</th>
-                                <th>Date</th>
-                                <th>Client (Numéro de téléphone)</th>
-                                <th class="text-end">Actions</th>
-                            </tr>
+                        <tr>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Statut</th>
+                            <th>Date</th>
+                            <th>Client (Numéro de téléphone)</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
                         </thead>
                         <tbody>
+
                             {% for item in claims %}
                                 <tr>
                                     <td>{{ item.description|slice(0, 100) }}{% if item.description|length > 100 %}...{% endif %}</td>
@@ -157,6 +159,7 @@
                                     </td>
                                 </tr>
                             {% endfor %}
+
                         </tbody>
                     </table>
                 </div>
