@@ -16,38 +16,53 @@ class AIContentGenerator
         $this->openRouterToken = $openRouterToken;
     }
 
-    public function generateCaption(Event $event, string $platform = 'facebook', ?string $forceModel = null): string
+    public function generateEventDescription(Event $event): string
     {
-        // Choix automatique du modèle
-        $model = $forceModel ?? $this->chooseModel($event);
-
         $response = $this->client->request('POST', 'https://openrouter.ai/api/v1/chat/completions', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->openRouterToken,
                 'Content-Type' => 'application/json',
-                'HTTP-Referer' => 'https://yourapp.com/', // remplace avec ton site ou localhost
-                'X-Title' => 'EvoPlanCaptionGenerator',   // titre de ton app sur OpenRouter
+                'HTTP-Referer' => 'https://yourapp.com/',
+                'X-Title' => 'EvoPlanEventGenerator',
             ],
             'json' => [
-                'model' => $model,
+                'model' => 'openai/gpt-4',
                 'messages' => [
                     [
-                        'role' => 'user',
-                        'content' => <<<PROMPT
-Rédige une courte légende attrayante pour promouvoir un événement nommé "{$event->getNom()}" qui aura lieu le {$event->getDateDebut()->format('d/m/Y H:i')} à {$event->getLieu()->value}. 
-Utilise un ton motivant et engageant, adapté à un post sur {$platform}. Fais en sorte d'inspirer les gens à y participer !
-PROMPT,
+                        'role' => 'system',
+                        'content' => 'Tu es un expert en rédaction de descriptions d\'événements. Ta mission est de créer des descriptions attractives, détaillées et engageantes pour des événements divers.'
                     ],
+                    [
+                        'role' => 'user',
+                        'content' => sprintf(
+                            "Crée une description complète pour un événement nommé '%s' qui aura lieu le %s à %s. \n" .
+                            "Prix: %s TND\n" .
+                            "Capacité: %s personnes\n" .
+                            "Statut: %s\n" .
+                            "La description doit être engageante, détaillée (entre 150 et 300 mots) et inclure:\n" .
+                            "- Une introduction accrocheuse\n" .
+                            "- Les points forts de l'événement\n" .
+                            "- Ce que les participants vont apprendre/expérimenter\n" .
+                            "- Pourquoi cet événement est unique\n" .
+                            "- Un appel à l'action motivant",
+                            $event->getNom(),
+                            $event->getDateDebut() ? $event->getDateDebut()->format('d/m/Y H:i') : '[date non définie]',
+                            $event->getLieu() ? $event->getLieu()->value : '[lieu non défini]',
+                            $event->getPrix() ?? 0,
+                            $event->getCapacite() ?? 0,
+                            $event->getStatut() ? $event->getStatut()->value : '[statut non défini]'
+                        )
+                    ]
                 ],
                 'temperature' => 0.7,
-                'max_tokens' => 150,
-            ],
+                'max_tokens' => 600
+            ]
         ]);
 
         $content = json_decode($response->getContent(false), true);
 
         if (!isset($content['choices'][0]['message']['content'])) {
-            throw new \Exception('Erreur OpenRouter: Réponse inattendue.');
+            throw new \Exception('Erreur lors de la génération de la description: ' . ($content['error']['message'] ?? 'Réponse inattendue'));
         }
 
         return trim($content['choices'][0]['message']['content']);

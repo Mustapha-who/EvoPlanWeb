@@ -1,0 +1,262 @@
+{% extends 'User/base_dashboard.html.twig' %}
+
+{% block title %}Statistiques de l'Événement - {{ event.nom }}{% endblock %}
+
+{% block content %}
+<div class="container-xl px-4 mt-n10">
+    <!-- Titre principal avec description -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1">Statistiques de l'événement</h1>
+            <h2 class="h3 text-primary mb-0">{{ event.nom }}</h2>
+            <p class="mb-0 text-muted">Analyse des performances et engagement des participants</p>
+        </div>
+        <div class="badge bg-primary-soft text-primary">
+            <i class="me-1" data-feather="calendar"></i>
+            {{ event.dateDebut|date('d/m/Y') }} - {{ event.dateFin|date('d/m/Y') }}
+        </div>
+    </div>
+
+    <!-- Section avec chiffres clés améliorée -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-start-lg border-start-primary h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="small fw-bold text-primary mb-1">Total des Visites</div>
+                            <div class="h4">{{ totalVisites }}</div>
+                            <div class="text-xs text-muted">
+                                Nombre total de consultations de votre événement
+                            </div>
+                        </div>
+                        <div class="ms-2">
+                            <i class="text-primary" data-feather="eye"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-start-lg border-start-success h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="small fw-bold text-success mb-1">Visiteurs Uniques</div>
+                            <div class="h4">{{ visiteursUniques }}</div>
+                            <div class="text-xs text-muted">
+                                Personnes distinctes ayant consulté l'événement
+                            </div>
+                        </div>
+                        <div class="ms-2">
+                            <i class="text-success" data-feather="users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-start-lg border-start-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="small fw-bold text-warning mb-1">Taux de Conversion</div>
+                            <div class="h4">{{ tauxConversion }}%</div>
+                            <div class="text-xs text-muted">
+                                Pourcentage de visiteurs ayant réservé
+                            </div>
+                        </div>
+                        <div class="ms-2">
+                            <i class="text-warning" data-feather="trending-up"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-start-lg border-start-danger h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="small fw-bold text-danger mb-1">Réservations</div>
+                            <div class="h4">{{ nombreReservations }}</div>
+                            <div class="text-xs text-muted">
+                                Participations confirmées à l'événement
+                            </div>
+                        </div>
+                        <div class="ms-2">
+                            <i class="text-danger" data-feather="check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analyse textuelle des indicateurs -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <i class="me-1" data-feather="bar-chart-2"></i>
+            Analyse des performances
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h5 class="mb-3">Engagement global</h5>
+                    <p class="mb-0">
+                        Votre événement a généré <strong>{{ totalVisites }} consultations</strong>
+                        provenant de <strong>{{ visiteursUniques }} visiteurs uniques</strong>,
+                        ce qui démontre un bon niveau d'intérêt.
+                        {% if tauxConversion > 10 %}
+                            Le taux de conversion de <span class="text-success">{{ tauxConversion }}%</span>
+                            est excellent et dépasse la moyenne sectorielle.
+                        {% else %}
+                            Le taux de conversion de <span class="text-warning">{{ tauxConversion }}%</span>
+                            pourrait être amélioré par des actions ciblées.
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="mb-3">Recommandations</h5>
+                    <ul class="mb-0">
+                        {% if jours is not empty %}
+                            <li>Période de forte affluence : {{ jours|last }} ({{ visitesParJour|last }} visites)</li>
+                        {% endif %}
+                        <li>Ratio visites/réservations : 1 réservation pour {{ (totalVisites/nombreReservations)|round(1) }} visites</li>
+                        {% if (totalVisites - nombreReservations) > 100 %}
+                            <li class="text-danger">Opportunité: {{ (totalVisites - nombreReservations) }} visiteurs n'ont pas réservé (ciblez-les)</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques améliorés -->
+    <div class="row">
+        <!-- Évolution temporelle -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="me-1" data-feather="activity"></i>
+                        Évolution des visites sur 7 jours
+                    </div>
+                    <div class="small text-muted">Mis à jour: {{ "now"|date("d/m/Y H:i") }}</div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area" style="height: 300px;">
+                        <canvas id="visitesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Répartition -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <i class="me-1" data-feather="pie-chart"></i>
+                    Taux de conversion
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="chart-pie" style="height: 250px;">
+                        <canvas id="conversionChart"></canvas>
+                    </div>
+                    <div class="mt-auto pt-3 text-center">
+                        <div class="h4 mb-1">{{ tauxConversion }}%</div>
+                        <div class="small text-muted">des visiteurs ont réservé</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Données pour les graphiques
+    const visitesData = {{ visitesParJour|json_encode|raw }};
+    const jours = Object.keys(visitesData).map(date => new Date(date).toLocaleDateString('fr-FR', {weekday: 'short', day: 'numeric'}));
+    const visites = Object.values(visitesData);
+
+    // Graphique en ligne amélioré
+    const ctxArea = document.getElementById('visitesChart').getContext('2d');
+    new Chart(ctxArea, {
+        type: 'line',
+        data: {
+            labels: jours,
+            datasets: [{
+                label: 'Visites',
+                data: visites,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.05)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Graphique en camembert amélioré
+    const ctxPie = document.getElementById('conversionChart').getContext('2d');
+    new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+            labels: ['Réservations', 'Visites sans réservation'],
+            datasets: [{
+                data: [{{ nombreReservations }}, {{ totalVisites - nombreReservations }}],
+                backgroundColor: ['#4CAF50', '#FF6384'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 20
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

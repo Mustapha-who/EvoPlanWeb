@@ -80,10 +80,26 @@
                 <!-- Étape 2: Sélection de la plateforme -->
                 <div class="step">
                     <div class="step-title">2. Partage vers</div>
-                    {{ form_row(form.plateforme, {
-                        'attr': {'class': 'form-select'},
-                        'label': 'Sélectionnez une plateforme'
-                    }) }}
+                   <div class="mb-3">
+                       <label for="publication_plateforme" class="form-label">Sélectionnez une plateforme</label>
+                       <select id="publication_plateforme" name="{{ form.plateforme.vars.full_name }}" class="form-select">
+                           {% for choice in form.plateforme.vars.choices %}
+                               <option value="{{ choice.value }}">{{ choice.label }}</option>
+                           {% endfor %}
+                       </select>
+
+                       <div class="d-flex mt-2 gap-2">
+                           <a href="{{ path('connect_facebook_start') }}" class="btn btn-outline-primary btn-sm">
+                               Se connecter à Facebook
+                           </a>
+                           <a href="#" class="btn btn-outline-danger btn-sm disabled">
+                               Se connecter à Instagram
+                           </a>
+                           <a href="#" class="btn btn-outline-info btn-sm disabled">
+                               Se connecter à Twitter
+                           </a>
+                       </div>
+                   </div>
                 </div>
 
                 <!-- Étape 3: Création du contenu -->

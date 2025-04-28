@@ -18,6 +18,8 @@
         "gregwar/captcha": "^1.2",
         "imagine/imagine": "^1.5",
         "knplabs/knp-paginator-bundle": "^6.8",
+        "league/oauth2-client": "^2.8",
+        "league/oauth2-facebook": "^2.2",
         "myclabs/php-enum": "^1.8",
         "nyholm/psr7": "*",
         "openai-php/client": "*",
