@@ -239,5 +239,51 @@ final class ReservationController extends AbstractController
         $this->addFlash('danger', 'Le paiement a échoué. Veuillez réessayer.');
         return $this->redirectToRoute('app_event_show', ['id_event' => $eventId]);
     }
+    #[Route('/{id_reservation}/delete', name: 'app_reservation_delete', methods: ['POST'])]
+    public function delete(
+        Request $request,
+        Reservation $reservation,
+        EntityManagerInterface $entityManager,
+        MailerInterface $mailer
+    ): Response {
+        // Vérification du token CSRF pour la sécurité
+        if ($this->isCsrfTokenValid('delete'.$reservation->getIdReservation(), $request->request->get('_token'))) {
+            // Récupération de l'événement avant suppression pour la redirection
+            $event = $reservation->getEvent();
 
+            // Envoi d'un email de confirmation d'annulation si nécessaire
+            $client = $reservation->getClient();
+            if ($client && $client->getEmail()) {
+                $email = (new Email())
+                    ->from('noreply@evoplan.com')
+                    ->to($client->getEmail())
+                    ->subject('Confirmation d\'annulation de réservation')
+                    ->text(sprintf(
+                        "Votre réservation pour l'événement %s a été annulée.\n\n" .
+                        "Détails de l'événement :\n" .
+                        "Date : %s\n" .
+                        "Lieu : %s\n\n" .
+                        "Si vous n'êtes pas à l'origine de cette annulation, veuillez nous contacter.",
+                        $event->getNom(),
+                        $event->getDateDebut()->format('d/m/Y H:i'),
+                        $event->getLieu()->value
+                    ));
+
+                $mailer->send($email);
+            }
+
+            // Suppression effective de la réservation
+            $entityManager->remove($reservation);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La réservation a été supprimée avec succès.');
+        } else {
+            $this->addFlash('danger', 'Jeton CSRF invalide, impossible de supprimer la réservation.');
+        }
+
+        // Redirection vers la liste des réservations de l'événement
+        return $this->redirectToRoute('app_reservations_event', [
+            'id_event' => $event->getId_event()
+        ], Response::HTTP_SEE_OTHER);
+    }
 }
