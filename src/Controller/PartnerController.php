@@ -12,15 +12,26 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Form\FormError;
+use Knp\Component\Pager\PaginatorInterface;
 
 #[Route('/partner')]
 final class PartnerController extends AbstractController
 {
     #[Route('/', name: 'app_partner_index', methods: ['GET'])]
-    public function index(PartnerRepository $partnerRepository): Response
+    public function index(PartnerRepository $partnerRepository, Request $request, PaginatorInterface $paginator): Response
     {
+        $query = $partnerRepository->createQueryBuilder('p')
+            ->orderBy('p.id_partner', 'DESC')
+            ->getQuery();
+
+        $partners = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            5 // Items per page
+        );
+
         return $this->render('partner/index.html.twig', [
-            'partners' => $partnerRepository->findAll(),
+            'partners' => $partners,
         ]);
     }
 
