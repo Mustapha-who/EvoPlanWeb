@@ -6,76 +6,89 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 12px;
+            margin: 20px;
             color: #333;
         }
-        h1 {
-            color: #007bff;
+        .header {
             text-align: center;
+            margin-bottom: 30px;
             border-bottom: 2px solid #007bff;
             padding-bottom: 10px;
         }
-        h2 {
-            color: #444;
-            margin-top: 20px;
+        .header img {
+            max-width: 150px;
+            margin-bottom: 10px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #007bff;
+        }
+        .filters {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .filters p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .filters strong {
+            color: #495057;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-bottom: 20px;
         }
         th, td {
-            border: 1px solid #ddd;
+            border: 1px solid #dee2e6;
             padding: 8px;
             text-align: left;
+            font-size: 14px;
         }
         th {
             background-color: #007bff;
             color: white;
+            font-weight: bold;
         }
         tr:nth-child(even) {
-            background-color: #f2f2f2;
+            background-color: #f8f9fa;
         }
         .stats {
             margin-top: 20px;
             padding: 10px;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
+            background-color: #e9ecef;
+            border-radius: 5px;
         }
-        .filters {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
+        .stats p {
+            margin: 5px 0;
+            font-size: 14px;
         }
-        .date {
-            text-align: right;
-            font-size: 10px;
-            color: #777;
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #6c757d;
         }
     </style>
 </head>
 <body>
-    <div class="date">
-        Rapport généré le : {{ date|date('d/m/Y H:i:s') }}
+    <div class="header">
+        <!-- Remplacez par le chemin de votre logo -->
+        <!-- <img src="{{ absolute_url(asset('images/logo.png')) }}" alt="Logo"> -->
+        <h1>Rapport des Réclamations</h1>
+        <p>Généré le {{ 'now'|date('d/m/Y H:i') }}</p>
     </div>
-
-    <h1>Rapport des Réclamations</h1>
 
     <div class="filters">
-        <h2>Filtres appliqués</h2>
-        <p><strong>Statut :</strong> {{ filters.claimStatus|default('Aucun') }}</p>
-        <p><strong>Type :</strong> {{ filters.claimType|default('Aucun') }}</p>
+        <h3>Filtres Appliqués</h3>
+        <p><strong>Statut :</strong> {{ filters.claimStatus|default('Tous') }}</p>
+        <p><strong>Type :</strong> {{ filters.claimType|default('Tous') }}</p>
+        <p><strong>Mot-clé :</strong> {{ filters.keyword|default('Aucun') }}</p>
     </div>
 
-    <div class="stats">
-        <h2>Statistiques</h2>
-        <p><strong>Nouvelles :</strong> {{ status_counts.new }}</p>
-        <p><strong>En cours :</strong> {{ status_counts.in_progress }}</p>
-        <p><strong>Résolues :</strong> {{ status_counts.resolved }}</p>
-    </div>
-
-    <h2>Liste des Réclamations</h2>
     <table>
         <thead>
             <tr>
@@ -84,7 +97,7 @@
                 <th>Type</th>
                 <th>Statut</th>
                 <th>Date</th>
-                <th>Client (Numéro)</th>
+                <th>Client</th>
             </tr>
         </thead>
         <tbody>
@@ -94,15 +107,28 @@
                     <td>{{ claim.description|slice(0, 100) }}{% if claim.description|length > 100 %}...{% endif %}</td>
                     <td>{{ claim.claimType }}</td>
                     <td>{{ claim.claimStatus }}</td>
-                    <td>{{ claim.creationDate|date('d/m/Y') }}</td>
+                    <td>{{ claim.creationDate ? claim.creationDate|date('d/m/Y') : 'N/A' }}</td>
                     <td>{{ claim.client ? claim.client.phoneNumber : 'N/A' }}</td>
                 </tr>
             {% else %}
                 <tr>
-                    <td colspan="6">Aucune réclamation trouvée.</td>
+                    <td colspan="6" style="text-align: center;">Aucune réclamation trouvée</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <div class="stats">
+        <h3>Statistiques</h3>
+        <p><strong>Total des réclamations :</strong> {{ claims|length }}</p>
+        <p><strong>Nouvelles :</strong> {{ status_counts.new|default(0) }}</p>
+        <p><strong>En cours :</strong> {{ status_counts.in_progress|default(0) }}</p>
+        <p><strong>Résolues :</strong> {{ status_counts.resolved|default(0) }}</p>
+    </div>
+
+    <div class="footer">
+        <p>Rapport généré par le système de gestion des réclamations</p>
+        <p>&copy; {{ 'now'|date('Y') }} Votre Entreprise</p>
+    </div>
 </body>
 </html>

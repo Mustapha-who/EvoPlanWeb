@@ -26,7 +26,9 @@
 
     <div class="container-xl px-4 mt-n10">
         <div class="card mb-4">
-            <div class="card-header">Réclamations par jour</div>
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Réclamations par jour</h5>
+            </div>
             <div class="card-body">
                 <div id="calendar"></div>
             </div>
@@ -36,7 +38,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.css" rel="stylesheet">
+    <link href="{{ asset('main.min.css', 'fullcalendar') }}" rel="stylesheet">
     <style>
         #calendar {
             max-width: 1100px;
@@ -44,24 +46,75 @@
         }
         .fc-event {
             cursor: pointer;
+            border-radius: 3px;
+            padding: 2px 5px;
+        }
+        .fc-event-new {
+            background-color: #ffc107;
+            border-color: #e0a800;
+        }
+        .fc-event-in_progress {
+            background-color: #17a2b8;
+            border-color: #138496;
+        }
+        .fc-event-resolved {
+            background-color: #28a745;
+            border-color: #218838;
+        }
+        .fc .fc-daygrid-day-number {
+            color: #495057;
+            font-weight: 500;
+        }
+        .fc .fc-daygrid-day:hover {
+            background-color: rgba(0, 123, 255, 0.05);
         }
     </style>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.js"></script>
+    <script src="{{ asset('main.min.js', 'fullcalendar') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const calendarEl = document.getElementById('calendar');
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                events: {{ events|raw }},
-                eventColor: '#007bff',
+                locale: 'fr',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                events: [
+                    {% for claim in claims %}
+                        {% if claim.creationDate %}
+                            {
+                                title: '{{ claim.description|slice(0, 30) }}{% if claim.description|length > 30 %}...{% endif %}',
+                                start: '{{ claim.creationDate|date('Y-m-d') }}',
+                                url: '{{ path('app_claim_admin_show', {'id': claim.id}) }}',
+                                classNames: [
+                                    {% if claim.claimStatus == 'new' %}'fc-event-new'{% elseif claim.claimStatus == 'in_progress' %}'fc-event-in_progress'{% else %}'fc-event-resolved'{% endif %}
+                                ],
+                                extendedProps: {
+                                    type: '{{ claim.claimType }}',
+                                    status: '{{ claim.claimStatus }}'
+                                }
+                            }{% NIPPLE not loop.last %},{% endif %}
+                        {% endif %}
+                    {% endfor %}
+                ],
                 eventClick: function(info) {
+                    info.jsEvent.preventDefault();
                     if (info.event.url) {
                         window.location.href = info.event.url;
                     }
+                },
+                eventDidMount: function(info) {
+                    new bootstrap.Tooltip(info.el, {
+                        title: `Type: ${info.event.extendedProps.type}<br>Statut: ${info.event.extendedProps.status}`,
+                        html: true,
+                        placement: 'top'
+                    });
                 }
             });
             calendar.render();

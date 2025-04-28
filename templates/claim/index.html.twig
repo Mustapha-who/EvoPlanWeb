@@ -28,9 +28,9 @@
                                 Exporter
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ path('app_claim_export_excel', filter_form.vars.data|default({})) }}">Excel</a></li>
-                                <li><a class="dropdown-item" href="{{ path('app_claim_export_pdf', filter_form.vars.data|default({})) }}">PDF</a></li>
-                                <li><a class="dropdown-item" href="{{ path('app_claim_export_csv', filter_form.vars.data|default({})) }}">CSV</a></li>
+                                <li><a class="dropdown-item" href="{{ path('app_claim_export_excel', filters|default({})) }}">Excel</a></li>
+                                <li><a class="dropdown-item" href="{{ path('app_claim_export_pdf', filters|default({})) }}">PDF</a></li>
+                                <li><a class="dropdown-item" href="{{ path('app_claim_export_csv', filters|default({})) }}">CSV</a></li>
                             </ul>
                         </div>
                     </div>
@@ -60,20 +60,21 @@
                 <span>Filtres de recherche</span>
             </div>
             <div class="card-body">
-                {{ form_start(filter_form, {'attr': {'class': 'needs-validation', 'novalidate': ''}}) }}
+                {{ form_start(filter_form, {'method': 'GET', 'attr': {'class': 'filter-form'}}) }}
                 <div class="row g-3">
                     <div class="col-md-4">
-                        {{ form_row(filter_form.claimStatus, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_row(filter_form.claimStatus) }}
                     </div>
                     <div class="col-md-4">
-                        {{ form_row(filter_form.claimType, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_row(filter_form.claimType) }}
                     </div>
                     <div class="col-md-4">
-                        {{ form_row(filter_form.keyword, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_row(filter_form.keyword) }}
                     </div>
                 </div>
-                <div class="mt-3">
-                    {{ form_row(filter_form.submit, {'attr': {'class': 'btn btn-primary'}}) }}
+                <div class="mt-3 d-flex justify-content-between">
+                    {{ form_row(filter_form.submit) }}
+                    <a href="{{ path('app_claim_index') }}" class="btn btn-secondary">Réinitialiser</a>
                 </div>
                 {{ form_end(filter_form) }}
             </div>
@@ -101,8 +102,32 @@
                             {% for item in claims %}
                                 <tr>
                                     <td>{{ item.description|slice(0, 100) }}{% if item.description|length > 100 %}...{% endif %}</td>
-                                    <td>{{ item.claimType }}</td>
-                                    <td>{{ item.claimStatus }}</td>
+                                    <td>
+                                        {% if item.claimType == 'technical' %}
+                                            Problème technique
+                                        {% elseif item.claimType == 'customer_service' %}
+                                            Service client
+                                        {% elseif item.claimType == 'delivery' %}
+                                            Livraison
+                                        {% elseif item.claimType == 'billing' %}
+                                            Facturation
+                                        {% elseif item.claimType == 'other' %}
+                                            Autre
+                                        {% else %}
+                                            {{ item.claimType }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.claimStatus == 'new' %}
+                                            Nouveau
+                                        {% elseif item.claimStatus == 'in_progress' %}
+                                            En cours
+                                        {% elseif item.claimStatus == 'resolved' %}
+                                            Résolu
+                                        {% else %}
+                                            {{ item.claimStatus }}
+                                        {% endif %}
+                                    </td>
                                     <td>{{ item.creationDate|date('d/m/Y') }}</td>
                                     <td>{{ item.client ? item.client.phoneNumber : 'N/A' }}</td>
                                     <td class="text-end">
@@ -136,14 +161,47 @@
                     </table>
                 </div>
 
-                <div class="navigation mt-4">
-                    {{ knp_pagination_render(claims, null, {}, {
-                        'align': 'center',
-                        'rounded': true,
-                        'size': 'lg',
-                        'style': 'margin-top: 1.5rem; font-size: 1.1rem;'
-                    }) }}
-                </div>
+                {% if claims.getTotalItemCount > claims.getItemNumberPerPage %}
+                    <div class="navigation mt-4 d-flex justify-content-center">
+                        <ul class="pagination">
+                            {% if claims.currentPageNumber > 1 %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ path('app_claim_index', {'page': claims.currentPageNumber - 1}|merge(filters|default({}))) }}" title="Précédent">
+                                        <span aria-hidden="true">«</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">«</span>
+                                </li>
+                            {% endif %}
+
+                            {% for page in 1..claims.getPageCount %}
+                                {% if page == claims.currentPageNumber %}
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">{{ page }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ path('app_claim_index', {'page': page}|merge(filters|default({}))) }}">{{ page }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if claims.currentPageNumber < claims.getPageCount %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ path('app_claim_index', {'page': claims.currentPageNumber + 1}|merge(filters|default({}))) }}" title="Suivant">
+                                        <span aria-hidden="true">»</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">»</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -212,56 +270,96 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@5.11.5/main.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@5.11.5/main.min.css" rel="stylesheet">
     <style>
         .table-hover tr:hover {
-            background-color: rgba(0, 119, 190, 0.05);
-            transition: background-color 0.3s ease;
+            background-color: rgba(0, 119, 190, 0.03);
         }
         .alert {
             margin-bottom: 1.5rem;
-            border-radius: 0.5rem;
         }
         .dropdown-menu {
             z-index: 1050;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
         }
-        .pagination {
+        .form-control, .form-select {
+            border-radius: 0.375rem;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        .navigation .pagination {
+            display: flex;
             justify-content: center;
             margin-top: 2rem;
-            font-size: 1.1rem;
+            padding: 0;
+            list-style: none;
+            font-family: 'Arial', sans-serif;
         }
-        .page-item.active .page-link {
-            background-color: #0077b6;
-            border-color: #0077b6;
-            color: white;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 119, 190, 0.2);
+        .navigation .pagination .page-item {
+            margin: 0 5px;
         }
-        .page-item .page-link {
-            color: #0077b6;
-            border: 1px solid #dee2e6;
-            margin: 0 0.3rem;
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            transition: all 0.2s ease;
+        .navigation .pagination .page-item .page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 10px !important;
+            border: 1px solid #e0e6ed !important;
+            background-color: #ffffff !important;
+            color: #007bff !important;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
-        .page-item.disabled .page-link {
-            color: #6c757d;
-            background-color: #f8f9fa;
-            border-color: #dee2e6;
+        .navigation .pagination .page-item .page-link:hover {
+            background-color: #f1f5f9 !important;
+            border-color: #d1d9e6 !important;
+            color: #0056b3 !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .navigation .pagination .page-item.active .page-link {
+            background-color: #007bff !important;
+            border-color: #007bff !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+        .navigation .pagination .page-item.disabled .page-link {
+            color: #adb5bd !important;
+            background-color: #f8f9fa !important;
+            border-color: #e0e6ed !important;
             cursor: not-allowed;
+            box-shadow: none;
         }
-        .page-item:not(.disabled) .page-link:hover {
-            background-color: #e9ecef;
-            border-color: #0077b6;
-            color: #005f8c;
-            transform: translateY(-1px);
+        .navigation .pagination .page-item:first-child .page-link,
+        .navigation .pagination .page-item:last-child .page-link {
+            font-size: 1.2rem;
+            border-radius: 10px !important;
         }
     </style>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@5.11.5/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@5.11.5/main.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -277,7 +375,9 @@
                     },
                     columns: [
                         { select: 0, sort: "asc" }
-                    ]
+                    ],
+                    perPage: 0,
+                    searchable: false
                 });
             }
 

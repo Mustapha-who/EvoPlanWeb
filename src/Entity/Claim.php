@@ -16,20 +16,20 @@ class Claim
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(length: 255)]
     private ?string $description = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(length: 255)]
     private ?string $claimType = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(length: 255)]
     private ?string $claimStatus = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $creationDate = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'client_id', referencedColumnName: 'id')]
+    #[ORM\ManyToOne(targetEntity: Client::class)]
+    #[ORM\JoinColumn(name: 'client_id', referencedColumnName: 'id', nullable: true)]
     private ?Client $client = null;
 
     public function getId(): ?int
@@ -42,7 +42,7 @@ class Claim
         return $this->description;
     }
 
-    public function setDescription(string $description): self
+    public function setDescription(string $description): static
     {
         $this->description = $description;
 
@@ -54,7 +54,7 @@ class Claim
         return $this->claimType;
     }
 
-    public function setClaimType(string $claimType): self
+    public function setClaimType(string $claimType): static
     {
         $this->claimType = $claimType;
 
@@ -66,7 +66,7 @@ class Claim
         return $this->claimStatus;
     }
 
-    public function setClaimStatus(string $claimStatus): self
+    public function setClaimStatus(string $claimStatus): static
     {
         $this->claimStatus = $claimStatus;
 
@@ -78,7 +78,7 @@ class Claim
         return $this->creationDate;
     }
 
-    public function setCreationDate(\DateTimeInterface $creationDate): self
+    public function setCreationDate(\DateTimeInterface $creationDate): static
     {
         $this->creationDate = $creationDate;
 
@@ -90,7 +90,7 @@ class Claim
         return $this->client;
     }
 
-    public function setClient(?Client $client): self
+    public function setClient(?Client $client): static
     {
         $this->client = $client;
 

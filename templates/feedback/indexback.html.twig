@@ -125,10 +125,10 @@
                                             <a href="{{ path('app_feedback_admin_show', {'id': item.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir détails">
                                                 <i data-feather="eye"></i>
                                             </a>
-                                            <a href="{{ path('app_feedback_edit', {'id': item.id}) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
+                                            <a href="{{ path('app_feedback_admin_edit', {'id': item.id}) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
                                                 <i data-feather="edit"></i>
                                             </a>
-                                            <form method="post" action="{{ path('app_feedback_delete', {'id': item.id}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression ?');">
+                                            <form method="post" action="{{ path('app_feedback_delete', {'id': item.id, 'source': 'admin'}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression ?');">
                                                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
                                                     <i data-feather="trash-2"></i>
@@ -151,8 +151,44 @@
                     </table>
                 </div>
                 {% if feedbacks.getTotalItemCount > feedbacks.getItemNumberPerPage %}
-                    <div class="navigation mt-4">
-                        {{ knp_pagination_render(feedbacks, null, {}, {'align': 'center'}) }}
+                    <div class="navigation mt-4 d-flex justify-content-center">
+                        <ul class="pagination">
+                            {% if feedbacks.currentPageNumber > 1 %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ path('app_feedback_admin_index', {'page': feedbacks.currentPageNumber - 1, 'rating': filters.rating|default(null), 'keyword': filters.keyword|default(null)}) }}" title="Précédent">
+                                        <span aria-hidden="true">«</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">«</span>
+                                </li>
+                            {% endif %}
+
+                            {% for page in 1..feedbacks.getPageCount %}
+                                {% if page == feedbacks.currentPageNumber %}
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">{{ page }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ path('app_feedback_admin_index', {'page': page, 'rating': filters.rating|default(null), 'keyword': filters.keyword|default(null)}) }}">{{ page }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if feedbacks.currentPageNumber < feedbacks.getPageCount %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ path('app_feedback_admin_index', {'page': feedbacks.currentPageNumber + 1, 'rating': filters.rating|default(null), 'keyword': filters.keyword|default(null)}) }}" title="Suivant">
+                                        <span aria-hidden="true">»</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">»</span>
+                                </li>
+                            {% endif %}
+                        </ul>
                     </div>
                 {% endif %}
             </div>
@@ -255,7 +291,6 @@
             background-color: #0056b3;
             border-color: #004085;
         }
-        /* Pagination Styles with Higher Specificity */
         .navigation .pagination {
             display: flex;
             justify-content: center;
@@ -335,7 +370,7 @@
                     searchable: false
                 });
             }
-            
+
             [].slice.call(document.querySelectorAll('[title]'))
                 .forEach(function (tooltipTriggerEl) {
                     new bootstrap.Tooltip(tooltipTriggerEl);

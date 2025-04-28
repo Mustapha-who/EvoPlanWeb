@@ -13,6 +13,12 @@
                             Détails de la Réclamation #{{ claim.id }} - Admin
                         </h1>
                     </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <a href="{{ path('app_claim_admin_index') }}" class="btn btn-secondary">
+                            <i data-feather="arrow-left"></i>
+                            Retour à la liste
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -36,14 +42,6 @@
                     <dt class="col-sm-3">Client</dt>
                     <dd class="col-sm-9">{{ claim.client ? claim.client.phoneNumber : 'N/A' }}</dd>
                 </dl>
-                <div class="mt-4">
-                    <a href="{{ path('app_claim_admin_edit', {'id': claim.id}) }}" class="btn btn-primary">Modifier le statut</a>
-                    <form method="post" action="{{ path('app_claim_delete', {'id': claim.id}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression ?');">
-                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ claim.id) }}">
-                        <button type="submit" class="btn btn-danger ms-2">Supprimer</button>
-                    </form>
-                    <a href="{{ path('app_claim_admin_index') }}" class="btn btn-secondary ms-2">Retour</a>
-                </div>
             </div>
         </div>
     </div>

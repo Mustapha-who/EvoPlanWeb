@@ -33,7 +33,6 @@ final class FeedbackController extends AbstractController
             $filters = $filterForm->getData();
         }
 
-        // Create query builder for pagination
         $queryBuilder = $feedbackRepository->createQueryBuilder('f')
             ->leftJoin('f.client', 'c')
             ->orderBy('f.id', 'DESC');
@@ -62,7 +61,7 @@ final class FeedbackController extends AbstractController
             'rating_counts' => $ratingCounts,
             'average_rating' => $averageRating,
             'filter_form' => $filterForm->createView(),
-            'filters' => $filters, // Pass filters for export links
+            'filters' => $filters,
         ]);
     }
 
@@ -77,7 +76,6 @@ final class FeedbackController extends AbstractController
             $filters = $filterForm->getData();
         }
 
-        // Create query builder for pagination
         $queryBuilder = $feedbackRepository->createQueryBuilder('f')
             ->leftJoin('f.client', 'c')
             ->orderBy('f.id', 'DESC');
@@ -106,7 +104,7 @@ final class FeedbackController extends AbstractController
             'rating_counts' => $ratingCounts,
             'average_rating' => $averageRating,
             'filter_form' => $filterForm->createView(),
-            'filters' => $filters, // Pass filters for export links
+            'filters' => $filters,
         ]);
     }
 
@@ -166,7 +164,26 @@ final class FeedbackController extends AbstractController
         ]);
     }
 
-    #[Route('/delete/{id}', name: 'app_feedback_delete', methods: ['POST'])]
+    #[Route('/admin/{id}/edit', name: 'app_feedback_admin_edit', methods: ['GET', 'POST'])]
+    public function adminEdit(Request $request, Feedback $feedback, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(FeedbackType::class, $feedback);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Le feedback a été modifié avec succès.');
+            return $this->redirectToRoute('app_feedback_admin_index');
+        }
+
+        return $this->render('feedback/edit_admin.html.twig', [
+            'feedback' => $feedback,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/delete-feedback/{id}', name: 'app_feedback_delete', methods: ['POST'])]
     public function delete(Request $request, Feedback $feedback, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$feedback->getId(), $request->request->get('_token'))) {
@@ -177,7 +194,10 @@ final class FeedbackController extends AbstractController
             $this->addFlash('error', 'Erreur lors de la suppression du feedback.');
         }
 
-        return $this->redirectToRoute('app_feedback_admin_index');
+        $source = $request->query->get('source', 'index');
+        $route = $source === 'admin' ? 'app_feedback_admin_index' : 'app_feedback_index';
+
+        return $this->redirectToRoute($route);
     }
 
     #[Route('/export/excel', name: 'app_feedback_export_excel', methods: ['GET'])]
