@@ -19,6 +19,7 @@ use App\Service\UserModule\UserService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -100,7 +101,8 @@ class AdminDashBoardController extends AbstractController
                 $form = $this->createForm(InstructorEditFormType::class, $userDTO);
                 break;
             default:
-                throw $this->createNotFoundException('Invalid user role.');
+                $this->addFlash('danger', 'Invalid user role.');
+                return $this->redirectToRoute('admin_dashboard');
         }
 
         $form->handleRequest($request);
@@ -161,12 +163,13 @@ class AdminDashBoardController extends AbstractController
                         $this->userService->updateInstructor($this->instructor);
                         break;
                 }
-                return $this->json(['success' => true, 'message' => 'User updated successfully.']);
+                $this->addFlash('success', 'User updated successfully.');
                // return $this->redirectToRoute('admin_dashboard');
+            }else {
+                $this->addFlash('info', 'No changes detected.');
             }
 
-            return $this->json(['success' => false, 'message' => 'No changes detected.']);
-           // return $this->redirectToRoute('admin_dashboard');
+            return $this->redirectToRoute('admin_dashboard');
         }
 
         return $this->render('User/_user_edit_form.html.twig', [
@@ -242,5 +245,43 @@ class AdminDashBoardController extends AbstractController
             'addEventPlannerForm' => $addEventPlannerForm->createView(),
             'accountType' => $accountType,
         ]);
+    }
+
+    #[Route('/admin/delete-user/{id}', name: 'admin_delete_user', methods: ['POST'])]
+    public function deleteUser(int $id): RedirectResponse
+    {
+        $user = $this->userService->getUserById($id);
+
+        if (!$user) {
+            $this->addFlash('danger', 'User not found.');
+            return $this->redirectToRoute('admin_dashboard');
+        }
+
+        $role = $user->getRoles()[0];
+        $this->logger->info('Deleting user', ['user_id' => $id, 'role' => $role]);
+
+        try {
+            switch ($role) {
+                case 'ROLE_CLIENT':
+                    $this->userService->deleteClient($id);
+                    break;
+                case 'ROLE_EVENTPLANNER':
+                    $this->userService->deleteEventPlanner($id);
+                    break;
+                case 'ROLE_INSTRUCTOR':
+                    $this->userService->deleteInstructor($id);
+                    break;
+                default:
+                    $this->addFlash('danger', 'Invalid user role.');
+                    return $this->redirectToRoute('admin_dashboard');
+            }
+
+            $this->addFlash('success', 'User deleted successfully.');
+        } catch (\Exception $e) {
+            $this->logger->error('Error deleting user', ['error' => $e->getMessage()]);
+            $this->addFlash('danger', 'An error occurred while deleting the user.');
+        }
+
+        return $this->redirectToRoute('admin_dashboard');
     }
 }

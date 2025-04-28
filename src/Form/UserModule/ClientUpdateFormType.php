@@ -30,6 +30,7 @@ class ClientUpdateFormType extends AbstractType
                 'required' => false,
             ])
             ->add('email', EmailType::class, [
+                'attr' => ['data-verify-target' => 'email'],
                 'required' => false,
                 'constraints' => [
                     new NotBlank(['message' => 'Email is required']),
@@ -37,6 +38,7 @@ class ClientUpdateFormType extends AbstractType
                 ],
             ])
             ->add('phoneNumber', TextType::class, [
+                'attr' => ['data-verify-target' => 'phone'],
                 'required' => false,
                 'constraints' => [
                     new Regex([

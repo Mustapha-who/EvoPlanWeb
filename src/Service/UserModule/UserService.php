@@ -12,6 +12,7 @@ use App\Repository\UserModule\ClientRepository;
 use App\Repository\UserModule\EventPlannerRepository;
 use App\Repository\UserModule\InstructorRepository;
 use App\Repository\UserModule\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 
 class UserService
 {
@@ -20,18 +21,26 @@ class UserService
     private ClientRepository $clientRepository;
     private InstructorRepository $instructorRepository;
     private UserRepository $userRepository;
+    private PasswordEncryption $passwordEncryption;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(
         AdministratorRepository $administratorRepository,
         EventPlannerRepository  $eventPlannerRepository,
         ClientRepository        $clientRepository,
-        InstructorRepository    $instructorRepository, UserRepository $userRepository
+        InstructorRepository    $instructorRepository,
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager,
+        PasswordEncryption $passwordEncryption
+
     ) {
         $this->administratorRepository = $administratorRepository;
         $this->eventPlannerRepository = $eventPlannerRepository;
         $this->clientRepository = $clientRepository;
         $this->instructorRepository = $instructorRepository;
         $this->userRepository = $userRepository;
+        $this->entityManager = $entityManager;
+        $this->passwordEncryption= $passwordEncryption;
     }
 
     public function getUserById(int $id): ?User
@@ -160,5 +169,94 @@ class UserService
     public function displayInstructors(): array
     {
         return $this->instructorRepository->displayUsers();
+    }
+
+
+    public function updatePasswordByEmail(string $email, string $newPassword): void
+    {
+        // Step 1: Find the user by email
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+
+        if (!$user) {
+            throw new \Exception('User not found');
+        }
+
+        // Step 2: Determine the user type
+        $roles = $user->getRoles();
+        $userType = null;
+
+        if (in_array('ROLE_CLIENT', $roles)) {
+            $userType = 'client';
+        } elseif (in_array('ROLE_INSTRUCTOR', $roles)) {
+            $userType = 'instructor';
+        } elseif (in_array('ROLE_EVENTPLANNER', $roles)) {
+            $userType = 'eventplanner';
+        } elseif (in_array('ROLE_ADMIN', $roles)) {
+            $userType = 'admin';
+        }
+
+        // Fallback: Use dtype column if roles are insufficient
+        if (!$userType) {
+            $userType = $this->entityManager->getConnection()->fetchOne(
+                'SELECT dtype FROM user WHERE email = :email',
+                ['email' => $email]
+            );
+        }
+
+        if (!$userType) {
+            throw new \Exception('Unable to determine user type');
+        }
+
+        // Step 3: Create a temporary object and set the new password
+        $tempUser = null;
+        switch ($userType) {
+            case 'client':
+                $tempUser = new Client();
+                break;
+            case 'instructor':
+                $tempUser = new Instructor();
+                break;
+            case 'eventplanner':
+                $tempUser = new EventPlanner();
+                break;
+            case 'admin':
+                $tempUser = new Administrator();
+                break;
+            default:
+                throw new \Exception('Unknown user type');
+        }
+        
+
+        $tempUser->setId($user->getId());
+        $tempUser->setPassword($newPassword);
+
+        // Step 4: Call the appropriate update service
+        switch ($userType) {
+            case 'client':
+                $this->updateClient($tempUser);
+                break;
+            case 'instructor':
+                $this->updateInstructor($tempUser);
+                break;
+            case 'eventplanner':
+                $this->updateEventPlanner($tempUser);
+                break;
+            case 'admin':
+                $this->updateAdministrator($tempUser);
+                break;
+        }
+    }
+
+    public function isCurrentPassword(int $id, string $password): bool
+    {
+
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['id' => $id]);
+
+        if (!$user) {
+            throw new \Exception('User not found');
+        }
+
+
+        return $this->passwordEncryption->verifyPassword($password,$user->getPassword());
     }
 }

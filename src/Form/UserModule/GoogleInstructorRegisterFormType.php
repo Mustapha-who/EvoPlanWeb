@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Form\UserModule;
 
 use App\Service\UserModule\ValidationService;
@@ -9,12 +8,12 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-class ClientRegistrationFormType extends AbstractType
+class GoogleInstructorRegisterFormType extends AbstractType
 {
     private ValidationService $validationService;
 
@@ -23,7 +22,7 @@ class ClientRegistrationFormType extends AbstractType
         $this->validationService = $validationService;
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options): void
+    public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
             ->add('firstName', TextType::class, [
@@ -37,18 +36,12 @@ class ClientRegistrationFormType extends AbstractType
                 ],
             ])
             ->add('email', EmailType::class, [
-                'constraints' => [
-                    new NotBlank(['message' => 'Email is required']),
-                    new Callback([$this, 'validateEmail']),
-                ],
+                'attr' => ['readonly' => true],
+                'data' => $options['email'], // Pre-fill with Google email
             ])
-            ->add('phoneNumber', TextType::class, [
+            ->add('certificate', TextType::class, [
                 'constraints' => [
-                    new NotBlank(['message' => 'Phone number is required']),
-                    new Regex([
-                        'pattern' => '/^\d{8}$/',
-                        'message' => 'Phone number must be exactly 8 digits',
-                    ]),
+                    new NotBlank(['message' => 'Certificate is required']),
                 ],
             ])
             ->add('password', PasswordType::class, [
@@ -63,22 +56,6 @@ class ClientRegistrationFormType extends AbstractType
                     new Callback([$this, 'validateConfirmPassword']),
                 ],
             ]);
-    }
-
-    public function validateEmail($email, ExecutionContextInterface $context): void
-    {
-        if (!$this->validationService->isValidEmail($email)) {
-            $context->buildViolation('Invalid email address')
-                ->atPath('email')
-                ->addViolation();
-            new Callback([$this, 'validateEmail']);
-        }
-
-        if ($this->validationService->isEmailExists($email)) {
-            $context->buildViolation('Email is already in use')
-                ->atPath('email')
-                ->addViolation();
-        }
     }
 
     public function validatePassword($password, ExecutionContextInterface $context): void
@@ -101,5 +78,10 @@ class ClientRegistrationFormType extends AbstractType
                 ->addViolation();
         }
     }
-
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
+            'email' => null, // Pass the email as an option
+        ]);
+    }
 }
