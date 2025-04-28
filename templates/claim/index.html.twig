@@ -1,8 +1,9 @@
-{% extends 'base.html.twig' %}
+
+{% extends 'User/base_dashboard.html.twig' %}
 
 {% block title %}Liste des Réclamations{% endblock %}
 
-{% block body %}
+{% block content %}
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
         <div class="container-xl px-4">
             <div class="page-header-content pt-4">
@@ -88,50 +89,50 @@
                 <div class="table-responsive">
                     <table class="table table-hover" id="datatablesSimple">
                         <thead class="table-light">
-                            <tr>
-                                <th>Description</th>
-                                <th>Type</th>
-                                <th>Statut</th>
-                                <th>Date</th>
-                                <th>Client (Numéro de téléphone)</th>
-                                <th class="text-end">Actions</th>
-                            </tr>
+                        <tr>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Statut</th>
+                            <th>Date</th>
+                            <th>Client (Numéro de téléphone)</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {% for item in claims %}
-                                <tr>
-                                    <td>{{ item.description|slice(0, 100) }}{% if item.description|length > 100 %}...{% endif %}</td>
-                                    <td>{{ item.claimType }}</td>
-                                    <td>{{ item.claimStatus }}</td>
-                                    <td>{{ item.creationDate|date('d/m/Y') }}</td>
-                                    <td>{{ item.client ? item.client.phoneNumber : 'N/A' }}</td>
-                                    <td class="text-end">
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ path('app_claim_show', {'id': item.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir détails">
-                                                <i data-feather="eye"></i>
-                                            </a>
-                                            <a href="{{ path('app_claim_edit', {'id': item.id}) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
-                                                <i data-feather="edit"></i>
-                                            </a>
-                                            <form method="post" action="{{ path('app_claim_delete', {'id': item.id}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression ?');">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
-                                                    <i data-feather="trash-2"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% else %}
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">
-                                        <div class="d-flex flex-column align-items-center">
-                                            <i data-feather="alert-circle" class="mb-2" style="width: 48px; height: 48px;"></i>
-                                            Aucune réclamation trouvée
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
+                        {% for item in claims %}
+                            <tr>
+                                <td>{{ item.description|slice(0, 100) }}{% if item.description|length > 100 %}...{% endif %}</td>
+                                <td>{{ item.claimType }}</td>
+                                <td>{{ item.claimStatus }}</td>
+                                <td>{{ item.creationDate|date('d/m/Y') }}</td>
+                                <td>{{ item.client ? item.client.phoneNumber : 'N/A' }}</td>
+                                <td class="text-end">
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ path('app_claim_show', {'id': item.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir détails">
+                                            <i data-feather="eye"></i>
+                                        </a>
+                                        <a href="{{ path('app_claim_edit', {'id': item.id}) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
+                                            <i data-feather="edit"></i>
+                                        </a>
+                                        <form method="post" action="{{ path('app_claim_delete', {'id': item.id}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                <i data-feather="trash-2"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <i data-feather="alert-circle" class="mb-2" style="width: 48px; height: 48px;"></i>
+                                        Aucune réclamation trouvée
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>

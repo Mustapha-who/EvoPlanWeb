@@ -1,8 +1,9 @@
-{% extends 'base.html.twig' %}
+{# Extend your User dashboard template #}
+{% extends 'User/base_dashboard.html.twig' %}
 
 {% block title %}Nouvelle Réclamation{% endblock %}
 
-{% block body %}
+{% block content %}
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
         <div class="container-xl px-4">
             <div class="page-header-content pt-4">
@@ -23,19 +24,86 @@
             <div class="card-header">Créer une réclamation</div>
             <div class="card-body">
                 {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': ''}}) }}
-                    <div class="mb-3">
-                        {{ form_row(form.description, {'attr': {'class': 'form-control'}}) }}
+                <div class="mb-3">
+                    {{ form_row(form.description, {
+                        'attr': {
+                            'class': 'form-control',
+                            'rows': 5,
+                            'placeholder': 'Décrivez votre réclamation en détail...'
+                        }
+                    }) }}
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form_row(form.claimType, {
+                            'attr': {
+                                'class': 'form-select'
+                            },
+                            'label': 'Type de réclamation'
+                        }) }}
                     </div>
-                    <div class="mb-3">
-                        {{ form_row(form.claimType, {'attr': {'class': 'form-select'}}) }}
+                    <div class="col-md-6 mb-3">
+                        {{ form_row(form.client, {
+                            'attr': {
+                                'class': 'form-select'
+                            },
+                            'label': 'Client concerné'
+                        }) }}
                     </div>
-                    <div class="mb-3">
-                        {{ form_row(form.client, {'attr': {'class': 'form-select'}}) }}
-                    </div>
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                    <a href="{{ path('app_claim_index') }}" class="btn btn-secondary ms-2">Annuler</a>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <a href="{{ path('app_claim_index') }}" class="btn btn-secondary me-2">
+                        <i data-feather="x" class="me-1"></i> Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i data-feather="save" class="me-1"></i> Enregistrer
+                    </button>
+                </div>
                 {{ form_end(form) }}
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .form-control:focus, .form-select:focus {
+            border-color: #0077b6;
+            box-shadow: 0 0 0 0.25rem rgba(0, 119, 190, 0.25);
+        }
+        .page-header {
+            margin-bottom: 2rem;
+        }
+        .card {
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+        }
+        .card-body {
+            padding: 1.5rem;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize any form-specific JavaScript here
+            const descriptionField = document.querySelector('#claim_description');
+            if (descriptionField) {
+                descriptionField.addEventListener('input', function() {
+                    // Example: Character counter implementation
+                    const charCount = this.value.length;
+                    console.log(`Characters: ${charCount}`);
+                });
+            }
+        });
+    </script>
 {% endblock %}
