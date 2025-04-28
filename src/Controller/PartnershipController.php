@@ -15,6 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Service\PartnershipReminderService;
+use Knp\Component\Pager\PaginatorInterface;
 
 #[Route('/partnership')]
 class PartnershipController extends AbstractController
@@ -27,9 +28,18 @@ class PartnershipController extends AbstractController
     }
     
     #[Route('/', name: 'app_partnership_index', methods: ['GET'])]
-    public function index(PartnershipRepository $partnershipRepository, PartnershipReminderService $reminderService): Response
+    public function index(PartnershipRepository $partnershipRepository, PartnershipReminderService $reminderService, Request $request, PaginatorInterface $paginator): Response
     {
-        $partnerships = $partnershipRepository->findAll();
+        $query = $partnershipRepository->createQueryBuilder('p')
+            ->orderBy('p.id_partnership', 'DESC')
+            ->getQuery();
+
+        $partnerships = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            5// Items per page
+        );
+
         $remindersCreated = 0;
         
         // Log start of partnership check process
