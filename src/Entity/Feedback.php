@@ -14,18 +14,30 @@ class Feedback
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\ManyToOne(targetEntity: Client::class)]
+    #[ORM\JoinColumn(name: "client_id", nullable: true)]
+    private ?Client $client = null;
+
+    #[ORM\Column(type: 'text')]
     private ?string $comments = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $rating = null;
-
-    #[ORM\ManyToOne(inversedBy: 'feedback')]
-    private ?Client $client = null;
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->client;
+    }
+
+    public function setClient(?Client $client): self
+    {
+        $this->client = $client;
+        return $this;
     }
 
     public function getComments(): ?string
@@ -33,10 +45,9 @@ class Feedback
         return $this->comments;
     }
 
-    public function setComments(string $comments): static
+    public function setComments(string $comments): self
     {
         $this->comments = $comments;
-
         return $this;
     }
 
@@ -45,22 +56,9 @@ class Feedback
         return $this->rating;
     }
 
-    public function setRating(int $rating): static
+    public function setRating(int $rating): self
     {
         $this->rating = $rating;
-
-        return $this;
-    }
-
-    public function getClient(): ?Client
-    {
-        return $this->client;
-    }
-
-    public function setClient(?Client $client): static
-    {
-        $this->client = $client;
-
         return $this;
     }
 }

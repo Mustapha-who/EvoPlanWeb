@@ -9,20 +9,21 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/venue')]
-final class VenueController extends AbstractController
+class VenueController extends AbstractController
 {
-    #[Route(name: 'app_venue_index', methods: ['GET'])]
+    #[Route('/venue', name: 'app_venue_index', methods: ['GET'])]
     public function index(VenueRepository $venueRepository): Response
     {
+        $venues = $venueRepository->findAll();
+
         return $this->render('venue/index.html.twig', [
-            'venues' => $venueRepository->findAll(),
+            'venues' => $venues,
         ]);
     }
 
-    #[Route('/new', name: 'app_venue_new', methods: ['GET', 'POST'])]
+    #[Route('/venue/new', name: 'app_venue_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $venue = new Venue();
@@ -38,11 +39,11 @@ final class VenueController extends AbstractController
 
         return $this->render('venue/new.html.twig', [
             'venue' => $venue,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
-    #[Route('/{id}', name: 'app_venue_show', methods: ['GET'])]
+    #[Route('/venue/{id}', name: 'app_venue_show', methods: ['GET'])]
     public function show(Venue $venue): Response
     {
         return $this->render('venue/show.html.twig', [
@@ -50,7 +51,7 @@ final class VenueController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_venue_edit', methods: ['GET', 'POST'])]
+    #[Route('/venue/{id}/edit', name: 'app_venue_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Venue $venue, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(VenueType::class, $venue);
@@ -58,22 +59,26 @@ final class VenueController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
+            $this->addFlash('success', 'Venue modifiée avec succès.');
 
             return $this->redirectToRoute('app_venue_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('venue/edit.html.twig', [
             'venue' => $venue,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
-    #[Route('/{id}', name: 'app_venue_delete', methods: ['POST'])]
+    #[Route('/venue/{id}/delete', name: 'app_venue_delete', methods: ['POST'])]
     public function delete(Request $request, Venue $venue, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$venue->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$venue->getId(), $request->request->get('_token'))) {
             $entityManager->remove($venue);
             $entityManager->flush();
+            $this->addFlash('success', 'Venue supprimée avec succès.');
+        } else {
+            $this->addFlash('error', 'Erreur lors de la suppression de la venue.');
         }
 
         return $this->redirectToRoute('app_venue_index', [], Response::HTTP_SEE_OTHER);
