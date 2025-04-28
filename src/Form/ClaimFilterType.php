@@ -7,6 +7,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ClaimFilterType extends AbstractType
 {
@@ -41,7 +42,7 @@ class ClaimFilterType extends AbstractType
                 'label' => 'Mot-clé',
                 'required' => false,
                 'attr' => [
-                    'placeholder' => 'Rechercher dans la description...',
+                    'placeholder' => 'Rechercher dans les descriptions...',
                     'class' => 'form-control',
                 ],
             ])
@@ -49,5 +50,10 @@ class ClaimFilterType extends AbstractType
                 'label' => 'Filtrer',
                 'attr' => ['class' => 'btn btn-primary'],
             ]);
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([]);
     }
 }

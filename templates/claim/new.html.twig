@@ -10,9 +10,15 @@
                 <div class="row align-items-center justify-content-between">
                     <div class="col-auto mt-4">
                         <h1 class="page-header-title">
-                            <div class="page-header-icon"><i data-feather="plus"></i></div>
+                            <div class="page-header-icon"><i data-feather="plus-circle"></i></div>
                             Nouvelle Réclamation
                         </h1>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <a href="{{ path('app_claim_index') }}" class="btn btn-secondary">
+                            <i data-feather="arrow-left"></i>
+                            Retour à la liste
+                        </a>
                     </div>
                 </div>
             </div>
@@ -21,43 +27,33 @@
 
     <div class="container-xl px-4 mt-n10">
         <div class="card mb-4">
-            <div class="card-header">Créer une réclamation</div>
+            <div class="card-header">
+                <span>Créer une nouvelle réclamation</span>
+            </div>
             <div class="card-body">
                 {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': ''}}) }}
-                <div class="mb-3">
-                    {{ form_row(form.description, {
-                        'attr': {
-                            'class': 'form-control',
-                            'rows': 5,
-                            'placeholder': 'Décrivez votre réclamation en détail...'
-                        }
-                    }) }}
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        {{ form_row(form.claimType, {
-                            'attr': {
-                                'class': 'form-select'
-                            },
-                            'label': 'Type de réclamation'
-                        }) }}
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        {{ form_row(form.description, {'attr': {'class': 'form-control'}}) }}
                     </div>
-                    <div class="col-md-6 mb-3">
-                        {{ form_row(form.client, {
-                            'attr': {
-                                'class': 'form-select'
-                            },
-                            'label': 'Client concerné'
-                        }) }}
+                    <div class="col-md-6">
+                        {{ form_row(form.claimType, {'attr': {'class': 'form-select'}}) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.client, {'attr': {'class': 'form-select'}}) }}
                     </div>
                 </div>
-                <div class="d-flex justify-content-end">
-                    <a href="{{ path('app_claim_index') }}" class="btn btn-secondary me-2">
-                        <i data-feather="x" class="me-1"></i> Annuler
-                    </a>
+                <div class="mt-4">
                     <button type="submit" class="btn btn-primary">
-                        <i data-feather="save" class="me-1"></i> Enregistrer
+                        <i data-feather="save"></i>
+                        Enregistrer
                     </button>
+                    <a href="{{ path('app_claim_index') }}" class="btn btn-secondary ms-2">
+                        <i data-feather="x"></i>
+                        Annuler
+                    </a>
+
                 </div>
                 {{ form_end(form) }}
             </div>
@@ -68,42 +64,28 @@
 {% block stylesheets %}
     {{ parent() }}
     <style>
+
+        .form-control, .form-select {
+            border-radius: 0.375rem;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+        }
         .form-control:focus, .form-select:focus {
-            border-color: #0077b6;
-            box-shadow: 0 0 0 0.25rem rgba(0, 119, 190, 0.25);
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
         }
-        .page-header {
-            margin-bottom: 2rem;
+        .form-label {
+            font-weight: 500;
+            color: #495057;
         }
-        .card {
-            border-radius: 0.5rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            border-radius: 0.375rem;
         }
-        .card-header {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
-            font-weight: 600;
-            padding: 1rem 1.5rem;
-        }
-        .card-body {
-            padding: 1.5rem;
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
         }
     </style>
-{% endblock %}
 
-{% block javascripts %}
-    {{ parent() }}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize any form-specific JavaScript here
-            const descriptionField = document.querySelector('#claim_description');
-            if (descriptionField) {
-                descriptionField.addEventListener('input', function() {
-                    // Example: Character counter implementation
-                    const charCount = this.value.length;
-                    console.log(`Characters: ${charCount}`);
-                });
-            }
-        });
-    </script>
 {% endblock %}

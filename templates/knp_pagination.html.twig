@@ -1,16 +1,16 @@
 {# templates/knp_pagination.html.twig #}
 {% if pageCount > 1 %}
-    <ul class="pagination justify-content-center">
+    <ul class="pagination">
         {# Bouton "Précédent" #}
         {% if previous is defined %}
             <li class="page-item">
                 <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): previous})) }}" title="Précédent">
-                    <span aria-hidden="true">&laquo;</span>
+                    <span aria-hidden="true">«</span>
                 </a>
             </li>
         {% else %}
             <li class="page-item disabled">
-                <span class="page-link" aria-hidden="true">&laquo;</span>
+                <span class="page-link" aria-hidden="true">«</span>
             </li>
         {% endif %}
 
@@ -31,12 +31,12 @@
         {% if next is defined %}
             <li class="page-item">
                 <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): next})) }}" title="Suivant">
-                    <span aria-hidden="true">&raquo;</span>
+                    <span aria-hidden="true">»</span>
                 </a>
             </li>
         {% else %}
             <li class="page-item disabled">
-                <span class="page-link" aria-hidden="true">&raquo;</span>
+                <span class="page-link" aria-hidden="true">»</span>
             </li>
         {% endif %}
     </ul>
