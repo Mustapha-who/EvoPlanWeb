@@ -11,14 +11,25 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Form\FormError;
+use Knp\Component\Pager\PaginatorInterface;
 
 #[Route('/contract')]
 final class ContractController extends AbstractController{
     #[Route('/', name: 'app_contract_index', methods: ['GET'])]
-    public function index(ContractRepository $contractRepository): Response
+    public function index(ContractRepository $contractRepository, Request $request, PaginatorInterface $paginator): Response
     {
+        $query = $contractRepository->createQueryBuilder('c')
+            ->orderBy('c.id_contract', 'DESC')
+            ->getQuery();
+
+        $contracts = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            5 // Items per page
+        );
+
         return $this->render('contract/index.html.twig', [
-            'contracts' => $contractRepository->findAll(),
+            'contracts' => $contracts,
         ]);
     }
 

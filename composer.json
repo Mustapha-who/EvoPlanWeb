@@ -18,7 +18,9 @@
         "gregwar/captcha": "^1.2",
         "imagine/imagine": "^1.5",
 
+
         "mailersend/mailersend": "^0.32.0",
+
         "myclabs/php-enum": "^1.8",
         "pear/http_request2": "^2.7",
 
