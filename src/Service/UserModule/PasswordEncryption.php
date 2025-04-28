@@ -37,4 +37,7 @@ class PasswordEncryption
     {
         return password_needs_rehash($hashedPassword, PASSWORD_BCRYPT);
     }
+
+
+
 }

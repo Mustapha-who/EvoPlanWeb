@@ -134,7 +134,14 @@
 
             <div class="card-body">
 
-
+                {% for label, messages in app.flashes %}
+                    <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
 
                 <table id="datatablesSimple">
                     <thead>
@@ -164,9 +171,11 @@
 
                                     <i data-feather="edit"></i>
                                 </button>
-                                <button class="btn btn-datatable btn-icon btn-transparent-dark">
-                                    <i data-feather="trash-2"></i>
-                                </button>
+                                <form method="post" action="{{ path('admin_delete_user', {id: user.id}) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                    <button type="submit" class="btn btn-datatable btn-icon btn-transparent-dark">
+                                        <i data-feather="trash-2"></i>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
 
@@ -185,6 +194,20 @@
     <script src="{{ asset('js/scripts.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
     <script src="{{ asset('js/datatables/datatables-simple-demo.js') }}"></script>
+    <script>
+        // Save the scroll position before the page unloads
+        window.addEventListener('beforeunload', function () {
+            localStorage.setItem('scrollPosition', window.scrollY);
+        });
 
+        // Restore the scroll position when the page loads
+        window.addEventListener('load', function () {
+            const scrollPosition = localStorage.getItem('scrollPosition');
+            if (scrollPosition) {
+                window.scrollTo(0, parseInt(scrollPosition, 10));
+                localStorage.removeItem('scrollPosition'); // Clear the saved position
+            }
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 {% endblock %}

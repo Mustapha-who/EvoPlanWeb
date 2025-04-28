@@ -19,98 +19,98 @@
                                 </div>
                                 <div class="card-body">
                                     <div id="client-form">
-                                        {{ form_start(clientForm) }}
+                                        {{ form_start(GoogleclientForm) }}
                                         <div class="row gx-3">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="small mb-1" for="inputFirstName">First Name</label>
-                                                    {{ form_widget(clientForm.firstName, {'attr': {'class': 'form-control', 'placeholder': 'Enter first name'}}) }}
-                                                    {{ form_errors(clientForm.firstName) }}
+                                                    {{ form_widget(GoogleclientForm.firstName, {'attr': {'class': 'form-control', 'placeholder': 'Enter first name'}}) }}
+                                                    {{ form_errors(GoogleclientForm.firstName) }}
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="small mb-1" for="inputLastName">Last Name</label>
-                                                    {{ form_widget(clientForm.lastName, {'attr': {'class': 'form-control', 'placeholder': 'Enter last name'}}) }}
-                                                    {{ form_errors(clientForm.lastName) }}
+                                                    {{ form_widget(GoogleclientForm.lastName, {'attr': {'class': 'form-control', 'placeholder': 'Enter last name'}}) }}
+                                                    {{ form_errors(GoogleclientForm.lastName) }}
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="mb-3">
                                             <label class="small mb-1" for="inputEmailAddress">Email</label>
-                                            {{ form_widget(clientForm.email, {'attr': {'class': 'form-control', 'placeholder': 'Enter email address'}}) }}
-                                            {{ form_errors(clientForm.email) }}
+                                            {{ form_widget(GoogleclientForm.email, {'attr': {'class': 'form-control', 'placeholder': 'Enter email address'}}) }}
+                                            {{ form_errors(GoogleclientForm.email) }}
                                         </div>
                                         <div class="mb-3">
                                             <label class="small mb-1" for="inputPhoneNumber">Phone Number</label>
-                                            {{ form_widget(clientForm.phoneNumber, {'attr': {'class': 'form-control', 'placeholder': 'Enter phone number'}}) }}
-                                            {{ form_errors(clientForm.phoneNumber) }}
+                                            {{ form_widget(GoogleclientForm.phoneNumber, {'attr': {'class': 'form-control', 'placeholder': 'Enter phone number'}}) }}
+                                            {{ form_errors(GoogleclientForm.phoneNumber) }}
                                         </div>
                                         <div class="row gx-3">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="small mb-1" for="inputPassword">Password</label>
-                                                    {{ form_widget(clientForm.password, {'attr': {'class': 'form-control', 'placeholder': 'Enter password'}}) }}
-                                                    {{ form_errors(clientForm.password) }}
+                                                    {{ form_widget(GoogleclientForm.password, {'attr': {'class': 'form-control', 'placeholder': 'Enter password'}}) }}
+                                                    {{ form_errors(GoogleclientForm.password) }}
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="small mb-1" for="inputConfirmPassword">Confirm Password</label>
-                                                    {{ form_widget(clientForm.confirmPassword, {'attr': {'class': 'form-control', 'placeholder': 'Confirm password'}}) }}
-                                                    {{ form_errors(clientForm.confirmPassword) }}
+                                                    {{ form_widget(GoogleclientForm.confirmPassword, {'attr': {'class': 'form-control', 'placeholder': 'Confirm password'}}) }}
+                                                    {{ form_errors(GoogleclientForm.confirmPassword) }}
                                                 </div>
                                             </div>
                                         </div>
                                         <button class="btn btn-primary btn-block" type="submit">Create Account</button>
-                                        {{ form_end(clientForm) }}
+                                        {{ form_end(GoogleclientForm) }}
                                     </div>
                                     <div id="instructor-form" style="display: none;">
-                                        {{ form_start(instructorForm) }}
+                                        {{ form_start(GoogleinstructorForm) }}
                                         <div class="row gx-3">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="small mb-1" for="inputFirstName">First Name</label>
-                                                    {{ form_widget(instructorForm.firstName, {'attr': {'class': 'form-control', 'placeholder': 'Enter first name'}}) }}
-                                                    {{ form_errors(instructorForm.firstName) }}
+                                                    {{ form_widget(GoogleinstructorForm.firstName, {'attr': {'class': 'form-control', 'placeholder': 'Enter first name'}}) }}
+                                                    {{ form_errors(GoogleinstructorForm.firstName) }}
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="small mb-1" for="inputLastName">Last Name</label>
-                                                    {{ form_widget(instructorForm.lastName, {'attr': {'class': 'form-control', 'placeholder': 'Enter last name'}}) }}
-                                                    {{ form_errors(instructorForm.lastName) }}
+                                                    {{ form_widget(GoogleinstructorForm.lastName, {'attr': {'class': 'form-control', 'placeholder': 'Enter last name'}}) }}
+                                                    {{ form_errors(GoogleinstructorForm.lastName) }}
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="mb-3">
                                             <label class="small mb-1" for="inputEmailAddress">Email</label>
-                                            {{ form_widget(instructorForm.email, {'attr': {'class': 'form-control', 'placeholder': 'Enter email address'}}) }}
-                                            {{ form_errors(instructorForm.email) }}
+                                            {{ form_widget(GoogleinstructorForm.email, {'attr': {'class': 'form-control', 'placeholder': 'Enter email address'}}) }}
+                                            {{ form_errors(GoogleinstructorForm.email) }}
                                         </div>
                                         <div class="mb-3">
                                             <label class="small mb-1" for="inputCertificate">Certificate</label>
-                                            {{ form_widget(instructorForm.certificate, {'attr': {'class': 'form-control', 'placeholder': 'Enter certificate'}}) }}
-                                            {{ form_errors(instructorForm.certificate) }}
+                                            {{ form_widget(GoogleinstructorForm.certificate, {'attr': {'class': 'form-control', 'placeholder': 'Enter certificate'}}) }}
+                                            {{ form_errors(GoogleinstructorForm.certificate) }}
                                         </div>
                                         <div class="row gx-3">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="small mb-1" for="inputPassword">Password</label>
-                                                    {{ form_widget(instructorForm.password, {'attr': {'class': 'form-control', 'placeholder': 'Enter password'}}) }}
-                                                    {{ form_errors(instructorForm.password) }}
+                                                    {{ form_widget(GoogleinstructorForm.password, {'attr': {'class': 'form-control', 'placeholder': 'Enter password'}}) }}
+                                                    {{ form_errors(GoogleinstructorForm.password) }}
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="small mb-1" for="inputConfirmPassword">Confirm Password</label>
-                                                    {{ form_widget(instructorForm.confirmPassword, {'attr': {'class': 'form-control', 'placeholder': 'Confirm password'}}) }}
-                                                    {{ form_errors(instructorForm.confirmPassword) }}
+                                                    {{ form_widget(GoogleinstructorForm.confirmPassword, {'attr': {'class': 'form-control', 'placeholder': 'Confirm password'}}) }}
+                                                    {{ form_errors(GoogleinstructorForm.confirmPassword) }}
                                                 </div>
                                             </div>
                                         </div>
                                         <button class="btn btn-primary btn-block" type="submit">Create Account</button>
-                                        {{ form_end(instructorForm) }}
+                                        {{ form_end(GoogleinstructorForm) }}
                                     </div>
                                 </div>
                                 <div class="card-footer text-center">
@@ -126,7 +126,7 @@
             <footer class="footer-admin mt-auto footer-dark">
                 <div class="container-xl px-4">
                     <div class="row">
-                        <div class="col-md-6 small">Copyright &copy; Your Website 2021</div>
+                        <div class="col-md-6 small">Copyright &copy; EvoPlan 2025</div>
                         <div class="col-md-6 text-md-end small">
                             <a href="#!">Privacy Policy</a>
                             &middot;
