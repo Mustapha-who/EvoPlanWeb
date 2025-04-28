@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail Publication{% endblock %}
+
+{% block body %}
+<h1>Détail de la publication</h1>
+
+<p><strong>Contenu :</strong> {{ publication.contenu }}</p>
+<p><strong>Date :</strong> {{ publication.datePublication|date('Y-m-d H:i') }}</p>
+<p><strong>Plateforme :</strong> {{ publication.plateforme }}</p>
+<p><strong>Événement :</strong> {{ publication.event.nom }}</p>
+
+{% if publication.imagePath %}
+    <p><strong>Image :</strong><br><img src="{{ asset('uploads/images/' ~ publication.imagePath) }}" width="300"></p>
+{% endif %}
+
+<a href="{{ path('app_publication_index') }}">Retour à la liste</a>
+{% endblock %}

@@ -79,15 +79,7 @@
                                            title="Modifier">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <form method="post" action="{{ path('app_venue_delete', {'id': venue.id}) }}" 
-                                              class="d-inline" 
-                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette venue ?');">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ venue.id) }}">
-                                            <button class="btn btn-sm btn-outline-danger ms-1"
-                                                    title="Supprimer">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
+                                        {% include 'venue/_delete_form.html.twig' with {'venue': venue} %}
                                     </td>
                                 </tr>
                             {% else %}
@@ -106,4 +98,4 @@
             </div>
         </div>
     </div>
-{% endblock %} 
+{% endblock %}

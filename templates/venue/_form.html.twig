@@ -1,4 +1,103 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+{% if not form.vars.valid %}
+    <div class="alert alert-danger alert-dismissible fade show mb-4">
+        <span>Veuillez corriger les erreurs dans le formulaire.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endif %}
+
+<div class="card mb-4">
+    <div class="card-header">Détails du lieu</div>
+    <div class="card-body">
+        <!-- Adresse -->
+        <div class="mb-4">
+            {{ form_label(form.address, 'Adresse', {'label_attr': {'class': 'form-label'}}) }}
+            <span class="text-danger">*</span>
+            {{ form_widget(form.address, {'attr': {'class': 'form-control' ~ (form.address.vars.errors|length ? ' is-invalid' : ''), 'id': 'venue_address'}}) }}
+            {{ form_errors(form.address) }}
+            <div id="map" style="height: 300px; margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Capacité -->
+        <div class="mb-4">
+            {{ form_label(form.capacity, 'Capacité', {'label_attr': {'class': 'form-label'}}) }}
+            <span class="text-danger">*</span>
+            {{ form_widget(form.capacity, {'attr': {'class': 'form-control' ~ (form.capacity.vars.errors|length ? ' is-invalid' : '')}}) }}
+            {{ form_errors(form.capacity) }}
+        </div>
+
+        <!-- Ressource -->
+        <div class="mb-4">
+            {{ form_label(form.ressource, 'Ressource associée', {'label_attr': {'class': 'form-label'}}) }}
+            <span class="text-danger">*</span>
+            {{ form_widget(form.ressource, {'attr': {'class': 'form-select' ~ (form.ressource.vars.errors|length ? ' is-invalid' : '')}}) }}
+            {{ form_errors(form.ressource) }}
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="d-flex justify-content-between mt-5">
+            <a href="{{ path('app_venue_index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle me-1"></i>
+                Annuler
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save me-1"></i>
+                Enregistrer
+            </button>
+        </div>
+    </div>
+</div>
+
 {{ form_end(form) }}
+
+<script>
+    async function geocodeAddress(address) {
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
+            const data = await response.json();
+            if (data.length > 0) {
+                return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+            }
+            return null;
+        } catch (error) {
+            console.error('Erreur de géocodage:', error);
+            return null;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Initialisation de la carte Leaflet
+        const map = L.map('map').setView([48.8566, 2.3522], 13); // Centré sur Paris par défaut
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        let marker = null;
+
+        // Fonction pour mettre à jour la carte
+        async function updateMap() {
+            const addressInput = document.getElementById('venue_address');
+            const address = addressInput.value;
+
+            if (address) {
+                const coords = await geocodeAddress(address);
+                if (coords) {
+                    map.setView([coords.lat, coords.lng], 13);
+                    if (marker) {
+                        marker.setLatLng([coords.lat, coords.lng]);
+                    } else {
+                        marker = L.marker([coords.lat, coords.lng]).addTo(map);
+                    }
+                }
+            }
+        }
+
+        // Écouter les changements dans le champ address
+        const addressInput = document.getElementById('venue_address');
+        addressInput.addEventListener('input', updateMap);
+
+        // Initialiser la carte avec l'adresse actuelle
+        updateMap();
+    });
+</script>

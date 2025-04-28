@@ -39,13 +39,19 @@ security:
                 path: logout
                 target: login
                 invalidate_session: true
-
-
+            custom_authenticators:
+                - App\Service\UserModule\GoogleAuthenticator
+                - App\Service\UserModule\RecaptchaAuthenticator
     access_control:
         - { path: ^/signup, roles: PUBLIC_ACCESS }
         - { path: ^/tosignup, roles: PUBLIC_ACCESS }
+        - { path: ^/google-signup, roles: PUBLIC_ACCESS }
+        - { path: ^/google/login, roles: PUBLIC_ACCESS }
+        - { path: ^/google/callback, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/logout, roles: PUBLIC_ACCESS }
+        - { path: ^/forgot-password, roles: PUBLIC_ACCESS }
+        - { path: ^/verify-email, roles: PUBLIC_ACCESS }
         - { path: ^/admin/google/auth, roles: PUBLIC_ACCESS }
         - { path: ^/calendar-callback, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
@@ -63,6 +69,7 @@ security:
         - { path: ^/user/profile, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
         - { path: ^/sidenav/profile, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
         - { path: ^/user/account_security, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
+        - { path: ^/user/update_password, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
         - { path: ^/app_home, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
         - { path: ^/, roles: [ ROLE_ADMIN, ROLE_EVENTPLANNER, ROLE_CLIENT, ROLE_INSTRUCTOR ] }
 when@test:

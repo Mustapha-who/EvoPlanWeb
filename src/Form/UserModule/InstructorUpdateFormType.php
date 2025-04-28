@@ -30,6 +30,7 @@ class InstructorUpdateFormType extends AbstractType
                 'required' => false,
             ])
             ->add('email', EmailType::class, [
+                'attr' => ['data-verify-target' => 'email'],
                 'required' => false,
                 'constraints' => [
                     new NotBlank(['message' => 'Email is required']),

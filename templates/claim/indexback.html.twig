@@ -1,0 +1,326 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - Liste des Réclamations{% endblock %}
+
+{% block body %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="alert-circle"></i></div>
+                            Administration - Liste des Réclamations
+                        </h1>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <a href="{{ path('app_claim_admin_calendar') }}" class="btn btn-info ms-2">
+                            <i data-feather="calendar"></i>
+                            Calendrier
+                        </a>
+                        <button type="button" class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#statsModal">
+                            <i data-feather="bar-chart-2"></i>
+                            Statistiques
+                        </button>
+                        <div class="btn-group ms-2">
+                            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i data-feather="download"></i>
+                                Exporter
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ path('app_claim_export_excel', filter_form.vars.data|default({})) }}">Excel</a></li>
+                                <li><a class="dropdown-item" href="{{ path('app_claim_export_pdf', filter_form.vars.data|default({})) }}">PDF</a></li>
+                                <li><a class="dropdown-item" href="{{ path('app_claim_export_csv', filter_form.vars.data|default({})) }}">CSV</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-xl px-4 mt-n10">
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <span>Filtres de recherche</span>
+            </div>
+            <div class="card-body">
+                {{ form_start(filter_form, {'attr': {'class': 'needs-validation', 'novalidate': ''}}) }}
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        {{ form_row(filter_form.claimStatus, {'attr': {'class': 'form-select'}}) }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form_row(filter_form.claimType, {'attr': {'class': 'form-select'}}) }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form_row(filter_form.keyword, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                </div>
+                <div class="mt-3">
+                    {{ form_row(filter_form.submit, {'attr': {'class': 'btn btn-primary'}}) }}
+                </div>
+                {{ form_end(filter_form) }}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Gestion des Réclamations</span>
+                <div class="small text-muted">{{ claims.getTotalItemCount }} réclamation(s) au total</div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="datatablesSimple">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Client (Numéro de téléphone)</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in claims %}
+                                <tr>
+                                    <td>{{ item.description|slice(0, 100) }}{% if item.description|length > 100 %}...{% endif %}</td>
+                                    <td>{{ item.claimType }}</td>
+                                    <td>{{ item.claimStatus }}</td>
+                                    <td>{{ item.creationDate|date('d/m/Y') }}</td>
+                                    <td>{{ item.client ? item.client.phoneNumber : 'N/A' }}</td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('app_claim_admin_show', {'id': item.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir détails">
+                                                <i data-feather="eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_claim_admin_edit', {'id': item.id}) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
+                                                <i data-feather="edit"></i>
+                                            </a>
+                                            <form method="post" action="{{ path('app_claim_delete', {'id': item.id}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                    <i data-feather="trash-2"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i data-feather="alert-circle" class="mb-2" style="width: 48px; height: 48px;"></i>
+                                            Aucune réclamation trouvée
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="navigation mt-4">
+                    {{ knp_pagination_render(claims, null, {}, {'align': 'center'}) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="statsModal" tabindex="-1" aria-labelledby="statsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="statsModalLabel">
+                        <i data-feather="bar-chart-2" class="me-2"></i>
+                        Statistiques des Réclamations
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    Répartition des statuts
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="statusChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    Détails
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Total des réclamations
+                                            <span class="badge bg-primary rounded-pill">{{ claims.getTotalItemCount }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Nouvelles
+                                            <span class="badge bg-warning rounded-pill">{{ status_counts.new }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            En cours
+                                            <span class="badge bg-info rounded-pill">{{ status_counts.in_progress }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Résolues
+                                            <span class="badge bg-success rounded-pill">{{ status_counts.resolved }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i data-feather="x" class="me-1"></i>
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .table-hover tr:hover {
+            background-color: rgba(0, 119, 190, 0.03);
+        }
+        .alert {
+            margin-bottom: 1.5rem;
+        }
+        .dropdown-menu {
+            z-index: 1050;
+        }
+        .navigation .pagination {
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #0077b6;
+            border-color: #0077b6;
+            color: white;
+        }
+        .pagination .page-item .page-link {
+            color: #0077b6;
+            border: 1px solid #dee2e6;
+            margin: 0 0.2rem;
+            border-radius: 0.25rem;
+        }
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
+        .pagination .page-item:not(.disabled) .page-link:hover {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const datatablesSimple = document.getElementById('datatablesSimple');
+            if (datatablesSimple) {
+                new simpleDatatables.DataTable(datatablesSimple, {
+                    labels: {
+                        placeholder: "Rechercher...",
+                        perPage: "{select} éléments par page",
+                        noRows: "Aucune réclamation trouvée",
+                        info: "Affichage de {start} à {end} sur {rows} éléments"
+                    },
+                    columns: [
+                        { select: 0, sort: "asc" }
+                    ]
+                });
+            }
+
+            [].slice.call(document.querySelectorAll('[title]'))
+                .forEach(function (tooltipTriggerEl) {
+                    new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+
+            const statsModal = document.getElementById('statsModal');
+            if (statsModal) {
+                statsModal.addEventListener('shown.bs.modal', function() {
+                    const ctx = document.getElementById('statusChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Nouvelles', 'En cours', 'Résolues'],
+                            datasets: [{
+                                data: [
+                                    {{ status_counts.new|default(0) }},
+                                    {{ status_counts.in_progress|default(0) }},
+                                    {{ status_counts.resolved|default(0) }}
+                                ],
+                                backgroundColor: [
+                                    '#ffc107',
+                                    '#17a2b8',
+                                    '#28a745'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const value = context.raw;
+                                            const percentage = Math.round((value / total) * 100);
+                                            return `${context.label}: ${value} (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+{% endblock %}

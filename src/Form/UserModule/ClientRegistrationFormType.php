@@ -71,6 +71,7 @@ class ClientRegistrationFormType extends AbstractType
             $context->buildViolation('Invalid email address')
                 ->atPath('email')
                 ->addViolation();
+            new Callback([$this, 'validateEmail']);
         }
 
         if ($this->validationService->isEmailExists($email)) {
@@ -100,4 +101,5 @@ class ClientRegistrationFormType extends AbstractType
                 ->addViolation();
         }
     }
+
 }

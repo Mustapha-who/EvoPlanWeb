@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - Calendrier des Réclamations{% endblock %}
+
+{% block body %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="calendar"></i></div>
+                            Calendrier des Réclamations
+                        </h1>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <a href="{{ path('app_claim_admin_index') }}" class="btn btn-secondary">
+                            <i data-feather="arrow-left"></i>
+                            Retour à la liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header">Réclamations par jour</div>
+            <div class="card-body">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.css" rel="stylesheet">
+    <style>
+        #calendar {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .fc-event {
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: {{ events|raw }},
+                eventColor: '#007bff',
+                eventClick: function(info) {
+                    if (info.event.url) {
+                        window.location.href = info.event.url;
+                    }
+                }
+            });
+            calendar.render();
+        });
+    </script>
+{% endblock %}

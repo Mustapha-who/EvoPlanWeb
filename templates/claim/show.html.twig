@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails Réclamation #{{ claim.id }}{% endblock %}
+{% block title %}Détails de la Réclamation{% endblock %}
 
 {% block body %}
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
@@ -9,8 +9,8 @@
                 <div class="row align-items-center justify-content-between">
                     <div class="col-auto mt-4">
                         <h1 class="page-header-title">
-                            <div class="page-header-icon"><i data-feather="file-text"></i></div>
-                            Détails Réclamation #{{ claim.id }}
+                            <div class="page-header-icon"><i data-feather="alert-circle"></i></div>
+                            Détails de la Réclamation #{{ claim.id }}
                         </h1>
                     </div>
                 </div>
@@ -20,49 +20,29 @@
 
     <div class="container-xl px-4 mt-n10">
         <div class="card mb-4">
-            <div class="card-header">Informations détaillées</div>
+            <div class="card-header">Informations</div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <h5 class="fw-bold">Description</h5>
-                            <p>{{ claim.description }}</p>
-                        </div>
-                        <div class="mb-3">
-                            <h5 class="fw-bold">Type</h5>
-                            <p>{{ claim.claimType }}</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <h5 class="fw-bold">Statut</h5>
-                            <span class="badge 
-                                {% if claim.claimStatus == 'Ouvert' %}bg-success
-                                {% elseif claim.claimStatus == 'En cours' %}bg-warning
-                                {% elseif claim.claimStatus == 'Résolu' %}bg-primary
-                                {% else %}bg-secondary
-                                {% endif %} rounded-pill">
-                                {{ claim.claimStatus }}
-                            </span>
-                        </div>
-                        <div class="mb-3">
-                            <h5 class="fw-bold">Date de création</h5>
-                            <p>{{ claim.creationDate|date('d/m/Y') }}</p>
-                        </div>
-                        <div class="mb-3">
-                            <h5 class="fw-bold">Client</h5>
-                            <p>{{ claim.client ? claim.client.name : 'N/A' }}</p>
-                        </div>
-                    </div>
-                </div>
-
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">ID</dt>
+                    <dd class="col-sm-9">{{ claim.id }}</dd>
+                    <dt class="col-sm-3">Description</dt>
+                    <dd class="col-sm-9">{{ claim.description }}</dd>
+                    <dt class="col-sm-3">Type</dt>
+                    <dd class="col-sm-9">{{ claim.claimType }}</dd>
+                    <dt class="col-sm-3">Statut</dt>
+                    <dd class="col-sm-9">{{ claim.claimStatus }}</dd>
+                    <dt class="col-sm-3">Date de création</dt>
+                    <dd class="col-sm-9">{{ claim.creationDate|date('d/m/Y') }}</dd>
+                    <dt class="col-sm-3">Client</dt>
+                    <dd class="col-sm-9">{{ claim.client ? claim.client.phoneNumber : 'N/A' }}</dd>
+                </dl>
                 <div class="mt-4">
-                    <a href="{{ path('app_claim_index') }}" class="btn btn-secondary">
-                        <i data-feather="arrow-left"></i> Retour à la liste
-                    </a>
-                    <a href="{{ path('app_claim_edit', {'id': claim.id}) }}" class="btn btn-primary ms-2">
-                        <i data-feather="edit"></i> Modifier
-                    </a>
+                    <a href="{{ path('app_claim_edit', {'id': claim.id}) }}" class="btn btn-primary">Modifier</a>
+                    <form method="post" action="{{ path('app_claim_delete', {'id': claim.id}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression ?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ claim.id) }}">
+                        <button type="submit" class="btn btn-danger ms-2">Supprimer</button>
+                    </form>
+                    <a href="{{ path('app_claim_index') }}" class="btn btn-secondary ms-2">Retour</a>
                 </div>
             </div>
         </div>

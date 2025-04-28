@@ -54,6 +54,9 @@
                                 <a href="{{ path('app_ressource_edit', {'id': ressource.id}) }}" class="btn btn-sm btn-outline-primary me-2">
                                     <i class="bi bi-pencil"></i> Modifier
                                 </a>
+                                <a href="{{ path('export_ressources') }}" class="btn btn-sm btn-outline-success me-2">
+                                    <i class="bi bi-file-earmark-excel"></i> Exporter Excel
+                                </a>
                                 <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
                                     <i class="bi bi-trash"></i> Supprimer
                                 </button>
@@ -140,6 +143,43 @@
                     confirmButtonColor: '#4e73df'
                 });
             {% endfor %}
+
+            // Gestion du clic sur le bouton d'exportation Excel
+            document.querySelector('.btn-outline-success').addEventListener('click', function(e) {
+                e.preventDefault();
+                fetch('{{ path('export_ressources') }}')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erreur HTTP : ' + response.status);
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'ressources_export.xlsx';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(url);
+                        Swal.fire({
+                            title: 'Succès',
+                            text: 'Le fichier Excel a été téléchargé avec succès !',
+                            icon: 'success',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Erreur :', error);
+                        Swal.fire({
+                            title: 'Erreur',
+                            text: 'Une erreur s\'est produite lors du téléchargement du fichier Excel.',
+                            icon: 'error',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    });
+            });
         });
     </script>
 {% endblock %}

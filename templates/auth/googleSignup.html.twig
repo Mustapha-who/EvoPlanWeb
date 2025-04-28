@@ -1,0 +1,161 @@
+{% extends 'auth/base_auth.html.twig' %}
+
+{% block title %}Register {% endblock %}
+
+{% block body %}
+    <div id="layoutAuthentication">
+        <div id="layoutAuthentication_content">
+            <main>
+                <div class="container-xl px-4">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-7">
+                            <div class="card shadow-lg border-0 rounded-lg mt-5">
+                                <div class="card-header justify-content-center">
+                                    <h3 class="fw-light my-4">Create Account</h3>
+                                    <nav class="nav nav-borders custom-nav">
+                                        <a class="nav-link active" id="client-tab" href="#" onclick="showForm('client')">Client</a>
+                                        <a class="nav-link" id="instructor-tab" href="#" onclick="showForm('instructor')">Instructor</a>
+                                    </nav>
+                                </div>
+                                <div class="card-body">
+                                    <div id="client-form">
+                                        {{ form_start(GoogleclientForm) }}
+                                        <div class="row gx-3">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="small mb-1" for="inputFirstName">First Name</label>
+                                                    {{ form_widget(GoogleclientForm.firstName, {'attr': {'class': 'form-control', 'placeholder': 'Enter first name'}}) }}
+                                                    {{ form_errors(GoogleclientForm.firstName) }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="small mb-1" for="inputLastName">Last Name</label>
+                                                    {{ form_widget(GoogleclientForm.lastName, {'attr': {'class': 'form-control', 'placeholder': 'Enter last name'}}) }}
+                                                    {{ form_errors(GoogleclientForm.lastName) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="small mb-1" for="inputEmailAddress">Email</label>
+                                            {{ form_widget(GoogleclientForm.email, {'attr': {'class': 'form-control', 'placeholder': 'Enter email address'}}) }}
+                                            {{ form_errors(GoogleclientForm.email) }}
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="small mb-1" for="inputPhoneNumber">Phone Number</label>
+                                            {{ form_widget(GoogleclientForm.phoneNumber, {'attr': {'class': 'form-control', 'placeholder': 'Enter phone number'}}) }}
+                                            {{ form_errors(GoogleclientForm.phoneNumber) }}
+                                        </div>
+                                        <div class="row gx-3">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="small mb-1" for="inputPassword">Password</label>
+                                                    {{ form_widget(GoogleclientForm.password, {'attr': {'class': 'form-control', 'placeholder': 'Enter password'}}) }}
+                                                    {{ form_errors(GoogleclientForm.password) }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="small mb-1" for="inputConfirmPassword">Confirm Password</label>
+                                                    {{ form_widget(GoogleclientForm.confirmPassword, {'attr': {'class': 'form-control', 'placeholder': 'Confirm password'}}) }}
+                                                    {{ form_errors(GoogleclientForm.confirmPassword) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-primary btn-block" type="submit">Create Account</button>
+                                        {{ form_end(GoogleclientForm) }}
+                                    </div>
+                                    <div id="instructor-form" style="display: none;">
+                                        {{ form_start(GoogleinstructorForm) }}
+                                        <div class="row gx-3">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="small mb-1" for="inputFirstName">First Name</label>
+                                                    {{ form_widget(GoogleinstructorForm.firstName, {'attr': {'class': 'form-control', 'placeholder': 'Enter first name'}}) }}
+                                                    {{ form_errors(GoogleinstructorForm.firstName) }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="small mb-1" for="inputLastName">Last Name</label>
+                                                    {{ form_widget(GoogleinstructorForm.lastName, {'attr': {'class': 'form-control', 'placeholder': 'Enter last name'}}) }}
+                                                    {{ form_errors(GoogleinstructorForm.lastName) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="small mb-1" for="inputEmailAddress">Email</label>
+                                            {{ form_widget(GoogleinstructorForm.email, {'attr': {'class': 'form-control', 'placeholder': 'Enter email address'}}) }}
+                                            {{ form_errors(GoogleinstructorForm.email) }}
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="small mb-1" for="inputCertificate">Certificate</label>
+                                            {{ form_widget(GoogleinstructorForm.certificate, {'attr': {'class': 'form-control', 'placeholder': 'Enter certificate'}}) }}
+                                            {{ form_errors(GoogleinstructorForm.certificate) }}
+                                        </div>
+                                        <div class="row gx-3">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="small mb-1" for="inputPassword">Password</label>
+                                                    {{ form_widget(GoogleinstructorForm.password, {'attr': {'class': 'form-control', 'placeholder': 'Enter password'}}) }}
+                                                    {{ form_errors(GoogleinstructorForm.password) }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="small mb-1" for="inputConfirmPassword">Confirm Password</label>
+                                                    {{ form_widget(GoogleinstructorForm.confirmPassword, {'attr': {'class': 'form-control', 'placeholder': 'Confirm password'}}) }}
+                                                    {{ form_errors(GoogleinstructorForm.confirmPassword) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-primary btn-block" type="submit">Create Account</button>
+                                        {{ form_end(GoogleinstructorForm) }}
+                                    </div>
+                                </div>
+                                <div class="card-footer text-center">
+                                    <div class="small"><a href="{{ path('login') }}">Have an account? Go to login</a></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <div id="layoutAuthentication_footer">
+            <footer class="footer-admin mt-auto footer-dark">
+                <div class="container-xl px-4">
+                    <div class="row">
+                        <div class="col-md-6 small">Copyright &copy; EvoPlan 2025</div>
+                        <div class="col-md-6 text-md-end small">
+                            <a href="#!">Privacy Policy</a>
+                            &middot;
+                            <a href="#!">Terms &amp; Conditions</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <style>
+        .custom-nav .nav-link {
+            margin-left: 0 !important;
+        }
+    </style>
+
+    <script>
+        function showForm(formType) {
+            document.getElementById('client-form').style.display = formType === 'client' ? 'block' : 'none';
+            document.getElementById('instructor-form').style.display = formType === 'instructor' ? 'block' : 'none';
+            document.getElementById('client-tab').classList.toggle('active', formType === 'client');
+            document.getElementById('instructor-tab').classList.toggle('active', formType === 'instructor');
+        }
+
+        // Automatically show the correct form based on the initial accountType
+        document.addEventListener('DOMContentLoaded', function() {
+            const accountType = '{{ accountType }}';
+            showForm(accountType);
+        });
+    </script>
+{% endblock %}
