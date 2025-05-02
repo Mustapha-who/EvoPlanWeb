@@ -82,7 +82,6 @@
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php83" />
       <path value="$PROJECT_DIR$/vendor/symfony/serializer" />
       <path value="$PROJECT_DIR$/vendor/symfony/security-http" />
-      <path value="$PROJECT_DIR$/vendor/symfony/stimulus-bundle" />
       <path value="$PROJECT_DIR$/vendor/symfony/service-contracts" />
       <path value="$PROJECT_DIR$/vendor/symfony/security-bundle" />
       <path value="$PROJECT_DIR$/vendor/symfony/runtime" />
@@ -91,7 +90,6 @@
       <path value="$PROJECT_DIR$/vendor/symfony/twig-bundle" />
       <path value="$PROJECT_DIR$/vendor/symfony/twig-bridge" />
       <path value="$PROJECT_DIR$/vendor/symfony/validator" />
-      <path value="$PROJECT_DIR$/vendor/symfony/ux-turbo" />
       <path value="$PROJECT_DIR$/vendor/symfony/string" />
       <path value="$PROJECT_DIR$/vendor/symfony/stopwatch" />
       <path value="$PROJECT_DIR$/vendor/symfony/translation-contracts" />
@@ -142,11 +140,6 @@
       <path value="$PROJECT_DIR$/vendor/markbaker/complex" />
       <path value="$PROJECT_DIR$/vendor/markbaker/matrix" />
       <path value="$PROJECT_DIR$/vendor/gregwar/captcha" />
-      <path value="$PROJECT_DIR$/vendor/stella-maris/clock" />
-      <path value="$PROJECT_DIR$/vendor/symfony/mercure" />
-      <path value="$PROJECT_DIR$/vendor/symfony/mercure-bundle" />
-      <path value="$PROJECT_DIR$/vendor/lcobucci/clock" />
-      <path value="$PROJECT_DIR$/vendor/lcobucci/jwt" />
       <path value="$PROJECT_DIR$/vendor/dompdf/php-font-lib" />
       <path value="$PROJECT_DIR$/vendor/dompdf/dompdf" />
       <path value="$PROJECT_DIR$/vendor/phpoffice/phpspreadsheet" />

@@ -70,6 +70,20 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+    # config/services.yaml
+    # config/services.yaml
+    # config/services.yaml
+    # config/services.yaml
+    # config/services.yaml
 
-    # add more service definitions when explicit configuration is needed
+    # Définition du service MeteoService
+    App\Service\MeteoService:
+        arguments:
+            $apiKey: '%env(OPENWEATHER_API_KEY)%'  # Récupère la clé API depuis .env
+            $client: '@http_client'  # Injecte le client HTTP Symfony
+
+
+
+
+        # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

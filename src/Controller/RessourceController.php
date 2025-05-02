@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/ressource')]
-final class RessourceController extends AbstractController
+class RessourceController extends AbstractController
 {
     #[Route(name: 'app_ressource_index', methods: ['GET'])]
     public function index(RessourceRepository $ressourceRepository): Response
@@ -20,6 +20,17 @@ final class RessourceController extends AbstractController
         return $this->render('ressource/index.html.twig', [
             'ressources' => $ressourceRepository->findAll(),
         ]);
+    }
+
+    #[Route('/hotels', name: 'app_hotels_static', methods: ['GET'])]
+    public function hotelsStatic(): Response
+    {
+        return $this->render('front.html.twig');
+    }
+    #[Route('/homepage', name: 'app_homepage', methods: ['GET'])]
+    public function homepage(): Response
+    {
+        return $this->render('ressource/front.html.twig');
     }
 
     #[Route('/new', name: 'app_ressource_new', methods: ['GET', 'POST'])]
@@ -78,4 +89,5 @@ final class RessourceController extends AbstractController
 
         return $this->redirectToRoute('app_ressource_index', [], Response::HTTP_SEE_OTHER);
     }
+
 }
