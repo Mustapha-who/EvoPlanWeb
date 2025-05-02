@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Equipement;
 use App\Form\EquipementType;
 use App\Repository\EquipementRepository;
+use App\Service\MeteoService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -44,10 +45,14 @@ final class EquipementController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_equipement_show', methods: ['GET'])]
-    public function show(Equipement $equipement): Response
+    public function show(Equipement $equipement, MeteoService $meteoService): Response
     {
+        // Récupérer toutes les prévisions météo
+        $previsions = $meteoService->getAllPrevisions();
+
         return $this->render('equipement/show.html.twig', [
             'equipement' => $equipement,
+            'previsions' => $previsions, // Passer les données météo à la vue
         ]);
     }
 

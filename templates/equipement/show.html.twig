@@ -3,6 +3,7 @@
 {% block title %}Détails de l'équipement #{{ equipement.id }}{% endblock %}
 
 {% block body %}
+    <!-- En-tête -->
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
         <div class="container-xl px-4">
             <div class="page-header-content pt-4">
@@ -25,7 +26,7 @@
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- Contenu principal -->
     <div class="container-xl px-4 mt-n10">
         <div class="card mb-4">
             <div class="card-header">
@@ -33,7 +34,7 @@
                 Fiche technique
             </div>
             <div class="card-body">
-                <div class="table-responsive">
+                <div class="table-responsive mb-4">
                     <table class="table table-bordered">
                         <tbody>
                             <tr class="table-light">
@@ -56,16 +57,42 @@
                     </table>
                 </div>
 
+                <!-- Bloc météo -->
+                <h2>Prévisions météo</h2>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Ville</th>
+                                <th>Température (°C)</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prevision in previsions %}
+                                <tr>
+                                    <td>{{ prevision.ville }}</td>
+                                    <td>{{ prevision.temperature }}</td>
+                                    <td>{{ prevision.description }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="3">Aucune prévision météo disponible</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Actions -->
                 <div class="d-flex justify-content-between mt-4">
                     <a href="{{ path('app_equipement_index') }}" class="btn btn-outline-secondary">
                         <i class="fas fa-list me-1"></i> Liste des équipements
                     </a>
-                    
                     <div>
                         <a href="{{ path('app_equipement_edit', {'id': equipement.id}) }}" class="btn btn-primary me-2">
                             <i class="fas fa-edit me-1"></i> Modifier
                         </a>
-                        
                         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
                             <i class="fas fa-trash me-1"></i> Supprimer
                         </button>
@@ -107,9 +134,8 @@
     {{ parent() }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialisation des tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
         });

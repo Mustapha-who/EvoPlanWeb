@@ -17,10 +17,12 @@ class CaptchaController extends AbstractController
         $captcha = new CaptchaBuilder();
         $captcha->build();
 
-        // Stocker le code CAPTCHA dans la session pour la validation
+        // Stocker le code CAPTCHA dans la session
         $session->set('captcha_code', $captcha->getPhrase());
 
-        // Retourner l'image CAPTCHA en base64
+        // Log pour vérifier que le code est stocké
+        $this->addFlash('debug', 'CAPTCHA généré : ' . $session->get('captcha_code'));
+
         return $this->json(['captcha' => $captcha->inline()]);
     }
 
@@ -28,16 +30,27 @@ class CaptchaController extends AbstractController
     public function validate(Request $request, SessionInterface $session): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $userCaptcha = $data['captcha'] ?? '';
-
-        // Récupérer le code CAPTCHA depuis la session
+        $userCaptcha = isset($data['captcha']) ? trim($data['captcha']) : '';
         $captchaCode = $session->get('captcha_code');
 
-        // Comparer (insensible à la casse)
+        // Log pour débogage
+        $this->addFlash('debug', 'Saisie utilisateur : ' . $userCaptcha . ' | Code stocké : ' . $captchaCode);
+
+        if (empty($userCaptcha) || empty($captchaCode)) {
+            return $this->json([
+                'success' => false,
+                'error' => 'Code CAPTCHA manquant ou session expirée.'
+            ], 400);
+        }
+
         if (strtolower($userCaptcha) === strtolower($captchaCode)) {
+            $session->remove('captcha_code');
             return $this->json(['success' => true], 200);
         }
 
-        return $this->json(['success' => false], 400);
+        return $this->json([
+            'success' => false,
+            'error' => 'Code CAPTCHA incorrect.'
+        ], 400);
     }
 }

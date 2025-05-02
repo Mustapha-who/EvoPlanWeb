@@ -1,0 +1,148 @@
+{% block css %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-top: 2rem;
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .header {
+            background: linear-gradient(90deg, #007bff, #6610f2);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        .hotel-img {
+            max-width: 100px;
+            height: auto;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+    </style>
+    <script data-search-pseudo-elements defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/feather.min.js" crossorigin="anonymous"></script>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <!-- En-tête -->
+        <div class="header">
+            <h1>Hôtels et Salles de Conférence en Tunisie</h1>
+            <p>Découvrez une sélection d'établissements pour vos séjours et événements professionnels</p>
+        </div>
+
+        <!-- Tableau des établissements -->
+        <div class="card">
+            <div class="card-body">
+                <table id="datatablesSimple" class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Photo</th>
+                            <th>Nom</th>
+                            <th>Type</th>
+                            <th>Ville</th>
+                            <th>Capacité</th>
+                            <th>Contact</th>
+                            <th>Site Web</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><img src="https://www.elmouradi.com/images/hotels/gammarth/slideshow/1.jpg" alt="El Mouradi Gammarth" class="hotel-img"></td>
+                            <td>El Mouradi Gammarth</td>
+                            <td>Hôtel</td>
+                            <td>Gammarth</td>
+                            <td>500 chambres</td>
+                            <td>+216 71 274 300</td>
+                            <td><a href="https://www.elmouradi.com" target="_blank">Visiter</a></td>
+                        </tr>
+                        <tr>
+                            <td><img src="https://via.placeholder.com/100x60?text=Tunis+Center" alt="Tunis International Center" class="hotel-img"></td>
+                            <td>Tunis International Center</td>
+                            <td>Salle de Conférence</td>
+                            <td>Tunis</td>
+                            <td>1000 personnes</td>
+                            <td>+216 71 123 456</td>
+                            <td><a href="#" target="_blank">Visiter</a></td>
+                        </tr>
+                        <tr>
+                            <td><img src="https://www.therusselior.com/images/slideshow/1.jpg" alt="The Russelior Hotel & Spa" class="hotel-img"></td>
+                            <td>The Russelior Hotel & Spa</td>
+                            <td>Hôtel</td>
+                            <td>Hammamet</td>
+                            <td>300 chambres</td>
+                            <td>+216 72 244 500</td>
+                            <td><a href="https://www.therusselior.com" target="_blank">Visiter</a></td>
+                        </tr>
+                        <tr>
+                            <td><img src="https://via.placeholder.com/100x60?text=Palais+Sousse" alt="Palais des Congrès Sousse" class="hotel-img"></td>
+                            <td>Palais des Congrès Sousse</td>
+                            <td>Salle de Conférence</td>
+                            <td>Sousse</td>
+                            <td>800 personnes</td>
+                            <td>+216 73 225 700</td>
+                            <td><a href="#" target="_blank">Visiter</a></td>
+                        </tr>
+                        <tr>
+                            <td><img src="https://www.labadira.com/images/slideshow/1.jpg" alt="La Badira" class="hotel-img"></td>
+                            <td>La Badira</td>
+                            <td>Hôtel</td>
+                            <td>Hammamet</td>
+                            <td>130 chambres</td>
+                            <td>+216 72 280 280</td>
+                            <td><a href="https://www.labadira.com" target="_blank">Visiter</a></td>
+                        </tr>
+                        <tr>
+                            <td><img src="https://via.placeholder.com/100x60?text=Medina+Belisaire" alt="Medina Belisaire & Thalasso" class="hotel-img"></td>
+                            <td>Medina Belisaire & Thalasso</td>
+                            <td>Hôtel</td>
+                            <td>Hammamet</td>
+                            <td>276 chambres</td>
+                            <td>+216 72 280 000</td>
+                            <td><a href="#" target="_blank">Visiter</a></td>
+                        </tr>
+                        <tr>
+                            <td><img src="https://via.placeholder.com/100x60?text=Carthage+Convention" alt="Carthage Convention Center" class="hotel-img"></td>
+                            <td>Carthage Convention Center</td>
+                            <td>Salle de Conférence</td>
+                            <td>Carthage</td>
+                            <td>1200 personnes</td>
+                            <td>+216 71 910 000</td>
+                            <td><a href="#" target="_blank">Visiter</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const dataTable = new simpleDatatables.DataTable('#datatablesSimple', {
+                searchable: true,
+                fixedHeight: true,
+                perPage: 10,
+                labels: {
+                    placeholder: "Rechercher...",
+                    perPage: "{select} entrées par page",
+                    noRows: "Aucun établissement trouvé",
+                    info: "Affichage de {start} à {end} sur {rows} établissements"
+                }
+            });
+            feather.replace(); // Initialisation des icônes Feather
+        });
+    </script>
+{% endblock %}
