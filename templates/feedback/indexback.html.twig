@@ -1,0 +1,435 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - Liste des Feedbacks{% endblock %}
+
+{% block body %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="message-square"></i></div>
+                            Administration - Liste des Feedbacks
+                        </h1>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <button type="button" class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#statsModal">
+                            <i data-feather="bar-chart-2"></i>
+                            Statistiques
+                        </button>
+                        <div class="btn-group ms-2">
+                            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i data-feather="download"></i>
+                                Exporter
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ path('app_feedback_export_excel', {'rating': filters.rating|default(null), 'keyword': filters.keyword|default(null)}) }}">Excel</a></li>
+                                <li><a class="dropdown-item" href="{{ path('app_feedback_export_pdf', {'rating': filters.rating|default(null), 'keyword': filters.keyword|default(null)}) }}">PDF</a></li>
+                                <li><a class="dropdown-item" href="{{ path('app_feedback_export_csv', {'rating': filters.rating|default(null), 'keyword': filters.keyword|default(null)}) }}">CSV</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-xl px-4 mt-n10">
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <span>Filtres de recherche</span>
+            </div>
+            <div class="card-body">
+                {{ form_start(filter_form) }}
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        {{ form_row(filter_form.rating, {
+                            'attr': {
+                                'class': 'form-select'
+                            }
+                        }) }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form_row(filter_form.keyword, {
+                            'attr': {
+                                'class': 'form-control',
+                                'placeholder': 'Rechercher dans les commentaires...'
+                            }
+                        }) }}
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        {{ form_row(filter_form.submit, {
+                            'attr': {
+                                'class': 'btn btn-primary w-100'
+                            }
+                        }) }}
+                    </div>
+                </div>
+                {{ form_end(filter_form) }}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Gestion des Feedbacks</span>
+                <div class="small text-muted">{{ feedbacks.getTotalItemCount }} feedback(s) au total</div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="datatablesSimple">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Commentaire</th>
+                                <th class="text-center">Note</th>
+                                <th>Client (Numéro de téléphone)</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in feedbacks %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ item.comments|slice(0, 100) }}{% if item.comments|length > 100 %}...{% endif %}</div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="star-rating" title="{{ item.rating }}/5">
+                                            {% for i in 1..5 %}
+                                                {% if i <= item.rating %}
+                                                    <i class="fas fa-star text-warning"></i>
+                                                {% else %}
+                                                    <i class="far fa-star text-muted"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <small class="text-muted d-block">({{ item.rating }}/5)</small>
+                                    </td>
+                                    <td>{{ item.client ? item.client.phoneNumber : 'N/A' }}</td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('app_feedback_admin_show', {'id': item.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir détails">
+                                                <i data-feather="eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_feedback_admin_edit', {'id': item.id}) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
+                                                <i data-feather="edit"></i>
+                                            </a>
+                                            <form method="post" action="{{ path('app_feedback_delete', {'id': item.id, 'source': 'admin'}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                    <i data-feather="trash-2"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i data-feather="message-square" class="mb-2" style="width: 48px; height: 48px;"></i>
+                                            Aucun feedback trouvé
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if feedbacks.getTotalItemCount > feedbacks.getItemNumberPerPage %}
+                    <div class="navigation mt-4 d-flex justify-content-center">
+                        <ul class="pagination">
+                            {% if feedbacks.currentPageNumber > 1 %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ path('app_feedback_admin_index', {'page': feedbacks.currentPageNumber - 1, 'rating': filters.rating|default(null), 'keyword': filters.keyword|default(null)}) }}" title="Précédent">
+                                        <span aria-hidden="true">«</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">«</span>
+                                </li>
+                            {% endif %}
+
+                            {% for page in 1..feedbacks.getPageCount %}
+                                {% if page == feedbacks.currentPageNumber %}
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">{{ page }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ path('app_feedback_admin_index', {'page': page, 'rating': filters.rating|default(null), 'keyword': filters.keyword|default(null)}) }}">{{ page }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if feedbacks.currentPageNumber < feedbacks.getPageCount %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ path('app_feedback_admin_index', {'page': feedbacks.currentPageNumber + 1, 'rating': filters.rating|default(null), 'keyword': filters.keyword|default(null)}) }}" title="Suivant">
+                                        <span aria-hidden="true">»</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">»</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="statsModal" tabindex="-1" aria-labelledby="statsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="statsModalLabel">
+                        <i data-feather="bar-chart-2" class="me-2"></i>
+                        Statistiques des Feedbacks
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    Répartition des notes
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="ratingChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    Détails
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Total des feedbacks
+                                            <span class="badge bg-primary rounded-pill">{{ feedbacks.getTotalItemCount }}</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Note moyenne
+                                            <span class="badge bg-success rounded-pill">{{ average_rating|default(0)|number_format(1) }}/5</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i data-feather="x" class="me-1"></i>
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .star-rating {
+            display: inline-block;
+            line-height: 1;
+        }
+        .star-rating i {
+            font-size: 1.2rem;
+            margin: 0 1px;
+        }
+        .table-hover tr:hover {
+            background-color: rgba(0, 119, 190, 0.03);
+        }
+        .alert {
+            margin-bottom: 1.5rem;
+        }
+        .dropdown-menu {
+            z-index: 1050;
+        }
+        .form-control, .form-select {
+            border-radius: 0.375rem;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        .navigation .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+            padding: 0;
+            list-style: none;
+            font-family: 'Arial', sans-serif;
+        }
+        .navigation .pagination .page-item {
+            margin: 0 5px;
+        }
+        .navigation .pagination .page-item .page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 10px !important;
+            border: 1px solid #e0e6ed !important;
+            background-color: #ffffff !important;
+            color: #007bff !important;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        .navigation .pagination .page-item .page-link:hover {
+            background-color: #f1f5f9 !important;
+            border-color: #d1d9e6 !important;
+            color: #0056b3 !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .navigation .pagination .page-item.active .page-link {
+            background-color: #007bff !important;
+            border-color: #007bff !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+        .navigation .pagination .page-item.disabled .page-link {
+            color: #adb5bd !important;
+            background-color: #f8f9fa !important;
+            border-color: #e0e6ed !important;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .navigation .pagination .page-item:first-child .page-link,
+        .navigation .pagination .page-item:last-child .page-link {
+            font-size: 1.2rem;
+            border-radius: 10px !important;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const datatablesSimple = document.getElementById('datatablesSimple');
+            if (datatablesSimple) {
+                new simpleDatatables.DataTable(datatablesSimple, {
+                    labels: {
+                        placeholder: "Rechercher...",
+                        perPage: "{select} éléments par page",
+                        noRows: "Aucun résultat trouvé",
+                        info: "Affichage de {start} à {end} sur {rows} éléments"
+                    },
+                    columns: [
+                        { select: 0, sort: "asc" },
+                        { select: 1, sortable: false }
+                    ],
+                    perPage: 0,
+                    searchable: false
+                });
+            }
+
+            [].slice.call(document.querySelectorAll('[title]'))
+                .forEach(function (tooltipTriggerEl) {
+                    new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+
+            const statsModal = document.getElementById('statsModal');
+            if (statsModal) {
+                statsModal.addEventListener('shown.bs.modal', function() {
+                    const ctx = document.getElementById('ratingChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: ['1 étoile', '2 étoiles', '3 étoiles', '4 étoiles', '5 étoiles'],
+                            datasets: [{
+                                data: [
+                                    {{ rating_counts[1]|default(0) }},
+                                    {{ rating_counts[2]|default(0) }},
+                                    {{ rating_counts[3]|default(0) }},
+                                    {{ rating_counts[4]|default(0) }},
+                                    {{ rating_counts[5]|default(0) }}
+                                ],
+                                backgroundColor: [
+                                    '#dc3545',
+                                    '#fd7e14',
+                                    '#ffc107',
+                                    '#20c997',
+                                    '#198754'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const value = context.raw;
+                                            const percentage = Math.round((value / total) * 100);
+                                            return `${context.label}: ${value} (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+{% endblock %}

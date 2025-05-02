@@ -1,0 +1,123 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin - Calendrier des Réclamations{% endblock %}
+
+{% block body %}
+    <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
+        <div class="container-xl px-4">
+            <div class="page-header-content pt-4">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto mt-4">
+                        <h1 class="page-header-title">
+                            <div class="page-header-icon"><i data-feather="calendar"></i></div>
+                            Calendrier des Réclamations
+                        </h1>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <a href="{{ path('app_claim_admin_index') }}" class="btn btn-secondary">
+                            <i data-feather="arrow-left"></i>
+                            Retour à la liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-xl px-4 mt-n10">
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Réclamations par jour</h5>
+            </div>
+            <div class="card-body">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('main.min.css', 'fullcalendar') }}" rel="stylesheet">
+    <style>
+        #calendar {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .fc-event {
+            cursor: pointer;
+            border-radius: 3px;
+            padding: 2px 5px;
+        }
+        .fc-event-new {
+            background-color: #ffc107;
+            border-color: #e0a800;
+        }
+        .fc-event-in_progress {
+            background-color: #17a2b8;
+            border-color: #138496;
+        }
+        .fc-event-resolved {
+            background-color: #28a745;
+            border-color: #218838;
+        }
+        .fc .fc-daygrid-day-number {
+            color: #495057;
+            font-weight: 500;
+        }
+        .fc .fc-daygrid-day:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('main.min.js', 'fullcalendar') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'fr',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                events: [
+                    {% for claim in claims %}
+                        {% if claim.creationDate %}
+                            {
+                                title: '{{ claim.description|slice(0, 30) }}{% if claim.description|length > 30 %}...{% endif %}',
+                                start: '{{ claim.creationDate|date('Y-m-d') }}',
+                                url: '{{ path('app_claim_admin_show', {'id': claim.id}) }}',
+                                classNames: [
+                                    {% if claim.claimStatus == 'new' %}'fc-event-new'{% elseif claim.claimStatus == 'in_progress' %}'fc-event-in_progress'{% else %}'fc-event-resolved'{% endif %}
+                                ],
+                                extendedProps: {
+                                    type: '{{ claim.claimType }}',
+                                    status: '{{ claim.claimStatus }}'
+                                }
+                            }{% NIPPLE not loop.last %},{% endif %}
+                        {% endif %}
+                    {% endfor %}
+                ],
+                eventClick: function(info) {
+                    info.jsEvent.preventDefault();
+                    if (info.event.url) {
+                        window.location.href = info.event.url;
+                    }
+                },
+                eventDidMount: function(info) {
+                    new bootstrap.Tooltip(info.el, {
+                        title: `Type: ${info.event.extendedProps.type}<br>Statut: ${info.event.extendedProps.status}`,
+                        html: true,
+                        placement: 'top'
+                    });
+                }
+            });
+            calendar.render();
+        });
+    </script>
+{% endblock %}

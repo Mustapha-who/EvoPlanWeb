@@ -8,7 +8,16 @@ parameters:
     flouci_app_token: '%env(FLOUCI_APP_TOKEN)%'
     flouci_app_secret: '%env(FLOUCI_APP_SECRET)%'
     tickets_directory: '%kernel.project_dir%/public/uploads/tickets'
+
+    uploads_directory: '%kernel.project_dir%/public/uploads/publications'
+    openrouter_api_key: '%env(OPENROUTER_API_KEY)%'
+
     google_api_credentials: '%kernel.project_dir%/config/google_credentials.json'
+    twilio_account_sid: '%env(TWILIO_ACCOUNT_SID)%'
+    twilio_auth_token: '%env(TWILIO_AUTH_TOKEN)%'
+    twilio_phone_number: '%env(TWILIO_PHONE_NUMBER)%'
+
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -19,13 +28,31 @@ services:
             string $appSecret: '%env(FLOUCI_APP_SECRET)%'
             string $ticketsDirectory: '%tickets_directory%'
             string $eventImagesDirectory: '%event_images_directory%'
+
+            string $openRouterToken: '%openrouter_api_key%'
+
             string $credentialsPath: '%google_api_credentials%'
             string $projectDir: '%kernel.project_dir%'
+            string $apiMailerDsn: '%env(MAILER_DSN_API)%'
+            string $smtpMailerDsn: '%env(MAILER_DSN_SMTP)%'
+            string $secretKey: '%env(RECAPTCHA_SECRET_KEY)%'
+            string $siteKey: '%env(RECAPTCHA_SITE_KEY)%'
+            string $infoBipapiUrl: 'https://api.infobip.com/sms/2/text/advanced'
+            string $infoBipapiKey: 'cd3930c7c8bf8108580b74563b7e6f2e-03990690-4602-403a-b38b-a8bd99e27736'
+            string $infoBipsender: '447491163443'
+
     
-    # Container alias for our subscriber
     Symfony\Component\DependencyInjection\ContainerInterface:
         alias: 'service_container'
         public: true
+    App\Service\UserModule\InfoBipSMS:
+        arguments:
+
+
+            $apiKey: 'cd3930c7c8bf8108580b74563b7e6f2e-03990690-4602-403a-b38b-a8bd99e27736'
+            $sender: '447491163443'
+
+
 
     App\Service\UserModule\UserService:
         arguments:
@@ -33,11 +60,17 @@ services:
             $eventPlannerRepository: '@App\Repository\UserModule\EventPlannerRepository'
             $clientRepository: '@App\Repository\UserModule\ClientRepository'
             $instructorRepository: '@App\Repository\UserModule\InstructorRepository'
+    App\Service\UserModule\UserEmailService:
+    App\Service\EmailService:
     App\Service\FlouciPayment:
         arguments:
             $client: '@http_client'
     App\Service\TicketGeneratorService:
         arguments:
+
+    App\Service\AIContentGenerator:
+        arguments:
+            $client: '@http_client'
     App\Service\GoogleCalendarService:
         arguments:
             $credentialsPath: '%google_api_credentials%'
@@ -58,9 +91,18 @@ services:
             $projectDir: '%kernel.project_dir%'
             $filesystem: '@filesystem'
 
+    App\Service\UserModule\RecaptchaValidator:
+
+
+
+
     App\Form\WorkshopType:
         arguments: ['@doctrine.orm.entity_manager']
         tags: [form.type]
+
+    App\Service\TwilioService:
+         arguments:
+             $params: '@parameter_bag'
     App\Controller\UserModule\AccessDeniedController: ~
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -76,6 +118,7 @@ services:
     # config/services.yaml
     # config/services.yaml
 
+
     # Définition du service MeteoService
     App\Service\MeteoService:
         arguments:
@@ -87,3 +130,7 @@ services:
 
         # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+

@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails Réclamation #{{ claim.id }}{% endblock %}
+{% block title %}Détails Feedback #{{ feedback.id }}{% endblock %}
 
 {% block body %}
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
@@ -10,7 +10,7 @@
                     <div class="col-auto mt-4">
                         <h1 class="page-header-title">
                             <div class="page-header-icon"><i data-feather="file-text"></i></div>
-                            Détails Réclamation #{{ claim.id }}
+                            Détails Feedback #{{ feedback.id }}
                         </h1>
                     </div>
                 </div>
@@ -25,46 +25,32 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <h5 class="fw-bold">Description</h5>
-                            <p>{{ claim.description }}</p>
-                        </div>
-                        <div class="mb-3">
-                            <h5 class="fw-bold">Type</h5>
-                            <p>{{ claim.claimType }}</p>
+                            <h5 class="fw-bold">Commentaire</h5>
+                            <p>{{ feedback.comments }}</p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <h5 class="fw-bold">Statut</h5>
-                            <span class="badge 
-                                {% if claim.claimStatus == 'Ouvert' %}bg-success
-                                {% elseif claim.claimStatus == 'En cours' %}bg-warning
-                                {% elseif claim.claimStatus == 'Résolu' %}bg-primary
-                                {% else %}bg-secondary
-                                {% endif %} rounded-pill">
-                                {{ claim.claimStatus }}
-                            </span>
-                        </div>
-                        <div class="mb-3">
-                            <h5 class="fw-bold">Date de création</h5>
-                            <p>{{ claim.creationDate|date('d/m/Y H:i') }}</p>
-                        </div>
-                        <div class="mb-3">
-                            <h5 class="fw-bold">Client</h5>
-                            <p>{{ claim.client ? claim.client.name : 'N/A' }}</p>
+                            <h5 class="fw-bold">Note</h5>
+                            <p>
+                                <span class="star-rating" title="{{ feedback.rating }}/5">
+                                    {% for i in 1..5 %}
+                                        {% if i <= feedback.rating %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-muted"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                                ({{ feedback.rating }}/5)
+                            </p>
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-4">
-                    <a href="{{ path('app_claim_index') }}" class="btn btn-secondary">
+                    <a href="{{ path('app_feedback_index') }}" class="btn btn-secondary">
                         <i data-feather="arrow-left"></i> Retour à la liste
-                    </a>
-                    <a href="{{ path('app_claim_edit', {'id': claim.id}) }}" class="btn btn-primary ms-2">
-                        <i data-feather="edit"></i> Modifier
-                    </a>
-                    <a href="{{ path('app_claim_export_pdf', {'id': claim.id}) }}" class="btn btn-danger ms-2" target="_blank">
-                        <i data-feather="download"></i> Exporter en PDF
                     </a>
                 </div>
             </div>

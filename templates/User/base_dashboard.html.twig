@@ -5,7 +5,19 @@
     'app_partnership_index', 'app_partnership_new', 'app_partnership_show', 'app_partnership_edit',
     'app_contract_index', 'app_contract_new', 'app_contract_show', 'app_contract_edit'
 ] %}
-{% set all_pages_routes = account_routes|merge(partner_routes) %}
+{% set userclaim_routes = [
+    'app_claim_index', 'app_claim_new', 'app_claim_show'
+] %}
+{% set adminclaim_routes = [
+    'app_claim_admin_index', 'app_claim_admin_show', 'app_claim_admin_edit',
+] %}
+{% set userfeedback_routes = [
+   'app_feedback_index', 'app_feedback_new', 'app_feedback_show'
+] %}
+{% set adminfeedback_routes = [
+   'app_feedback_admin_index', 'app_feedback_admin_show', 'app_feedback_admin_edit',
+] %}
+{% set all_pages_routes = account_routes|merge(partner_routes)|merge(userclaim_routes)|merge(adminclaim_routes)|merge(userfeedback_routes)|merge(adminfeedback_routes) %}
 {% set dashboard_routes = ['app_event_index' , 'app_event_new' , 'app_event_edit', 'app_event_show','user_dashboard','app_reservations_event','app_reservation_edit','app_reservation_show','admin_dashboard','admin_add_user','admin_edit_user','app_event_home'] %}
 <html lang="en">
 <head>
@@ -280,23 +292,19 @@
                                     </nav>
                                 </div>
                                 {% endif %}
-                                <!--Side navbar workshop-->
+                                {% if 'ROLE_ADMIN' in app.user.getRoles() or 'ROLE_EVENTPLANNER' in app.user.getRoles() %}
+                                <a class="nav-link" href="{{path('app_ressource_index')}}">Ressources</a>
+                                <a class="nav-link {% if app.request.attributes.get('_route') in adminclaim_routes %}active{% endif %}" href="{{path('app_claim_admin_index')}}" >Claims</a>
+                                <a class="nav-link" href="{{path('app_feedback_admin_index')}} {% if app.request.attributes.get('_route') in adminfeedback_routes %}active{% endif %}">Feedback</a>
+                                {% endif %}
                                 {% if 'ROLE_ADMIN' in app.user.getRoles() or 'ROLE_EVENTPLANNER' in app.user.getRoles() or 'ROLE_INSTRUCTOR' in app.user.getRoles() %}
                                 <a class="nav-link" href="{{path('app_workshop_index')}}">Workshops</a>
-
-                                <!-- Nested Sidenav Accordion (Pages -> Knowledge Base)-->
-                                <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#pagesCollapseKnowledgeBase" aria-expanded="false" aria-controls="pagesCollapseKnowledgeBase">
-                                    Knowledge Base
-                                    <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                                </a>
-                                <div class="collapse" id="pagesCollapseKnowledgeBase" data-bs-parent="#accordionSidenavPagesMenu">
-                                    <nav class="sidenav-menu-nested nav">
-                                        <a class="nav-link" href="">Home 1</a>
-                                        <a class="nav-link" href="">Home 2</a>
-                                    </nav>
-                                </div>
                                 {% endif %}
+                                {% if 'ROLE_CLIENT' in app.user.getRoles() %}
+                                <a class="nav-link {% if app.request.attributes.get('_route') in userclaim_routes %}active{% endif %}" href="{{path('app_claim_index')}}">Claims </a>
+                                <a class="nav-link {% if app.request.attributes.get('_route') in userfeedback_routes %}active{% endif %}" href="{{path('app_feedback_index')}}">Feedback </a>
                                 <a class="nav-link" href="">Pricing</a>
+                                {% endif %}
                                 <a class="nav-link" href="{{path('logout')}}">Logout</a>
                             </nav>
                         </div>

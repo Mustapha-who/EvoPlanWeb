@@ -68,23 +68,11 @@
                                 {{ form_errors(form.rating) }}
                                 <div class="form-text">Choisissez une note entre 1 et 5</div>
                             </div>
-                            
-                            {% if form.client is defined %}
-                            <div class="mb-3">
-                                {{ form_label(form.client, null, {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.client, {
-                                    'attr': {
-                                        'class': 'form-select' ~ (form.client.vars.errors|length ? ' is-invalid' : '')
-                                    }
-                                }) }}
-                                {{ form_errors(form.client) }}
-                            </div>
-                            {% endif %}
                         </div>
                     </div>
-                    
+
                     <hr class="my-4">
-                    
+
                     <div class="d-flex justify-content-between">
                         <a href="{{ path('app_feedback_index') }}" class="btn btn-outline-secondary">
                             <i data-feather="arrow-left" class="me-2"></i> Retour à la liste
@@ -111,7 +99,6 @@
             font-size: 0.875em;
             margin-top: 0.25rem;
         }
-        /* Style optionnel pour le champ de note */
         input[type="number"] {
             -moz-appearance: textfield;
             width: 80px;

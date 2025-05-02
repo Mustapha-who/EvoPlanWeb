@@ -1,17 +1,24 @@
-{% extends 'base.html.twig' %}
+{# Extend your User dashboard template #}
+{% extends 'User/base_dashboard.html.twig' %}
 
-{% block title %}Modifier Réclamation{% endblock %}
+{% block title %}Nouvelle Réclamation{% endblock %}
 
-{% block body %}
+{% block content %}
     <header class="page-header page-header-dark bg-gradient-primary-to-secondary pb-10">
         <div class="container-xl px-4">
             <div class="page-header-content pt-4">
                 <div class="row align-items-center justify-content-between">
                     <div class="col-auto mt-4">
                         <h1 class="page-header-title">
-                            <div class="page-header-icon"><i data-feather="edit"></i></div>
-                            Modifier Réclamation
+                            <div class="page-header-icon"><i data-feather="plus-circle"></i></div>
+                            Nouvelle Réclamation
                         </h1>
+                    </div>
+                    <div class="col-12 col-xl-auto mt-4">
+                        <a href="{{ path('app_claim_index') }}" class="btn btn-secondary">
+                            <i data-feather="arrow-left"></i>
+                            Retour à la liste
+                        </a>
                     </div>
                 </div>
             </div>
@@ -20,91 +27,65 @@
 
     <div class="container-xl px-4 mt-n10">
         <div class="card mb-4">
-            <div class="card-header bg-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h2 class="card-title mb-0 text-primary">Formulaire de modification</h2>
-                    <i data-feather="edit-3" class="text-muted"></i>
-                </div>
+            <div class="card-header">
+                <span>Créer une nouvelle réclamation</span>
             </div>
             <div class="card-body">
-                {% for flashMessage in app.flashes('success') %}
-                    <div class="alert alert-success">{{ flashMessage }}</div>
-                {% endfor %}
+                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': ''}}) }}
 
-                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                {{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.description, {
-                                    'attr': {
-                                        'class': 'form-control' ~ (form.description.vars.errors|length ? ' is-invalid' : ''),
-                                        'placeholder': 'Décrivez votre réclamation...',
-                                        'style': 'height: 100px'
-                                    }
-                                }) }}
-                                {{ form_errors(form.description) }}
-                                <div class="form-text">20 caractères minimum</div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Date de création</label>
-                                <input type="text" class="form-control" value="{{ claim.creationDate|date('d/m/Y') }}" readonly>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Statut</label>
-                                <input type="text" class="form-control" value="{{ claim.claimStatus }}" readonly>
-                            </div>
-                            
-                            <div class="mb-3">
-                                {{ form_label(form.claim_type, null, {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.claim_type, {
-                                    'attr': {
-                                        'class': 'form-select' ~ (form.claim_type.vars.errors|length ? ' is-invalid' : '')
-                                    }
-                                }) }}
-                                {{ form_errors(form.claim_type) }}
-                            </div>
-                        </div>
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        {{ form_row(form.description, {'attr': {'class': 'form-control'}}) }}
                     </div>
-                    
-                    <hr class="my-4">
-                    
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ path('app_claim_index') }}" class="btn btn-outline-secondary">
-                            <i data-feather="arrow-left" class="me-2"></i> Retour à la liste
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i data-feather="save" class="me-2"></i> Enregistrer
-                        </button>
+                    <div class="col-md-6">
+                        {{ form_row(form.claimType, {'attr': {'class': 'form-select'}}) }}
                     </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.client, {'attr': {'class': 'form-select'}}) }}
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i data-feather="save"></i>
+                        Enregistrer
+                    </button>
+                    <a href="{{ path('app_claim_index') }}" class="btn btn-secondary ms-2">
+                        <i data-feather="x"></i>
+                        Annuler
+                    </a>
+
+                </div>
                 {{ form_end(form) }}
             </div>
         </div>
     </div>
 {% endblock %}
 
-{% block javascripts %}
-    <script>
-        // Active la validation Bootstrap
-        (function () {
-            'use strict'
-            
-            const forms = document.querySelectorAll('.needs-validation')
-            
-            Array.from(forms).forEach(form => {
-                form.addEventListener('submit', event => {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
 
-                    form.classList.add('was-validated')
-                }, false)
-            })
-        })()
-    </script>
+        .form-control, .form-select {
+            border-radius: 0.375rem;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            border-radius: 0.375rem;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+    </style>
+
 {% endblock %}

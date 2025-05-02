@@ -22,8 +22,7 @@
         <!-- Account page navigation-->
         <nav class="nav nav-borders">
             <a class="nav-link ms-0" href="{{ path('user_profile') }}">Profile</a>
-            <a class="nav-link active" href="account-security.html">Security</a>
-            <a class="nav-link" href="account-notifications.html">Notifications</a>
+            <a class="nav-link active" href="{{ path('account_security') }}">Security</a>
         </nav>
         <hr class="mt-0 mb-4" />
         <div class="row">
@@ -32,24 +31,26 @@
                 <div class="card mb-4">
                     <div class="card-header">Change Password</div>
                     <div class="card-body">
-                        <form>
-                            <!-- Form Group (current password)-->
-                            <div class="mb-3">
-                                <label class="small mb-1" for="currentPassword">Current Password</label>
-                                <input class="form-control" id="currentPassword" type="password" placeholder="Enter current password" />
-                            </div>
-                            <!-- Form Group (new password)-->
-                            <div class="mb-3">
-                                <label class="small mb-1" for="newPassword">New Password</label>
-                                <input class="form-control" id="newPassword" type="password" placeholder="Enter new password" />
-                            </div>
-                            <!-- Form Group (confirm password)-->
-                            <div class="mb-3">
-                                <label class="small mb-1" for="confirmPassword">Confirm Password</label>
-                                <input class="form-control" id="confirmPassword" type="password" placeholder="Confirm new password" />
-                            </div>
-                            <button class="btn btn-primary" type="button">Save</button>
-                        </form>
+                        {{ form_start(form, { 'attr': { 'id': 'updatePasswordForm' } }) }}
+                        <div class="mb-3">
+                            {{ form_label(form.current_password, 'Current Password', { 'label_attr': { 'class': 'small mb-1' } }) }}
+                            {{ form_widget(form.current_password, { 'attr': { 'class': 'form-control' } }) }}
+                            {{ form_errors(form.current_password) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.new_password, 'New Password', { 'label_attr': { 'class': 'small mb-1' } }) }}
+                            {{ form_widget(form.new_password, { 'attr': { 'class': 'form-control' } }) }}
+                            {{ form_errors(form.new_password) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(form.confirm_password, 'Confirm Password', { 'label_attr': { 'class': 'small mb-1' } }) }}
+                            {{ form_widget(form.confirm_password, { 'attr': { 'class': 'form-control' } }) }}
+                            {{ form_errors(form.confirm_password) }}
+                            {{ form_row(form._token) }}
+                        </div>
+
+                        <button id="submitPasswordButton" class="btn btn-primary" type="submit">Save</button>
+                        {{ form_end(form) }}
                     </div>
                 </div>
                 <!-- Security preferences card-->
@@ -72,7 +73,7 @@
                         <hr class="my-4" />
                         <!-- Data sharing options-->
                         <h5 class="mb-1">Data Sharing</h5>
-                        <p class="small text-muted">Sharing usage data can help us to improve our products and better serve our users as they navigate through our application. When you agree to share usage data with us, crash reports and usage analytics will be automatically sent to our development team for investigation.</p>
+                        <p class="small text-muted">Sharing usage data can help us to improve our products and better serve our users as they navigation through our application. When you agree to share usage data with us, crash reports and usage analytics will be automatically sent to our development team for investigation.</p>
                         <form>
                             <div class="form-check">
                                 <input class="form-check-input" id="radioUsage1" type="radio" name="radioUsage" checked />
@@ -119,4 +120,58 @@
             </div>
         </div>
     </div>
+    <script>
+        document.getElementById('updatePasswordForm').addEventListener('submit', async function(event) {
+            // Only intercept if form is valid (Symfony already validated)
+            console.log('Form validity check:', this.checkValidity());
+            console.log('Form elements validity:');
+            if (!this.checkValidity()) {
+                return;
+            }
+
+            //event.preventDefault();
+            const form = this;
+            const formData = new FormData(form);
+
+
+                // Step 1: Request verification code
+                const response = await fetch('/user/request_password_update', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    alert(result.message || 'Error requesting verification');
+                    return;
+                }
+
+                // Step 2: Get verification code
+                const verificationCode = prompt('Enter verification code sent to your email:');
+                if (!verificationCode) return;
+
+                // Step 3: Verify and update
+                const verifyResponse = await fetch('/user/verify_password_update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        verification_code: verificationCode,
+                        new_password: formData.get('form[new_password]')
+                    }),
+                });
+
+                const verifyResult = await verifyResponse.json();
+
+                if (verifyResult.success) {
+                    alert('Password updated successfully!');
+                    window.location.reload();
+                } else {
+                    alert(verifyResult.message || 'Verification failed');
+                }
+
+        });
+    </script>
 {% endblock %}

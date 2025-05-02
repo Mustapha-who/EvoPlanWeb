@@ -1,0 +1,43 @@
+{# templates/knp_pagination.html.twig #}
+{% if pageCount > 1 %}
+    <ul class="pagination">
+        {# Bouton "Précédent" #}
+        {% if previous is defined %}
+            <li class="page-item">
+                <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): previous})) }}" title="Précédent">
+                    <span aria-hidden="true">«</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link" aria-hidden="true">«</span>
+            </li>
+        {% endif %}
+
+        {# Numéros de pages #}
+        {% for page in pagesInRange %}
+            {% if page == current %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ page }}</span>
+                </li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): page})) }}">{{ page }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {# Bouton "Suivant" #}
+        {% if next is defined %}
+            <li class="page-item">
+                <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): next})) }}" title="Suivant">
+                    <span aria-hidden="true">»</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link" aria-hidden="true">»</span>
+            </li>
+        {% endif %}
+    </ul>
+{% endif %}

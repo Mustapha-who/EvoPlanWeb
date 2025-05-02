@@ -31,7 +31,7 @@ class EmailService
         
         // Get from email from env variable or use a default domain-based email
         // Using domain-based email helps with deliverability
-        $this->fromEmail = $this->getConfiguredFromEmail();
+        $this->fromEmail = 'yacineamrouche2512@gmail.com';
     }
 
     /**

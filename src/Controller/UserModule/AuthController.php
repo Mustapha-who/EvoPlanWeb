@@ -2,8 +2,11 @@
 
 namespace App\Controller\UserModule;
 
+use App\Service\UserModule\RecaptchaValidator;
+use App\Service\UserModule\UserEmailService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -11,24 +14,49 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class AuthController extends AbstractController
 {
-    #[Route('/login', name: 'login')]
-    public function login(AuthenticationUtils $authenticationUtils, LoggerInterface $logger): Response
+    private UserEmailService $emailService;
+    private RecaptchaValidator $recaptchaValidator;
+    private string $siteKey;
+
+    public function __construct(UserEmailService $emailService, RecaptchaValidator $recaptchaValidator,string $siteKey)
     {
-        // Check if the user is already logged in
+        $this->emailService = $emailService;
+        $this->recaptchaValidator = $recaptchaValidator;
+        $this->siteKey = $siteKey;
+    }
+
+    #[Route('/login', name: 'login')]
+    public function login(Request $request, AuthenticationUtils $authenticationUtils, LoggerInterface $logger): Response
+    {
         if ($this->getUser() instanceof UserInterface) {
             return $this->redirectToRoute('user_dashboard');
         }
+
 
         // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
         // Last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
+        // Check if the form was submitted
+        if ($request->isMethod('POST')) {
+            $recaptchaToken = $request->request->get('g-recaptcha-response');
 
+            // Validate the reCAPTCHA token
+            if (!$this->recaptchaValidator->validate($recaptchaToken)) {
+                $error = 'Invalid reCAPTCHA. Please try again.';
+                return $this->render('auth/login.html.twig', [
+                    'last_username' => $lastUsername,
+                    'error' => $error,
+                    'site_key' => $this->siteKey,
+                ]);
+            }
+        }
 
         return $this->render('auth/login.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
+            'site_key' => $this->siteKey,
         ]);
     }
 

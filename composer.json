@@ -13,15 +13,30 @@
         "doctrine/orm": "^3.3",
         "dompdf/dompdf": "^3.1",
         "endroid/qr-code": "4.0",
+        "facebook/graph-sdk": "*",
         "google/apiclient": "^2.18",
         "gregwar/captcha": "^1.2",
         "imagine/imagine": "^1.5",
+
+
+        "mailersend/mailersend": "^0.32.0",
+
         "myclabs/php-enum": "^1.8",
+        "pear/http_request2": "^2.7",
+
+        "knplabs/knp-paginator-bundle": "^6.8",
+        "league/oauth2-client": "^2.8",
+        "league/oauth2-facebook": "^2.2",
+        "myclabs/php-enum": "^1.8",
+        "nyholm/psr7": "*",
+        "openai-php/client": "*",
+
         "phpdocumentor/reflection-docblock": "^5.6",
-        "phpoffice/phpspreadsheet": "*",
+        "phpoffice/phpspreadsheet": "^4.2",
         "phpstan/phpdoc-parser": "^2.1",
         "symfony/asset": "6.4.*",
         "symfony/asset-mapper": "6.4.*",
+        "symfony/cache": "6.4.*",
         "symfony/console": "6.4.*",
         "symfony/doctrine-messenger": "6.4.*",
         "symfony/dotenv": "6.4.*",
@@ -32,6 +47,13 @@
         "symfony/http-client": "6.4.*",
         "symfony/intl": "6.4.*",
         "symfony/mailer": "6.4.*",
+
+
+        "symfony/mailer-send-mailer": "6.4.*",
+
+        "symfony/mercure-bundle": "*",
+
+
         "symfony/mime": "6.4.*",
         "symfony/monolog-bundle": "^3.0",
         "symfony/notifier": "6.4.*",
@@ -49,7 +71,8 @@
         "symfony/web-link": "6.4.*",
         "symfony/yaml": "6.4.*",
         "twig/extra-bundle": "^2.12|^3.0",
-        "twig/twig": "^2.12|^3.0"
+        "twig/twig": "^2.12|^3.0",
+        "twilio/sdk": "^8.5"
     },
     "config": {
         "allow-plugins": {
@@ -101,6 +124,7 @@
         }
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^4.1",
         "phpunit/phpunit": "^9.5",
         "symfony/browser-kit": "6.4.*",
         "symfony/css-selector": "6.4.*",
