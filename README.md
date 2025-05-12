@@ -1,27 +1,57 @@
-# EvoPlanWeb
+# EvoPlan: Healthcare Event Management Web (EvoPlanWeb) 📋
 
-A web-based scheduling and planning application for efficient project management, built for the Web Technologies 2A module.
+![PHP](https://img.shields.io/badge/PHP-8.x-blue)
+![License](https://img.shields.io/badge/License-MIT-blue)
+![Esprit](https://img.shields.io/badge/Esprit%20School-Web%20Technologies%202A-orange)
 
-## Description
+A web-based frontend for the EvoPlan healthcare event management platform, developed at Esprit School of Engineering.
 
-EvoPlanWeb is a web application designed to streamline project scheduling and task management. It allows users to create, manage, and track project plans through an intuitive interface.
+---
 
-- **Objective**: Simplify project planning and improve team collaboration.
-- **Problem Solved**: Addresses inefficiencies in manual scheduling and task tracking.
+## Overview 🌟
+
+EvoPlanWeb is the web frontend for the EvoPlan project, created as part of the **Web Technologies 2A** course at **[Esprit School of Engineering](https://esprit.tn/)**. This platform enables healthcare professionals and organizers to manage events like workshops, conferences, and training sessions through an intuitive web interface. Built with **PHP**, **HTML**, **CSS**, **JavaScript**, and **MySQL**, it integrates with the Hexatech Java backend to provide a seamless event management experience.
+
+---
+
+## Description 📝
+
+EvoPlanWeb serves as the user-facing interface for the EvoPlan healthcare event management platform. It allows users to create, manage, and track healthcare events, ensuring efficient planning and collaboration.
+
+- **Objective**: Simplify healthcare event planning with an intuitive web interface.
+- **Problem Solved**: Streamlines event management for healthcare professionals with a user-friendly frontend.
 - **Main Features**:
-  - Create and manage project schedules.
-  - Assign tasks to team members.
-  - Visualize timelines and progress.
-  - Store data securely using MySQL.
+  - Create and manage healthcare events (e.g., workshops, conferences).
+  - Assign tasks and resources for event planning.
+  - View event timelines and progress.
+  - Submit feedback and manage claims.
 
-## Table of Contents
+---
 
+## Table of Contents 📑
+
+- [Overview](#overview)
+- [Description](#description)
+- [Tech Stack](#tech-stack)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributions](#contributions)
+- [Acknowledgements](#acknowledgements)
 - [License](#license)
 
-## Installation
+---
+
+## Tech Stack 🛠️
+
+- **Frontend**: HTML, CSS, JavaScript
+- **Backend**: PHP 8.x
+- **Database**: MySQL
+- **Development Environment**: WAMP/XAMPP
+- **Other Tools**: Git
+
+---
+
+## Installation ⚙️
 
 Follow these steps to set up EvoPlanWeb locally:
 
@@ -39,9 +69,19 @@ Follow these steps to set up EvoPlanWeb locally:
 3. **Configure the database**:
    - Create a MySQL database (e.g., `evoplanweb_db`).
    - Import the SQL schema from `src/database/schema.sql` (if available).
-   - Update database credentials in `src/config/database.php` (if applicable).
+   - Update database credentials in `src/config/database.php`:
+     ```php
+     <?php
+     define('DB_HOST', 'localhost');
+     define('DB_NAME', 'evoplanweb_db');
+     define('DB_USER', 'your_username');
+     define('DB_PASS', 'your_password');
+     ?>
+     ```
 
-## Usage
+---
+
+## Usage 🚀
 
 To use EvoPlanWeb:
 
@@ -61,24 +101,26 @@ To use EvoPlanWeb:
 3. **Run the application**:
    - Ensure Apache and MySQL are running.
    - Open `http://localhost/EvoPlanWeb` in a browser.
-   - Log in or register to start creating schedules and managing tasks.
+   - Log in or register to start managing healthcare events, such as creating workshops or tracking conference schedules.
 
-## Contributions
+---
+
+## Contributions 🤝
 
 We welcome contributions to EvoPlanWeb! Thank you to all who have helped improve this project.
 
 ### Contributors
 - [MedAlizr](https://github.com/MedAlizr) - Responsible for implementing user functionality and core app integration.
-- [Mehdi Ayachi](https://github.com/mehdi5255)- Responsible for the Event and Event Planning module and its core features.
+- [Mehdi Ayachi](https://github.com/mehdi5255) - Responsible for the Event and Event Planning module and its core features.
 - [Mustapha Jerbi](https://github.com/Mustapha-who) - Creator of the Workshop module and features.
 - [Selim Ishak](https://github.com/selimisaac) - Creator of the Feedback and Claim Management module.
-- [Ghalia el Ouaer](https://github.com/ghaliaelouaer24) - Responsible for the Resources module.
+- [Ghalia El Ouaer](https://github.com/ghaliaelouaer24) - Responsible for the Resources module.
 - [Mohamed Amine Mezlini](https://github.com/aminemezlini321) - Responsible for the Partnerships and Contracts module.
 
 ### How to Contribute?
 
 1. **Fork the project**:
-   - Go to the [EvoPlanWeb repository](https://github.com/MedAlizr/EvoPlanWeb) and click **Fork** to create a copy in your GitHub account.
+   - Go to the [EvoPlanWeb repository](https://github.com/MedAlizr/EvoPlanWeb) and click **Fork**.
 
 2. **Clone your fork**:
    ```bash
@@ -99,8 +141,16 @@ We welcome contributions to EvoPlanWeb! Thank you to all who have helped improve
    ```
 
 5. **Submit a pull request**:
-   - Go to your fork on GitHub and create a pull request to the `main` branch of the original repository.
+   - Create a pull request to the `main` branch of the original repository.
 
-## License
+---
+
+## Acknowledgements 🙏
+
+This project was developed as part of the **Web Technologies 2A** course at **Esprit School of Engineering**. We thank our instructors and peers for their guidance and support in building this web frontend for EvoPlan.
+
+---
+
+## License 📜
 
 This project is licensed under the **MIT License**. For more details, see the [LICENSE](LICENSE) file.
