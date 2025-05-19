@@ -68,15 +68,9 @@ Follow these steps to set up EvoPlanWeb locally:
 
 3. **Configure the database**:
    - Create a MySQL database (e.g., `evoplanweb_db`).
-   - Import the SQL schema from `src/database/schema.sql` (if available).
-   - Update database credentials in `src/config/database.php`:
+   - Update database credentials in `.env`:
      ```php
-     <?php
-     define('DB_HOST', 'localhost');
-     define('DB_NAME', 'evoplanweb_db');
-     define('DB_USER', 'your_username');
-     define('DB_PASS', 'your_password');
-     ?>
+     DATABASE_URL="mysql://your_db_username:your_db_password@127.0.0.1:3306/evoplanweb_db?serverVersion=8.0"
      ```
 
 ---
