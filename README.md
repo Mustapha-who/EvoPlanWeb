@@ -144,7 +144,3 @@ We welcome contributions to EvoPlanWeb! Thank you to all who have helped improve
 This project was developed as part of the **Web Technologies 2A** course at **Esprit School of Engineering**. We thank our instructors and peers for their guidance and support in building this web frontend for EvoPlan.
 
 ---
-
-## License 📜
-
-This project is licensed under the **MIT License**. For more details, see the [LICENSE](LICENSE) file.
